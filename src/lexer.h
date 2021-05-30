@@ -3,18 +3,18 @@
  *
  * SPDX-License-Identifier: BSD-2-Clause
  */
- 
+
  #include <stdlib.h>
 
 // Lexeme Enumeration
 enum TokenType {
-	EQUAL, SEMICOLON,
-	
+	EQUAL,
+
 	IDENTIFIER, STRING, NUMERAL,
-	
-	VAR, DEF,
-	
-	EOF
+
+	VAR, FUNCTION,
+
+	EOF_CHAR
 };
 
 typedef struct {
@@ -29,6 +29,7 @@ typedef struct {
 
 TokenList token_list_create(size_t size);
 void token_list_free(TokenList *);
+void token_list_add(TokenList *, Token);
+void token_list_print(TokenList);
 
-
-// token_list_t scan_string(char *);
+TokenList scan(char *);

@@ -8,6 +8,7 @@
 
 int main(int argc, char *argv[])
 {
+	token_list_print(scan("var foo = 12\0"));
 
 	return 0;
 }
