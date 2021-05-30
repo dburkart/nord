@@ -33,6 +33,8 @@ int main(int argc, char *argv[])
         input[fsize] = 0;
 
         token_list_print(scan(input));
+
+        free(input);
     }
 
 done:
