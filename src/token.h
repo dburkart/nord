@@ -11,10 +11,16 @@
 
 // Lexeme Enumeration
 enum TokenType {
-	EQUAL,
+	// Single-character tokens
+	EQUAL, L_PAREN, R_PAREN, COLON, COMMA, EOL,
 
+	// Arrows
+	R_ARROW,
+
+	// Literals
 	IDENTIFIER, STRING, NUMERAL,
 
+	// Keywords
 	VAR, FUNCTION,
 
 	EOF_CHAR // 'EOF' is reserved on some platforms

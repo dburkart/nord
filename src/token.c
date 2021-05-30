@@ -54,9 +54,32 @@ void token_list_print(TokenList list)
 		Token t = list.tokens[i];
 		switch(t.type)
 		{
+			// Single character tokens
 			case EQUAL:
 				printf("[EQUAL] ");
 				break;
+			case L_PAREN:
+				printf("[L_PAREN] ");
+				break;
+			case R_PAREN:
+				printf("[R_PAREN] ");
+				break;
+			case COLON:
+				printf("[COLON] ");
+				break;
+			case COMMA:
+				printf("[COMMA] ");
+				break;
+			case EOL:
+				printf("[EOL] ");
+				break;
+
+			// Arrows
+			case R_ARROW:
+				printf("[R_ARROW] ");
+				break;
+
+			// Literals
 			case IDENTIFIER:
 				printf("[IDENTIFIER] ");
 				break;
@@ -66,14 +89,19 @@ void token_list_print(TokenList list)
 			case NUMERAL:
 				printf("[NUMERAL] ");
 				break;
+
+			// Keywords
 			case VAR:
 				printf("[VAR] ");
 				break;
 			case FUNCTION:
 				printf("[FUNCTION] ");
 				break;
+			// EOF
 			case EOF_CHAR:
 				printf("[EOF] ");
+				break;
+			default:
 				break;
 		}
 	}

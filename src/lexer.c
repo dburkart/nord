@@ -5,8 +5,16 @@
  */
 
 #include <assert.h>
+#include <stdbool.h>
 
 #include "lexer.h"
+
+bool is_reserved(const char c)
+{
+	if (c == '(' || c == ')' || c == ':' || c == ',')
+		return true;
+	return false;
+}
 
 int match_var(const char *c, TokenList *list)
 {
@@ -18,6 +26,17 @@ int match_var(const char *c, TokenList *list)
 	token_list_add(list, t);
 
 	return 3;
+}
+
+int match_fn(const char *c, TokenList *list)
+{
+	if (*c != 'f') return 0;
+	if (*(c+1) != 'n') return 0;
+
+	Token t = { FUNCTION };
+	token_list_add(list, t);
+
+	return 2;
 }
 
 int match_identifier(const char *c, TokenList *list)
@@ -36,6 +55,9 @@ int match_identifier(const char *c, TokenList *list)
 
 	while (*c != ' ' && *c != '\t' && *c != '\n' && *c != '\0')
 	{
+		if (is_reserved(*c))
+			break;
+
 		len = len + 1;
 		c = c + 1;
 	}
@@ -65,6 +87,17 @@ int match_numeral(const char *c, TokenList *list)
 	return len;
 }
 
+int match_right_arrow(const char *c, TokenList *list)
+{
+	if (*c != '-') return 0;
+	if (*(c+1) != '>') return 0;
+
+	Token t = { R_ARROW };
+	token_list_add(list, t);
+
+	return 2;
+}
+
 TokenList scan(char *input)
 {
 	// We just create an arbitrarily-sized token list to begin with
@@ -79,7 +112,11 @@ TokenList scan(char *input)
 		{
 			case ' ':
 			case '\t':
+				advance = 1;
+				break;
 			case '\n':
+				t.type = EOL;
+				token_list_add(&tokens, t);
 				advance = 1;
 				break;
 			case '=':
@@ -87,6 +124,34 @@ TokenList scan(char *input)
 				token_list_add(&tokens, t);
 				advance = 1;
 				break;
+			case '(':
+				t.type = L_PAREN;
+				token_list_add(&tokens, t);
+				advance = 1;
+				break;
+			case ')':
+				t.type = R_PAREN;
+				token_list_add(&tokens, t);
+				advance = 1;
+				break;
+			case ':':
+				t.type = COLON;
+				token_list_add(&tokens, t);
+				advance = 1;
+				break;
+			case ',':
+				t.type = COMMA;
+				token_list_add(&tokens, t);
+				advance = 1;
+				break;
+			case '-':
+				advance = match_right_arrow(c, &tokens);
+				if (advance)
+					break;
+			case 'f':
+				advance = match_fn(c, &tokens);
+				if (advance)
+					break;
 			case 'v':
 				advance = match_var(c, &tokens);
 				if (advance)
