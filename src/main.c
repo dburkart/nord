@@ -32,7 +32,9 @@ int main(int argc, char *argv[])
 
         input[fsize] = 0;
 
-        token_list_print(scan(input));
+        TokenList list = scan(input);
+        token_list_print(list);
+        token_list_destroy(list);
 
         free(input);
     }

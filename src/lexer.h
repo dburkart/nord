@@ -4,6 +4,12 @@
  * SPDX-License-Identifier: BSD-2-Clause
  */
 
- #include "token.h"
+#ifndef LEXER_H
+#define LEXER_H
 
+#include "token.h"
+
+// Scan an input string, and return a list of tokens.
 TokenList scan(char *);
+
+#endif

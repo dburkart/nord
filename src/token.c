@@ -26,11 +26,11 @@ TokenList token_list_create(size_t capacity)
 	return list;
 }
 
-void token_list_free(TokenList *list)
+void token_list_destroy(TokenList list)
 {
-	if (list->tokens)
+	if (list.tokens)
 	{
-		free(list->tokens);
+		free(list.tokens);
 	}
 }
 
