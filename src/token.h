@@ -11,34 +11,34 @@
 
 // Lexeme Enumeration
 enum TokenType {
-	// Single-character tokens
-	EQUAL, L_PAREN, R_PAREN, COLON, COMMA, EOL,
+    // Single-character tokens
+    EQUAL, L_PAREN, R_PAREN, COLON, COMMA, EOL,
 
-	// Arrows
-	R_ARROW,
+    // Arrows
+    R_ARROW,
 
-	// Literals
-	IDENTIFIER, STRING, NUMERAL,
+    // Literals
+    IDENTIFIER, STRING, NUMERAL,
 
-	// Keywords
-	VAR, FUNCTION,
+    // Keywords
+    VAR, FUNCTION,
 
-	EOF_CHAR // 'EOF' is reserved on some platforms
+    EOF_CHAR // 'EOF' is reserved on some platforms
 };
 
 // Token specific information
 typedef struct {
-	enum TokenType type;
-	// Positional data, relative to the original buffer
-	int start;
-	int end;
+    enum TokenType type;
+    // Positional data, relative to the original buffer
+    int start;
+    int end;
 } Token;
 
 // List of tokens to be fed to the parser
 typedef struct {
-	size_t size;
-	size_t capacity;
-	Token *tokens;
+    size_t size;
+    size_t capacity;
+    Token *tokens;
 } TokenList;
 
 TokenList token_list_create(size_t);

@@ -42,5 +42,5 @@ int main(int argc, char *argv[])
 done:
     fflush(stdout);
     fflush(stderr);
-	return status;
+    return status;
 }
