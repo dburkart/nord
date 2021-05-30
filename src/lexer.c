@@ -103,16 +103,20 @@ TokenList scan(char *input)
 	// We just create an arbitrarily-sized token list to begin with
 	TokenList tokens = token_list_create(2);
 
+	int pos = 0;
 	char *c = input;
 	while (*c != '\0')
 	{
+		int start = pos;
 		int advance = 0;
+		bool token_added = true;
 		Token t;
 		switch (*c)
 		{
 			case ' ':
 			case '\t':
 				advance = 1;
+				token_added = false;
 				break;
 			case '\n':
 				t.type = EOL;
@@ -164,6 +168,18 @@ TokenList scan(char *input)
 				advance = match_numeral(c, &tokens);
 				if (advance)
 					break;
+
+				token_added = false;
+		}
+
+		// Advance our position
+		pos = pos + advance;
+
+		// Record the location of the token
+		if (token_added)
+		{
+			tokens.tokens[tokens.size - 1].start = start;
+			tokens.tokens[tokens.size - 1].end = pos;
 		}
 
 		// TODO: Better Error handling here

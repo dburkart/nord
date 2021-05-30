@@ -29,6 +29,9 @@ enum TokenType {
 // Token specific information
 typedef struct {
 	enum TokenType type;
+	// Positional data, relative to the original buffer
+	int start;
+	int end;
 } Token;
 
 // List of tokens to be fed to the parser

@@ -56,54 +56,55 @@ void token_list_print(TokenList list)
 		{
 			// Single character tokens
 			case EQUAL:
-				printf("[EQUAL] ");
+				printf("[EQUAL");
 				break;
 			case L_PAREN:
-				printf("[L_PAREN] ");
+				printf("[L_PAREN");
 				break;
 			case R_PAREN:
-				printf("[R_PAREN] ");
+				printf("[R_PAREN");
 				break;
 			case COLON:
-				printf("[COLON] ");
+				printf("[COLON");
 				break;
 			case COMMA:
-				printf("[COMMA] ");
+				printf("[COMMA");
 				break;
 			case EOL:
-				printf("[EOL] ");
+				printf("[EOL");
 				break;
 
 			// Arrows
 			case R_ARROW:
-				printf("[R_ARROW] ");
+				printf("[R_ARROW");
 				break;
 
 			// Literals
 			case IDENTIFIER:
-				printf("[IDENTIFIER] ");
+				printf("[IDENTIFIER");
 				break;
 			case STRING:
-				printf("[STRING] ");
+				printf("[STRING");
 				break;
 			case NUMERAL:
-				printf("[NUMERAL] ");
+				printf("[NUMERAL");
 				break;
 
 			// Keywords
 			case VAR:
-				printf("[VAR] ");
+				printf("[VAR");
 				break;
 			case FUNCTION:
-				printf("[FUNCTION] ");
+				printf("[FUNCTION");
 				break;
 			// EOF
 			case EOF_CHAR:
-				printf("[EOF] ");
+				printf("[EOF");
 				break;
 			default:
 				break;
 		}
+		printf(":%d-%d] ", t.start, t.end);
 	}
 
 	printf("\n");
