@@ -37,7 +37,13 @@ void token_list_free(TokenList *list)
 
 void token_list_add(TokenList *list, Token t)
 {
-	// TODO: Grow our token list if necessary
+	if (list->size == list->capacity)
+	{
+		// Grow our capacity by 2x
+		list->capacity = list->capacity * 2;
+		list->tokens = realloc(list->tokens, sizeof(Token) * list->capacity);
+	}
+
 	list->tokens[list->size] = t;
 	list->size = list->size + 1;
 }
@@ -136,7 +142,7 @@ int match_numeral(const char *c, TokenList *list)
 TokenList scan(char *input)
 {
 	// We just create an arbitrarily-sized token list to begin with
-	TokenList tokens = token_list_create(10);
+	TokenList tokens = token_list_create(2);
 
 	char *c = input;
 	while (*c != '\0')
