@@ -4,6 +4,11 @@
  * SPDX-License-Identifier: BSD-2-Clause
  */
 
+/*
+ * This test runner takes any number of files as inputs, and prints out a
+ * single scanned token per line.
+ */
+
 #include <stdio.h>
 
 #include "lexer.h"
