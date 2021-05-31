@@ -1,2 +1,9 @@
-a.out
+# Binaries
+nord
+
+# macOS-related ignores
 .DS_Store
+
+# Test-related ignores
+__pycache__
+run

@@ -1,8 +1,12 @@
-CC=clang
-CFLAGS=-Werror -std=c99
+include Makefile.shared
 
 SOURCES=src/token.c src/lexer.c src/main.c
 BINARY=nord
 
+.PHONY: test
+
 all: $(SOURCES)
 	$(CC) $(CFLAGS) $(SOURCES) -o $(BINARY)
+
+test:
+	make -C test

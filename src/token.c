@@ -104,7 +104,7 @@ void token_list_print(TokenList list)
             default:
                 break;
         }
-        printf(":%d-%d] ", t.start, t.end);
+        printf(":%d-%d]\n", t.start, t.end);
     }
 
     printf("\n");
