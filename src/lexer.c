@@ -10,6 +10,10 @@
 
 #include "lexer.h"
 
+/*
+ * Return whether or not the specified character is reserved and shouldn't be
+ * allowed in an identifier.
+ */
 bool is_reserved(char c)
 {
     if (c == '(' || c == ')' || c == ':' || c == ',')
@@ -17,6 +21,9 @@ bool is_reserved(char c)
     return false;
 }
 
+/*
+ * Return whether or not the specified character is whitespace
+ */
 bool is_whitespace(char c)
 {
     if (c == ' ' || c == '\t' || c == '\n')
@@ -24,6 +31,11 @@ bool is_whitespace(char c)
     return false;
 }
 
+///---- Matching functions
+
+/*
+ * Match 'var' keyword
+ */
 int match_var(const char *c, TokenList *list)
 {
     if (*c != 'v') return 0;
@@ -36,6 +48,9 @@ int match_var(const char *c, TokenList *list)
     return 3;
 }
 
+/*
+ * Match 'fn' keyword
+ */
 int match_fn(const char *c, TokenList *list)
 {
     if (*c != 'f') return 0;
@@ -47,6 +62,10 @@ int match_fn(const char *c, TokenList *list)
     return 2;
 }
 
+/*
+ * Match an identifier. Identifiers must begin with an alphabetic character,
+ * and can contain any non-reserved character.
+ */
 int match_identifier(const char *c, TokenList *list)
 {
     int len = 0;
@@ -76,6 +95,9 @@ int match_identifier(const char *c, TokenList *list)
     return len;
 }
 
+/*
+ * Match a number.
+ */
 int match_numeral(const char *c, TokenList *list)
 {
     int len = 0;
@@ -95,6 +117,9 @@ int match_numeral(const char *c, TokenList *list)
     return len;
 }
 
+/*
+ * Match the -> keyword.
+ */
 int match_right_arrow(const char *c, TokenList *list)
 {
     if (*c != '-') return 0;
@@ -106,6 +131,9 @@ int match_right_arrow(const char *c, TokenList *list)
     return 2;
 }
 
+/*
+ * Scan a string, and return a list of corresponding tokens.
+ */
 TokenList scan(char *input)
 {
     // We just create an arbitrarily-sized token list to begin with
