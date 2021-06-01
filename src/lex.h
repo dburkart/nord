@@ -21,6 +21,8 @@ Token accept(ScanContext *);
 // Return the next token, but don't consume it
 Token peek(ScanContext *);
 
+char *token_value(ScanContext *, Token);
+
 // Scan an input string, and return a list of tokens.
 TokenList scan_input(char *);
 

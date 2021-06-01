@@ -7,6 +7,7 @@
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "lex.h"
 
@@ -245,6 +246,15 @@ Token accept(ScanContext *context)
     Token t = peek(context);
     context->position = t.end;
     return t;
+}
+
+char *token_value(ScanContext *context, Token t)
+{
+    int len = t.end - t.start;
+    char *value = calloc(len + 1, sizeof(char));
+    memcpy(value, context->buffer + t.start, len);
+
+    return value;
 }
 
 /*

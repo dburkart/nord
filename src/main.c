@@ -32,9 +32,19 @@ int main(int argc, char *argv[])
 
         input[fsize] = 0;
 
-        TokenList list = scan_input(input);
-        token_list_print(list);
-        token_list_destroy(list);
+        ScanContext context;
+        context.buffer = input;
+        context.position = 0;
+
+        while (peek(&context).type != EOF_CHAR)
+        {
+            Token t = accept(&context);
+            char *value = token_value(&context, t);
+
+            printf("%d {%d, %d} : (%s)\n", t.type, t.start, t.end, value);
+
+            free(value);
+        }
 
         free(input);
     }
