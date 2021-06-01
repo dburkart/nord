@@ -97,6 +97,9 @@ void token_list_print(TokenList list)
             case FUNCTION:
                 printf("[FUNCTION");
                 break;
+            case INVALID:
+                printf("[INVALID");
+                break;
             // EOF
             case EOF_CHAR:
                 printf("[EOF");

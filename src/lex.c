@@ -210,7 +210,7 @@ Token peek(ScanContext *context)
                     break;
                 }
 
-                // We didn't match anything, so consume until we hit whitespace, and set error = true
+                // We didn't match anything, so consume until we hit whitespace
                 advance = 1;
                 while (!is_whitespace(*(c+advance)))
                 {
