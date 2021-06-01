@@ -11,7 +11,7 @@
 
 #include <stdio.h>
 
-#include "lexer.h"
+#include "lex.h"
 
 int main(int argc, char *argv[])
 {

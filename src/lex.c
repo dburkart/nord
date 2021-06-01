@@ -8,7 +8,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "lexer.h"
+#include "lex.h"
 
 /*
  * Return whether or not the specified character is reserved and shouldn't be

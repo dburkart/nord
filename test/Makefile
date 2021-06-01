@@ -2,8 +2,8 @@ BASE = ..
 
 include $(BASE)/Makefile.shared
 
-all: lexer/run
+all: lex/run
 	python3 -m unittest discover -s . -p '*_test.py'
 
-lexer/run: $(BASE)/src/lexer.c $(BASE)/src/lexer.h $(BASE)/src/token.c $(BASE)/src/token.h lexer/run.c
-	$(CC) $(CFLAGS) -I$(BASE)/src $(BASE)/src/lexer.c $(BASE)/src/token.c lexer/run.c -o lexer/run
+lex/run: $(BASE)/src/lex.c $(BASE)/src/lex.h $(BASE)/src/token.c $(BASE)/src/token.h lex/run.c
+	$(CC) $(CFLAGS) -I$(BASE)/src $(BASE)/src/lex.c $(BASE)/src/token.c lex/run.c -o lex/run
