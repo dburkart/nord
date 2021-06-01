@@ -248,7 +248,8 @@ Token accept(ScanContext *context)
 }
 
 /*
- * Scan a string, and return a list of corresponding tokens.
+ * Scan a string, and return a list of corresponding tokens. This is primarily
+ * for testing purposes.
  */
 TokenList scan_input(char *input)
 {
