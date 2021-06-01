@@ -18,7 +18,7 @@ enum TokenType {
     R_ARROW,
 
     // Literals
-    IDENTIFIER, STRING, NUMERAL,
+    IDENTIFIER, STRING, NUMBER,
 
     // Keywords
     VAR, FUNCTION,

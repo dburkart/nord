@@ -90,7 +90,7 @@ int match_identifier(const char *c)
 /*
  * Match a number.
  */
-int match_numeral(const char *c)
+int match_number(const char *c)
 {
     int len = 0;
 
@@ -204,10 +204,10 @@ Token peek(ScanContext *context)
                     break;
                 }
 
-                advance = match_numeral(c);
+                advance = match_number(c);
                 if (advance)
                 {
-                    t.type = NUMERAL;
+                    t.type = NUMBER;
                     break;
                 }
 

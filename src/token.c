@@ -86,8 +86,8 @@ void token_list_print(TokenList list)
             case STRING:
                 printf("[STRING");
                 break;
-            case NUMERAL:
-                printf("[NUMERAL");
+            case NUMBER:
+                printf("[NUMBER");
                 break;
 
             // Keywords
