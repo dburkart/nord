@@ -8,5 +8,5 @@ term            -> term_md ( ( "-" | "+" ) term_md )* ;
 term_md         -> unary ( ( "/" | "*" ) unary )*  ;
 unary           -> ( "!" | "-" ) unary
                  | primary ;
-primary         -> NUMBER | STRING | "true" | "false" | "nil"
+primary         -> IDENTIFIER | NUMBER | STRING | "true" | "false" | "nil"
                  | "(" expression ")" ;
