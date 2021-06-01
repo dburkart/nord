@@ -1,0 +1,12 @@
+# Grammar reference for Nord. Documented in roughly BNF form.
+
+# Expressions
+expression      -> equality ;
+equality        -> comparison ( ( "!=" | "==") comparison )* ;
+comparison      -> term ( ( ">" | ">=" | "<" | "<=" ) term )* ;
+term            -> term_md ( ( "-" | "+" ) term_md )* ;
+term_md         -> unary ( ( "/" | "*" ) unary )*  ;
+unary           -> ( "!" | "-" ) unary
+                 | primary ;
+primary         -> NUMBER | STRING | "true" | "false" | "nil"
+                 | "(" expression ")" ;
