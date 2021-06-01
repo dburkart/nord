@@ -36,14 +36,11 @@ bool is_whitespace(char c)
 /*
  * Match 'var' keyword
  */
-int match_var(const char *c, TokenList *list)
+int match_var(const char *c)
 {
     if (*c != 'v') return 0;
     if (*(c+1) != 'a') return 0;
     if (*(c+2) != 'r') return 0;
-
-    Token t = { VAR };
-    token_list_add(list, t);
 
     return 3;
 }
@@ -51,13 +48,10 @@ int match_var(const char *c, TokenList *list)
 /*
  * Match 'fn' keyword
  */
-int match_fn(const char *c, TokenList *list)
+int match_fn(const char *c)
 {
     if (*c != 'f') return 0;
     if (*(c+1) != 'n') return 0;
-
-    Token t = { FUNCTION };
-    token_list_add(list, t);
 
     return 2;
 }
@@ -66,7 +60,7 @@ int match_fn(const char *c, TokenList *list)
  * Match an identifier. Identifiers must begin with an alphabetic character,
  * and can contain any non-reserved character.
  */
-int match_identifier(const char *c, TokenList *list)
+int match_identifier(const char *c)
 {
     int len = 0;
 
@@ -89,16 +83,13 @@ int match_identifier(const char *c, TokenList *list)
         c = c + 1;
     }
 
-    Token t = { IDENTIFIER };
-    token_list_add(list, t);
-
     return len;
 }
 
 /*
  * Match a number.
  */
-int match_numeral(const char *c, TokenList *list)
+int match_numeral(const char *c)
 {
     int len = 0;
 
@@ -111,22 +102,16 @@ int match_numeral(const char *c, TokenList *list)
         c = c + 1;
     }
 
-    Token t = { NUMERAL };
-    token_list_add(list, t);
-
     return len;
 }
 
 /*
  * Match the -> keyword.
  */
-int match_right_arrow(const char *c, TokenList *list)
+int match_right_arrow(const char *c)
 {
     if (*c != '-') return 0;
     if (*(c+1) != '>') return 0;
-
-    Token t = { R_ARROW };
-    token_list_add(list, t);
 
     return 2;
 }
@@ -148,6 +133,7 @@ TokenList scan(char *input)
         bool token_added = true;
         bool error = false;
         Token t;
+
         switch (*c)
         {
             case ' ':
@@ -186,25 +172,47 @@ TokenList scan(char *input)
                 advance = 1;
                 break;
             case '-':
-                advance = match_right_arrow(c, &tokens);
+                advance = match_right_arrow(c);
                 if (advance)
+                {
+                    t.type = R_ARROW;
+                    token_list_add(&tokens, t);
                     break;
-            case 'f':
-                advance = match_fn(c, &tokens);
-                if (advance)
-                    break;
-            case 'v':
-                advance = match_var(c, &tokens);
-                if (advance)
-                    break;
-            default:
-                advance = match_identifier(c, &tokens);
-                if (advance)
-                    break;
+                }
 
-                advance = match_numeral(c, &tokens);
+            case 'f':
+                advance = match_fn(c);
                 if (advance)
+                {
+                    t.type = FUNCTION;
+                    token_list_add(&tokens, t);
                     break;
+                }
+            case 'v':
+                advance = match_var(c);
+                if (advance)
+                {
+                    t.type = VAR;
+                    token_list_add(&tokens, t);
+                    break;
+                }
+
+            default:
+                advance = match_identifier(c);
+                if (advance)
+                {
+                    t.type = IDENTIFIER;
+                    token_list_add(&tokens, t);
+                    break;
+                }
+
+                advance = match_numeral(c);
+                if (advance)
+                {
+                    t.type = NUMERAL;
+                    token_list_add(&tokens, t);
+                    break;
+                }
 
                 // We didn't match anything, so consume until we hit whitespace, and set error = true
                 advance = 1;
