@@ -117,58 +117,59 @@ int match_right_arrow(const char *c)
 }
 
 /*
- * Scan a string, and return a list of corresponding tokens.
+ * Return the next token on the input stream, without advancing the scan position
  */
-TokenList scan(char *input)
+Token peek(ScanContext *context)
 {
-    // We just create an arbitrarily-sized token list to begin with
-    TokenList tokens = token_list_create(2);
+    int start;
+    int position = context->position;
+    int advance = 0;
+    Token t;
+    bool token_found = true;
 
-    int pos = 0;
-    char *c = input;
-    while (*c != '\0')
-    {
-        int start = pos;
-        int advance = 0;
-        bool token_added = true;
-        bool error = false;
-        Token t;
+    // If our lookahead token has already been calculated, return it
+    if (context->lookahead.start >= position && position > 0)
+        return context->lookahead;
 
+    do {
+        char *c = context->buffer + position;
+
+        start = position;
+        // We don't set to true in the switch statement below
+        token_found = true;
         switch (*c)
         {
             case ' ':
             case '\t':
                 advance = 1;
-                token_added = false;
+                token_found = false;
+                break;
+            case '\0':
+                t.type = EOF_CHAR;
+                advance = 1;
                 break;
             case '\n':
                 t.type = EOL;
-                token_list_add(&tokens, t);
                 advance = 1;
                 break;
             case '=':
                 t.type = EQUAL;
-                token_list_add(&tokens, t);
                 advance = 1;
                 break;
             case '(':
                 t.type = L_PAREN;
-                token_list_add(&tokens, t);
                 advance = 1;
                 break;
             case ')':
                 t.type = R_PAREN;
-                token_list_add(&tokens, t);
                 advance = 1;
                 break;
             case ':':
                 t.type = COLON;
-                token_list_add(&tokens, t);
                 advance = 1;
                 break;
             case ',':
                 t.type = COMMA;
-                token_list_add(&tokens, t);
                 advance = 1;
                 break;
             case '-':
@@ -176,7 +177,6 @@ TokenList scan(char *input)
                 if (advance)
                 {
                     t.type = R_ARROW;
-                    token_list_add(&tokens, t);
                     break;
                 }
 
@@ -185,7 +185,6 @@ TokenList scan(char *input)
                 if (advance)
                 {
                     t.type = FUNCTION;
-                    token_list_add(&tokens, t);
                     break;
                 }
             case 'v':
@@ -193,7 +192,6 @@ TokenList scan(char *input)
                 if (advance)
                 {
                     t.type = VAR;
-                    token_list_add(&tokens, t);
                     break;
                 }
 
@@ -202,7 +200,6 @@ TokenList scan(char *input)
                 if (advance)
                 {
                     t.type = IDENTIFIER;
-                    token_list_add(&tokens, t);
                     break;
                 }
 
@@ -210,7 +207,6 @@ TokenList scan(char *input)
                 if (advance)
                 {
                     t.type = NUMERAL;
-                    token_list_add(&tokens, t);
                     break;
                 }
 
@@ -220,27 +216,51 @@ TokenList scan(char *input)
                 {
                     advance = advance + 1;
                 }
-                error = true;
+                t.type = INVALID;
         }
 
         // Advance our position
-        pos = pos + advance;
+        position = start + advance;
+    } while (!token_found);
 
-        // Record the location of the token
-        if (token_added)
-        {
-            tokens.tokens[tokens.size - 1].start = start;
-            tokens.tokens[tokens.size - 1].end = pos;
-        }
+    t.start = start;
+    t.end = position;
 
-        if (error)
-        {
-            printf("Unknown token found while scanning: \"%.*s\"\n", advance, c);
-            exit(2);
-        }
+    context->lookahead = t;
 
-        c += advance;
+    return t;
+}
+
+/*
+ * Accept the next token on the input stream, consuming it.
+ */
+Token accept(ScanContext *context)
+{
+    if (context->lookahead.start >= context->position && context->position > 0)
+    {
+        context->position = context->lookahead.end;
+        return context->lookahead;
     }
+
+    Token t = peek(context);
+    context->position = t.end;
+    return t;
+}
+
+/*
+ * Scan a string, and return a list of corresponding tokens.
+ */
+TokenList scan_input(char *input)
+{
+    // We just create an arbitrarily-sized token list to begin with
+    TokenList tokens = token_list_create(2);
+    Token t;
+    ScanContext context = {input, 0};
+
+    do {
+        t = accept(&context);
+        token_list_add(&tokens, t);
+    } while (t.type != EOF_CHAR);
 
     return tokens;
 }

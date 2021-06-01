@@ -23,6 +23,9 @@ enum TokenType {
     // Keywords
     VAR, FUNCTION,
 
+    // Invalid token
+    INVALID,
+
     EOF_CHAR // 'EOF' is reserved on some platforms
 };
 

@@ -9,7 +9,7 @@ class DiffTestCase(unittest.TestCase):
     def assertNoDiff(self, output, expectation_file):
         with open(os.path.join(self.expectations_dir(), expectation_file), 'r') as f:
             expected = f.read()
-        self.assertMultiLineEqual(output, expected)
+        self.assertMultiLineEqual(expected, output)
 
     def base_dir(self):
         # We get the path to our child class to calculate base directory

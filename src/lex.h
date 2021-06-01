@@ -9,7 +9,19 @@
 
 #include "token.h"
 
+// State for a single instance of a lexical scanner.
+typedef struct {
+    char *buffer;
+    int position;
+    Token lookahead;
+} ScanContext;
+
+// Return the next token for the given context
+Token accept(ScanContext *);
+// Return the next token, but don't consume it
+Token peek(ScanContext *);
+
 // Scan an input string, and return a list of tokens.
-TokenList scan(char *);
+TokenList scan_input(char *);
 
 #endif
