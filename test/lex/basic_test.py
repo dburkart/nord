@@ -9,3 +9,6 @@ class TestBasicTokens(util.DiffTestCase):
 
     def test_all_tokens(self):
         self.assertNoDiff(self.runtest('basic/all.n'), 'basic/all.txt')
+
+    def test_strings(self):
+        self.assertNoDiff(self.runtest('basic/strings.n'), 'basic/strings.txt')
