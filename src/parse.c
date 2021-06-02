@@ -12,6 +12,7 @@
 // Forward declarations
 AST *expression(ScanContext *);
 AST *equality(ScanContext *);
+AST *declaration(ScanContext *);
 AST *comparison(ScanContext *);
 AST *term(ScanContext *);
 AST *term_md(ScanContext *);
@@ -107,7 +108,42 @@ AST *make_group_expr(AST *expr)
 
 AST *expression(ScanContext *context)
 {
-    return equality(context);
+    AST *expr = equality(context);
+
+    if (expr == NULL)
+    {
+        expr = declaration(context);
+    }
+
+    return expr;
+}
+
+AST *declaration(ScanContext *context)
+{
+    AST *left = NULL;
+
+    if (peek(context).type != VAR)
+        return NULL;
+
+    accept(context);
+
+    if (peek(context).type != IDENTIFIER)
+        return NULL;
+
+    left = make_literal_expr(accept(context));
+
+    if (peek(context).type == EQUAL)
+    {
+        left = make_binary_expr(left, accept(context), equality(context));
+    }
+    else
+    {
+        Token operator = {EQUAL};
+        Token nil = {NIL};
+        left = make_binary_expr(left, operator, make_literal_expr(nil));
+    }
+
+    return left;
 }
 
 AST *equality(ScanContext *context)

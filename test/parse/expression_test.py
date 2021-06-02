@@ -12,3 +12,9 @@ class TestExpressions(util.DiffTestCase):
 
     def test_greater_or_equal(self):
         self.assertNoDiff(self.runtest('expressions/greater_or_equal.n'), 'expressions/greater_or_equal.txt')
+
+    def test_declaration_01(self):
+        self.assertNoDiff(self.runtest('expressions/declaration_01.n'), 'expressions/declaration_01.txt')
+
+    def test_declaration_02(self):
+        self.assertNoDiff(self.runtest('expressions/declaration_02.n'), 'expressions/declaration_02.txt')

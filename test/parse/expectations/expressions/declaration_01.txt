@@ -1,0 +1,3 @@
+BINARY(EQUAL)
+  ↳ LITERAL(IDENTIFIER) -> foo
+  ↳ LITERAL(NIL) -> 
