@@ -1,0 +1,4 @@
+if = ( ) : ,
+-> fn true false var foo 123
+12.one12 - + * / ! != ==
+nil

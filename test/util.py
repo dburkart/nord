@@ -7,6 +7,7 @@ from tempfile import NamedTemporaryFile
 
 class DiffTestCase(unittest.TestCase):
     def assertNoDiff(self, output, expectation_file):
+        self.maxDiff = None
         filepath = os.path.join(self.expectations_dir(), expectation_file)
 
         if os.environ.get('rebase') == 'YES':

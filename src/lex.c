@@ -47,6 +47,19 @@ int match_var(const char *c)
 }
 
 /*
+ * Match 'true' keyword
+ */
+int match_true(const char *c)
+{
+    if (*c != 't') return 0;
+    if (*(c+1) != 'r') return 0;
+    if (*(c+2) != 'u') return 0;
+    if (*(c+3) != 'e') return 0;
+
+    return 4;
+}
+
+/*
  * Match 'false' keyword
  */
 int match_false(const char *c)
@@ -58,6 +71,18 @@ int match_false(const char *c)
     if (*(c+4) != 'e') return 0;
 
     return 5;
+}
+
+/*
+ * Match 'nil' keyword
+ */
+int match_nil(const char *c)
+{
+    if (*c != 'n') return 0;
+    if (*(c+1) != 'i') return 0;
+    if (*(c+2) != 'l') return 0;
+
+    return 3;
 }
 
 /*
@@ -168,7 +193,25 @@ Token peek(ScanContext *context)
                 advance = 1;
                 break;
             case '=':
+                if (*(c+1) == '=')
+                {
+                    t.type = EQUAL_EQUAL;
+                    advance = 2;
+                    break;
+                }
+
                 t.type = EQUAL;
+                advance = 1;
+                break;
+            case '!':
+                if (*(c+1) == '=')
+                {
+                    t.type = BANG_EQUAL;
+                    advance = 2;
+                    break;
+                }
+
+                t.type = BANG;
                 advance = 1;
                 break;
             case '(':
@@ -195,6 +238,21 @@ Token peek(ScanContext *context)
                     break;
                 }
 
+                t.type = MINUS;
+                advance = 1;
+                break;
+            case '+':
+                t.type = PLUS;
+                advance = 1;
+                break;
+            case '*':
+                t.type = ASTERISK;
+                advance = 1;
+                break;
+            case '/':
+                t.type = SLASH;
+                advance = 1;
+                break;
             case 'f':
                 advance = match_fn(c);
                 if (advance)
@@ -207,6 +265,20 @@ Token peek(ScanContext *context)
                 if (advance)
                 {
                     t.type = FALSE;
+                    break;
+                }
+            case 'n':
+                advance = match_nil(c);
+                if (advance)
+                {
+                    t.type = NIL;
+                    break;
+                }
+            case 't':
+                advance = match_true(c);
+                if (advance)
+                {
+                    t.type = TRUE;
                     break;
                 }
             case 'v':

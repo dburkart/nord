@@ -65,6 +65,24 @@ const char *token_name(Token t)
         case EOL:
             return "EOL";
 
+        // COMPARATORS
+        case BANG:
+            return "BANG";
+        case BANG_EQUAL:
+            return "BANG_EQUAL";
+        case EQUAL_EQUAL:
+            return "EQUAL_EQUAL";
+
+        // MATH
+        case MINUS:
+            return "MINUS";
+        case PLUS:
+            return "PLUS";
+        case ASTERISK:
+            return "ASTERISK";
+        case SLASH:
+            return "SLASH";
+
         // Arrows
         case R_ARROW:
             return "R_ARROW";
@@ -78,8 +96,12 @@ const char *token_name(Token t)
             return "NUMBER";
 
         // Keywords
+        case TRUE:
+            return "TRUE";
         case FALSE:
             return "FALSE";
+        case NIL:
+            return "NIL";
         case VAR:
             return "VAR";
         case FUNCTION:
