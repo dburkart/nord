@@ -25,6 +25,8 @@ AST *parse(ScanContext *context)
 
 void print_ast_internal(ScanContext *context, AST *ast, int indent)
 {
+    char *token_val;
+
     for (int i = 0; i < indent; i++)
     {
         if (i > 0 && i % 2 == 0)
@@ -48,7 +50,9 @@ void print_ast_internal(ScanContext *context, AST *ast, int indent)
             print_ast_internal(context, ast->op.unary.operand, indent + 2);
             break;
         case LITERAL:
-            printf("LITERAL(%s) -> %s\n", token_name(ast->op.literal), token_value(context, ast->op.literal));
+            token_val = token_value(context, ast->op.literal);
+            printf("LITERAL(%s) -> %s\n", token_name(ast->op.literal), token_val);
+            free(token_val);
             break;
         case GROUP:
             printf("GROUP\n");

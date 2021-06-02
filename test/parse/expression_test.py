@@ -9,3 +9,6 @@ class TestExpressions(util.DiffTestCase):
 
     def test_grouping(self):
         self.assertNoDiff(self.runtest('expressions/grouping.n'), 'expressions/grouping.txt')
+
+    def test_greater_or_equal(self):
+        self.assertNoDiff(self.runtest('expressions/greater_or_equal.n'), 'expressions/greater_or_equal.txt')

@@ -234,6 +234,28 @@ Token peek(ScanContext *context)
                 t.type = BANG;
                 advance = 1;
                 break;
+            case '>':
+                if (*(c+1) == '=')
+                {
+                    t.type = GREATER_OR_EQUAL;
+                    advance = 2;
+                    break;
+                }
+
+                t.type = GREATER;
+                advance = 1;
+                break;
+            case '<':
+                if (*(c+1) == '=')
+                {
+                    t.type = LESS_OR_EQUAL;
+                    advance = 2;
+                    break;
+                }
+
+                t.type = LESS;
+                advance = 1;
+                break;
             case '(':
                 t.type = L_PAREN;
                 advance = 1;

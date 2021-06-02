@@ -72,6 +72,14 @@ const char *token_name(Token t)
             return "BANG_EQUAL";
         case EQUAL_EQUAL:
             return "EQUAL_EQUAL";
+        case LESS:
+            return "LESS";
+        case LESS_OR_EQUAL:
+            return "LESS_OR_EQUAL";
+        case GREATER:
+            return "GREATER";
+        case GREATER_OR_EQUAL:
+            return "GREATER_OR_EQUAL";
 
         // MATH
         case MINUS:
