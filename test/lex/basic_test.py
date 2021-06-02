@@ -15,3 +15,6 @@ class TestBasicTokens(util.DiffTestCase):
 
     def test_paren_no_space(self):
         self.assertNoDiff(self.runtest('basic/paren_no_space.n'), 'basic/paren_no_space.txt')
+
+    def test_operator_no_space(self):
+        self.assertNoDiff(self.runtest('basic/operator_no_space.n'), 'basic/operator_no_space.txt')

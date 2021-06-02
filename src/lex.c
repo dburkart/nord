@@ -18,7 +18,8 @@
  */
 bool is_reserved(char c)
 {
-    if (c == '(' || c == ')' || c == ':' || c == ',')
+    if (c == '(' || c == ')' || c == ':' || c == ',' || c == '*' || c == '+' ||
+        c == '/' || c == '-')
         return true;
     return false;
 }
