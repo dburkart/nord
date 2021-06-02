@@ -47,70 +47,62 @@ void token_list_add(TokenList *list, Token t)
     list->size = list->size + 1;
 }
 
+const char *token_name(Token t)
+{
+    switch(t.type)
+    {
+        // Single character tokens
+        case EQUAL:
+            return "EQUAL";
+        case L_PAREN:
+            return "L_PAREN";
+        case R_PAREN:
+            return "R_PAREN";
+        case COLON:
+            return "COLON";
+        case COMMA:
+            return "COMMA";
+        case EOL:
+            return "EOL";
+
+        // Arrows
+        case R_ARROW:
+            return "R_ARROW";
+
+        // Literals
+        case IDENTIFIER:
+            return "IDENTIFIER";
+        case STRING:
+            return "STRING";
+        case NUMBER:
+            return "NUMBER";
+
+        // Keywords
+        case FALSE:
+            return "FALSE";
+        case VAR:
+            return "VAR";
+        case FUNCTION:
+            return "FUNCTION";
+        case INVALID:
+            return "INVALID";
+
+        // EOF
+        case EOF_CHAR:
+            return "EOF";
+        default:
+            break;
+    }
+    // This shouldn't be reachable
+    return "UNKNOWN";
+}
+
 void token_list_print(TokenList list)
 {
     for (int i = 0; i < list.size; i++)
     {
         Token t = list.tokens[i];
-        switch(t.type)
-        {
-            // Single character tokens
-            case EQUAL:
-                printf("[EQUAL");
-                break;
-            case L_PAREN:
-                printf("[L_PAREN");
-                break;
-            case R_PAREN:
-                printf("[R_PAREN");
-                break;
-            case COLON:
-                printf("[COLON");
-                break;
-            case COMMA:
-                printf("[COMMA");
-                break;
-            case EOL:
-                printf("[EOL");
-                break;
-
-            // Arrows
-            case R_ARROW:
-                printf("[R_ARROW");
-                break;
-
-            // Literals
-            case IDENTIFIER:
-                printf("[IDENTIFIER");
-                break;
-            case STRING:
-                printf("[STRING");
-                break;
-            case NUMBER:
-                printf("[NUMBER");
-                break;
-
-            // Keywords
-            case FALSE:
-                printf("[FALSE");
-                break;
-            case VAR:
-                printf("[VAR");
-                break;
-            case FUNCTION:
-                printf("[FUNCTION");
-                break;
-            case INVALID:
-                printf("[INVALID");
-                break;
-            // EOF
-            case EOF_CHAR:
-                printf("[EOF");
-                break;
-            default:
-                break;
-        }
-        printf(":%d-%d]\n", t.start, t.end);
+        printf("[%s:%d-%d]\n", token_name(t), t.start, t.end);
     }
 
     printf("\n");
