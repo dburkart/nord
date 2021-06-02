@@ -47,6 +47,20 @@ int match_var(const char *c)
 }
 
 /*
+ * Match 'false' keyword
+ */
+int match_false(const char *c)
+{
+    if (*c != 'f') return 0;
+    if (*(c+1) != 'a') return 0;
+    if (*(c+2) != 'l') return 0;
+    if (*(c+3) != 's') return 0;
+    if (*(c+4) != 'e') return 0;
+
+    return 5;
+}
+
+/*
  * Match 'fn' keyword
  */
 int match_fn(const char *c)
@@ -186,6 +200,13 @@ Token peek(ScanContext *context)
                 if (advance)
                 {
                     t.type = FUNCTION;
+                    break;
+                }
+
+                advance = match_false(c);
+                if (advance)
+                {
+                    t.type = FALSE;
                     break;
                 }
             case 'v':

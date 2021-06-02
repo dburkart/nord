@@ -91,6 +91,9 @@ void token_list_print(TokenList list)
                 break;
 
             // Keywords
+            case FALSE:
+                printf("[FALSE");
+                break;
             case VAR:
                 printf("[VAR");
                 break;

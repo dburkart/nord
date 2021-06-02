@@ -7,8 +7,18 @@ from tempfile import NamedTemporaryFile
 
 class DiffTestCase(unittest.TestCase):
     def assertNoDiff(self, output, expectation_file):
-        with open(os.path.join(self.expectations_dir(), expectation_file), 'r') as f:
+        filepath = os.path.join(self.expectations_dir(), expectation_file)
+
+        if os.environ.get('rebase') == 'YES':
+            with open(filepath, 'w') as f:
+                f.write(output)
+
+        if not os.path.exists(filepath):
+            open(filepath, 'w')
+
+        with open(filepath, 'r') as f:
             expected = f.read()
+
         self.assertMultiLineEqual(expected, output)
 
     def base_dir(self):

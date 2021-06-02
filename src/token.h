@@ -11,8 +11,16 @@
 
 // Lexeme Enumeration
 enum TokenType {
-    // Single-character tokens
-    EQUAL, L_PAREN, R_PAREN, COLON, COMMA, EOL,
+    // Delimiters
+    L_PAREN, R_PAREN, COLON, COMMA, EOL,
+
+    EQUAL, BANG,
+
+    // Math
+    PLUS, MINUS, ASTERISK, SLASH,
+
+    // Comparators
+    GREATER, GREATER_OR_EQUAL, LESS, LESS_OR_EQUAL, EQUAL_EQUAL, BANG_EQUAL,
 
     // Arrows
     R_ARROW,
@@ -21,7 +29,7 @@ enum TokenType {
     IDENTIFIER, STRING, NUMBER,
 
     // Keywords
-    VAR, FUNCTION,
+    VAR, FUNCTION, TRUE, FALSE, NIL,
 
     // Invalid token
     INVALID,
