@@ -4,8 +4,10 @@
  * SPDX-License-Identifier: BSD-2-Clause
  */
 
-#ifndef LEXER_H
-#define LEXER_H
+#ifndef LEX_H
+#define LEX_H
+
+#include <stdbool.h>
 
 #include "token.h"
 
@@ -20,6 +22,8 @@ typedef struct {
 Token accept(ScanContext *);
 // Return the next token, but don't consume it
 Token peek(ScanContext *);
+// Return whether or not the next token matches the specified tokens
+bool match(ScanContext *, int, ...);
 
 char *token_value(ScanContext *, Token);
 

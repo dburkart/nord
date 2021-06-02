@@ -7,6 +7,7 @@
 #include <stdio.h>
 
 #include "lex.h"
+#include "parse.h"
 
 int main(int argc, char *argv[])
 {
@@ -36,15 +37,9 @@ int main(int argc, char *argv[])
         context.buffer = input;
         context.position = 0;
 
-        while (peek(&context).type != EOF_CHAR)
-        {
-            Token t = accept(&context);
-            char *value = token_value(&context, t);
+        AST *syntax_tree = parse(&context);
 
-            printf("%s {%d, %d} : (%s)\n", token_name(t), t.start, t.end, value);
-
-            free(value);
-        }
+        print_ast(&context, syntax_tree);
 
         free(input);
     }

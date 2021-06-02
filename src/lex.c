@@ -5,6 +5,7 @@
  */
 
 #include <stdbool.h>
+#include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -133,7 +134,7 @@ int match_number(const char *c)
 {
     int len = 0;
 
-    while (*c != ' ' && *c != '\t' && *c != '\n' && *c != '\0')
+    while (!is_whitespace(*c) && *c != 0 && !is_reserved(*c))
     {
         if (*c < '0' || *c > '9')
             return 0;
@@ -364,6 +365,26 @@ Token accept(ScanContext *context)
     Token t = peek(context);
     context->position = t.end;
     return t;
+}
+
+bool match(ScanContext *context, int num, ...)
+{
+    bool found = false;
+    Token next = peek(context);
+
+    va_list args;
+    va_start(args, num);
+    for (int i = 0; i < num; i++)
+    {
+        if (next.type == va_arg(args, int))
+        {
+            found = true;
+            break;
+        }
+    }
+    va_end(args);
+
+    return found;
 }
 
 char *token_value(ScanContext *context, Token t)
