@@ -146,6 +146,24 @@ int match_number(const char *c)
 }
 
 /*
+ * Match a string.
+ */
+int match_string(const char *c)
+{
+    int len = 1;
+
+    if (*c != '"')
+        return 0;
+
+    do {
+        len = len + 1;
+        c = c + 1;
+    } while (*c != '"');
+
+    return len;
+}
+
+/*
  * Match the -> keyword.
  */
 int match_right_arrow(const char *c)
@@ -253,6 +271,13 @@ Token peek(ScanContext *context)
                 t.type = SLASH;
                 advance = 1;
                 break;
+            case '"':
+                advance = match_string(c);
+                if (advance)
+                {
+                    t.type = STRING;
+                    break;
+                }
             case 'f':
                 advance = match_fn(c);
                 if (advance)

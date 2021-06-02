@@ -56,5 +56,6 @@ TokenList token_list_create(size_t);
 void token_list_destroy(TokenList);
 void token_list_add(TokenList *, Token);
 void token_list_print(TokenList);
+const char *token_name(Token);
 
 #endif

@@ -41,7 +41,7 @@ int main(int argc, char *argv[])
             Token t = accept(&context);
             char *value = token_value(&context, t);
 
-            printf("%d {%d, %d} : (%s)\n", t.type, t.start, t.end, value);
+            printf("%s {%d, %d} : (%s)\n", token_name(t), t.start, t.end, value);
 
             free(value);
         }
