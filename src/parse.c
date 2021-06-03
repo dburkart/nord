@@ -13,6 +13,7 @@
 AST *expression(ScanContext *);
 AST *equality(ScanContext *);
 AST *declaration(ScanContext *);
+AST *assignment(ScanContext *);
 AST *comparison(ScanContext *);
 AST *term(ScanContext *);
 AST *term_md(ScanContext *);
@@ -108,11 +109,11 @@ AST *make_group_expr(AST *expr)
 
 AST *expression(ScanContext *context)
 {
-    AST *expr = equality(context);
+    AST *expr = declaration(context);
 
     if (expr == NULL)
     {
-        expr = declaration(context);
+        expr = equality(context);
     }
 
     return expr;
@@ -127,21 +128,33 @@ AST *declaration(ScanContext *context)
 
     accept(context);
 
-    if (peek(context).type != IDENTIFIER)
-        return NULL;
-
-    left = make_literal_expr(accept(context));
-
-    if (peek(context).type == EQUAL)
-    {
-        left = make_binary_expr(left, accept(context), equality(context));
-    }
-    else
+    left = assignment(context);
+    if (left->type == LITERAL)
     {
         Token operator = {EQUAL};
         Token nil = {NIL};
-        left = make_binary_expr(left, operator, make_literal_expr(nil));
+        AST *right = make_literal_expr(nil);
+        left = make_binary_expr(left, operator, right);
     }
+
+    return left;
+}
+
+AST *assignment(ScanContext *context)
+{
+    AST *left = NULL;
+
+    if (peek(context).type != IDENTIFIER)
+        return equality(context);
+
+    left = make_literal_expr(accept(context));
+
+    if (peek(context).type != EQUAL)
+        return left;
+
+    Token operator = accept(context);
+    AST *right = assignment(context);
+    left = make_binary_expr(left, operator, right);
 
     return left;
 }

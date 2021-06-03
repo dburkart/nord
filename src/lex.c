@@ -382,11 +382,13 @@ Token accept(ScanContext *context)
     if (context->lookahead.start >= context->position && context->position > 0)
     {
         context->position = context->lookahead.end;
+        context->previous = context->lookahead;
         return context->lookahead;
     }
 
     Token t = peek(context);
     context->position = t.end;
+    context->previous = t;
     return t;
 }
 

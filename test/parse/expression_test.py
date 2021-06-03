@@ -18,3 +18,6 @@ class TestExpressions(util.DiffTestCase):
 
     def test_declaration_02(self):
         self.assertNoDiff(self.runtest('expressions/declaration_02.n'), 'expressions/declaration_02.txt')
+
+    def test_declaration_03(self):
+        self.assertNoDiff(self.runtest('expressions/declaration_03.n'), 'expressions/declaration_03.txt')

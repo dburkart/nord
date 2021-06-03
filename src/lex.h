@@ -15,6 +15,7 @@
 typedef struct {
     char *buffer;
     int position;
+    Token previous;
     Token lookahead;
 } ScanContext;
 

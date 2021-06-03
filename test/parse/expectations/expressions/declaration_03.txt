@@ -1,0 +1,9 @@
+BINARY(EQUAL)
+  ↳ LITERAL(IDENTIFIER) -> foo
+  ↳ BINARY(EQUAL)
+  ⋅ ↳ LITERAL(IDENTIFIER) -> x
+  ⋅ ↳ BINARY(EQUAL)
+  ⋅ ⋅ ↳ LITERAL(IDENTIFIER) -> y
+  ⋅ ⋅ ↳ BINARY(PLUS)
+  ⋅ ⋅ ⋅ ↳ LITERAL(NUMBER) -> 1
+  ⋅ ⋅ ⋅ ↳ LITERAL(NUMBER) -> 3

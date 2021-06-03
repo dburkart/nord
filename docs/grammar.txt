@@ -3,7 +3,11 @@
 # Expressions
 expression      -> equality
                  | declaration ;
-declaration     -> VAR IDENTIFIER ( "=" equality )?;
+declaration     -> VAR IDENTIFIER
+                 | VAR assignment ;
+assignment      -> IDENTIFIER "=" assignment
+                 | IDENTIFIER
+                 | equality ;
 equality        -> comparison ( ( "!=" | "==") comparison )* ;
 comparison      -> term ( ( ">" | ">=" | "<" | "<=" ) term )* ;
 term            -> term_md ( ( "-" | "+" ) term_md )* ;
