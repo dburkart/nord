@@ -25,6 +25,8 @@ Token accept(ScanContext *);
 Token peek(ScanContext *);
 // Return whether or not the next token matches the specified tokens
 bool match(ScanContext *, int, ...);
+// Rewind to the last seen token
+void backup(ScanContext *);
 
 char *token_value(ScanContext *, Token);
 

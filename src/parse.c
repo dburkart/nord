@@ -10,9 +10,11 @@
 #include "parse.h"
 
 // Forward declarations
+AST *declaration(ScanContext *);
+AST *statement(ScanContext *);
+AST *variable_decl(ScanContext *);
 AST *expression(ScanContext *);
 AST *equality(ScanContext *);
-AST *declaration(ScanContext *);
 AST *assignment(ScanContext *);
 AST *comparison(ScanContext *);
 AST *term(ScanContext *);
@@ -22,7 +24,7 @@ AST *primary(ScanContext *);
 
 AST *parse(ScanContext *context)
 {
-    return expression(context);
+    return declaration(context);
 }
 
 void print_ast_internal(ScanContext *context, AST *ast, int indent)
@@ -42,10 +44,25 @@ void print_ast_internal(ScanContext *context, AST *ast, int indent)
 
     switch(ast->type)
     {
+        case ASSIGN:
+            token_val = token_value(context, ast->op.assign.name);
+            printf("ASSIGN(%s) -> %s\n", token_name(ast->op.assign.name), token_val);
+            free(token_val);
+            print_ast_internal(context, ast->op.assign.value, indent + 2);
+            break;
         case BINARY:
             printf("BINARY(%s)\n", token_name(ast->op.binary.operator));
             print_ast_internal(context, ast->op.binary.left, indent + 2);
             print_ast_internal(context, ast->op.binary.right, indent + 2);
+            break;
+        case DECLARE:
+            token_val = token_value(context, ast->op.declare.name);
+            printf("DECLARE(%s) -> %s\n", token_name(ast->op.declare.name), token_val);
+            free(token_val);
+            if (ast->op.declare.initial_value)
+            {
+                print_ast_internal(context, ast->op.declare.initial_value, indent + 2);
+            }
             break;
         case UNARY:
             printf("UNARY(%s)\n", token_name(ast->op.unary.operator));
@@ -68,6 +85,16 @@ void print_ast(ScanContext *context, AST *ast)
     print_ast_internal(context, ast, 0);
 }
 
+AST* make_assign_expr(Token name, AST *value)
+{
+    AST *assign_expr = (AST *)malloc(sizeof(AST));
+    assign_expr->type = ASSIGN;
+    assign_expr->op.assign.name = name;
+    assign_expr->op.assign.value = value;
+
+    return assign_expr;
+}
+
 AST *make_binary_expr(AST *left, Token operator, AST *right)
 {
     AST *binary_expr = (AST *)malloc(sizeof(AST));
@@ -77,6 +104,17 @@ AST *make_binary_expr(AST *left, Token operator, AST *right)
     binary_expr->op.binary.right = right;
 
     return binary_expr;
+}
+
+AST *make_declare_expr(Token var_type, Token name, AST *initial_value)
+{
+    AST *declare_expr = (AST *)malloc(sizeof(AST));
+    declare_expr->type = DECLARE;
+    declare_expr->op.declare.var_type = var_type;
+    declare_expr->op.declare.name = name;
+    declare_expr->op.declare.initial_value = initial_value;
+
+    return declare_expr;
 }
 
 AST *make_unary_expr(Token operator, AST *operand)
@@ -107,54 +145,88 @@ AST *make_group_expr(AST *expr)
     return group_expr;
 }
 
-AST *expression(ScanContext *context)
-{
-    AST *expr = declaration(context);
-
-    if (expr == NULL)
-    {
-        expr = equality(context);
-    }
-
-    return expr;
-}
-
 AST *declaration(ScanContext *context)
 {
-    AST *left = NULL;
+    AST *left = variable_decl(context);
+
+    if (left == NULL)
+        left = statement(context);
+
+    return left;
+}
+
+AST *statement(ScanContext *context)
+{
+    AST *left = expression(context);
+
+    if (peek(context).type == EOL)
+    {
+        accept(context);
+        return left;
+    }
+
+    if (peek(context).type == EOF_CHAR)
+        return left;
+
+    return NULL;
+}
+
+AST *variable_decl(ScanContext *context)
+{
+    AST *left;
 
     if (peek(context).type != VAR)
         return NULL;
 
-    accept(context);
+    Token var_type = accept(context);
 
-    left = assignment(context);
-    if (left->type == LITERAL)
+    if (peek(context).type != IDENTIFIER)
     {
-        Token operator = {EQUAL};
-        Token nil = {NIL};
-        AST *right = make_literal_expr(nil);
-        left = make_binary_expr(left, operator, right);
+        backup(context);
+        return NULL;
     }
 
+    Token name = accept(context);
+    AST *right = NULL;
+
+    if (peek(context).type == EQUAL)
+    {
+        accept(context);
+        right = expression(context);
+    }
+
+    left = make_declare_expr(var_type, name, right);
+
     return left;
+}
+
+AST *expression(ScanContext *context)
+{
+    return assignment(context);
 }
 
 AST *assignment(ScanContext *context)
 {
     AST *left = NULL;
+    Token name;
 
     if (peek(context).type != IDENTIFIER)
         return equality(context);
 
-    left = make_literal_expr(accept(context));
+    name = accept(context);
 
     if (peek(context).type != EQUAL)
-        return left;
+    {
+        free(left);
+        backup(context);
+        return equality(context);
+    }
 
-    Token operator = accept(context);
-    AST *right = assignment(context);
-    left = make_binary_expr(left, operator, right);
+    // Consume the '='
+    accept(context);
+
+    AST *value = expression(context);
+    left = make_assign_expr(name, value);
 
     return left;
 }

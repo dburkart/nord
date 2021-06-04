@@ -14,7 +14,7 @@ typedef struct Expr
 {
     enum
     {
-        BINARY, UNARY, LITERAL, GROUP
+        ASSIGN, BINARY, DECLARE, UNARY, LITERAL, GROUP
     } type;
 
     union
@@ -23,10 +23,23 @@ typedef struct Expr
 
         struct
         {
+            Token name;
+            struct Expr* value;
+        } assign;
+
+        struct
+        {
             Token operator;
             struct Expr *left;
             struct Expr *right;
         } binary;
+
+        struct
+        {
+            Token var_type;
+            Token name;
+            struct Expr *initial_value;            // NULL if not initialized
+        } declare;
 
         struct
         {

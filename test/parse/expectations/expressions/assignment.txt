@@ -1,0 +1,2 @@
+ASSIGN(IDENTIFIER) -> foo
+  ↳ LITERAL(STRING) -> "bar"

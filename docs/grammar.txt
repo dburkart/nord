@@ -1,12 +1,14 @@
 # Grammar reference for Nord. Documented in roughly BNF form.
 
+# Statements
+declaration     -> variable_decl
+                 | statement ;
+statement       -> expression "\n" ;
+variable_decl   -> "var" IDENTIFIER ( "=" expression ) "\n" ;
+
 # Expressions
-expression      -> equality
-                 | declaration ;
-declaration     -> VAR IDENTIFIER
-                 | VAR assignment ;
+expression      -> assignment ;
 assignment      -> IDENTIFIER "=" assignment
-                 | IDENTIFIER
                  | equality ;
 equality        -> comparison ( ( "!=" | "==") comparison )* ;
 comparison      -> term ( ( ">" | ">=" | "<" | "<=" ) term )* ;

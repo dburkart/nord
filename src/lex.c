@@ -392,6 +392,12 @@ Token accept(ScanContext *context)
     return t;
 }
 
+void backup(ScanContext *context)
+{
+    context->position = context->previous.start;
+    context->lookahead = context->previous;
+}
+
 bool match(ScanContext *context, int num, ...)
 {
     bool found = false;
