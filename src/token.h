@@ -8,6 +8,7 @@
  #define TOKEN_H
 
 #include <stdlib.h>
+#include <stdint.h>
 
 // Lexeme Enumeration
 enum TokenType {
@@ -41,8 +42,8 @@ enum TokenType {
 typedef struct {
     enum TokenType type;
     // Positional data, relative to the original buffer
-    int start;
-    int end;
+    uint64_t start;
+    uint64_t end;
 } Token;
 
 // List of tokens to be fed to the parser

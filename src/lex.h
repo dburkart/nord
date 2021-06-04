@@ -8,13 +8,14 @@
 #define LEX_H
 
 #include <stdbool.h>
+#include <stdint.h>
 
 #include "token.h"
 
 // State for a single instance of a lexical scanner.
 typedef struct {
     char *buffer;
-    int position;
+    uint64_t position;
     Token previous;
     Token lookahead;
 } ScanContext;
