@@ -6,43 +6,41 @@
 
 #include <stdio.h>
 
-#include "lex.h"
-#include "parse.h"
+#include "bytecode.h"
+#include "vm.h"
 
 int main(int argc, char *argv[])
 {
     int status = 0;
 
-    if (argc == 1)
-    {
-        printf("Usage: %s <file-1> <file-2> ...\n", argv[0]);
-        goto done;
-    }
+    VM *vm;
+    CodeBlock *block = code_block_create();
 
-    for (int i = 1; i < argc; i++)
-    {
-        FILE *fp = fopen(argv[i], "r");
+    code_block_write(block, OP_LOAD);
+    code_block_write(block, 0);
+    code_block_write(block, 1);
+    code_block_write(block, OP_LOAD);
+    code_block_write(block, 1);
+    code_block_write(block, 2);
+    code_block_write(block, OP_ADD);
+    code_block_write(block, 1);
+    code_block_write(block, 2);
+    code_block_write(block, 3);
 
-        fseek(fp, 0, SEEK_END);
-        long fsize = ftell(fp);
-        fseek(fp, 0, SEEK_SET);
+    code_block_print(block);
 
-        char *input = malloc(fsize + 1);
-        fread(input, 1, fsize, fp);
-        fclose(fp);
+    vm = vm_create(block);
 
-        input[fsize] = 0;
+    Value a = {0, 15};
+    Value b = {0, 25};
+    memory_set(vm->memory, 0, a);
+    memory_set(vm->memory, 1, b);
 
-        ScanContext context;
-        context.buffer = input;
-        context.position = 0;
+    vm_execute(vm);
 
-        AST *syntax_tree = parse(&context);
+    vm_dump(vm);
 
-        print_ast(&context, syntax_tree);
-
-        free(input);
-    }
+    code_block_free(block);
 
 done:
     fflush(stdout);
