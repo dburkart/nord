@@ -101,31 +101,22 @@ void vm_execute(VM *vm)
     while (vm->ep < vm->code->size)
     {
         // Pull off the next opcode
-        uint8_t opcode = vm->code->code[vm->ep++];
-        uint8_t arg1;
-        uint8_t arg2;
-        uint8_t arg3;
-
+        Instruction instruction = vm->code->code[vm->ep++];
         Value result;
 
-        switch (opcode)
+        switch (instruction.opcode)
         {
             // Load a value into the specified register
             case OP_LOAD:
-                arg1 = vm->code->code[vm->ep++];
-                arg2 = vm->code->code[vm->ep++];
 
-                memory_set(vm->stack, arg2, memory_get(vm->memory, arg1));
+                memory_set(vm->stack, instruction.fields.pair.arg2, memory_get(vm->memory, instruction.fields.pair.arg1));
                 break;
             case OP_ADD:
-                arg1 = vm->code->code[vm->ep++];
-                arg2 = vm->code->code[vm->ep++];
-                arg3 = vm->code->code[vm->ep++];
                 result.type = VAL_INT;
-                result.contents.number = vm->stack->contents[arg1].contents.number + vm->stack->contents[arg2].contents.number;
+                result.contents.number = vm->stack->contents[instruction.fields.triplet.arg1].contents.number + vm->stack->contents[instruction.fields.triplet.arg2].contents.number;
 
                 // TODO: Don't assume numbers
-                memory_set(vm->stack, arg3, result);
+                memory_set(vm->stack, instruction.fields.triplet.arg3, result);
                 break;
         }
     }

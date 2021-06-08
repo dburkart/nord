@@ -21,20 +21,20 @@ void code_block_free(CodeBlock *block)
     free(block);
 }
 
-void code_block_write(CodeBlock *block, uint8_t val)
+void code_block_write(CodeBlock *block, Instruction val)
 {
     // First, handle an empty code block
     if (block->capacity == 0)
     {
         block->capacity = 2;
-        block->code = calloc(block->capacity, sizeof(uint8_t));
+        block->code = calloc(block->capacity, sizeof(Instruction));
     }
 
     // Grow our capacity if necessary
     if (block->size >= (block->capacity - 1))
     {
         block->capacity = block->capacity * 2;
-        block->code = realloc(block->code, sizeof(uint8_t) * block->capacity);
+        block->code = realloc(block->code, sizeof(Instruction) * block->capacity);
     }
 
     block->code[block->size] = val;
@@ -46,25 +46,20 @@ void code_block_print(CodeBlock *block)
     int num = 1;
     for (int i = 0; i < block->size; i++)
     {
-        uint8_t instruction = block->code[i];
+        Instruction instruction = block->code[i];
         int arg1;
         int arg2;
         int arg3;
 
         printf("%04d ", num);
 
-        switch(instruction)
+        switch(instruction.opcode)
         {
             case OP_LOAD:
-                arg1 = block->code[++i];
-                arg2 = block->code[++i];
-                printf("LOAD %04d %04d\n", arg1, arg2);
+                printf("LOAD %04d %04d\n", instruction.fields.pair.arg1, instruction.fields.pair.arg2);
                 break;
             case OP_ADD:
-                arg1 = block->code[++i];
-                arg2 = block->code[++i];
-                arg3 = block->code[++i];
-                printf("ADD %04d %04d %04d\n", arg1, arg2, arg3);
+                printf("ADD %04d %04d %04d\n", instruction.fields.triplet.arg1, instruction.fields.triplet.arg2, instruction.fields.triplet.arg3);
                 break;
             case OP_RETURN:
                 printf("RETURN\n");

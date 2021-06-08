@@ -15,17 +15,19 @@ int main(int argc, char *argv[])
 
     VM *vm;
     CodeBlock *block = code_block_create();
+    Instruction i;
 
-    code_block_write(block, OP_LOAD);
-    code_block_write(block, 0);
-    code_block_write(block, 1);
-    code_block_write(block, OP_LOAD);
-    code_block_write(block, 1);
-    code_block_write(block, 2);
-    code_block_write(block, OP_ADD);
-    code_block_write(block, 1);
-    code_block_write(block, 2);
-    code_block_write(block, 3);
+    i = (Instruction){OP_LOAD, 0, 1};
+    code_block_write(block, i);
+
+    i = (Instruction){OP_LOAD, 1, 2};
+    code_block_write(block, i);
+
+    i.opcode = OP_ADD;
+    i.fields.triplet.arg1 = 1;
+    i.fields.triplet.arg2 = 2;
+    i.fields.triplet.arg3 = 3;
+    code_block_write(block, i);
 
     code_block_print(block);
 

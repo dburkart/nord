@@ -19,15 +19,33 @@ typedef enum
     OP_RETURN
 } OpCode;
 
+typedef struct __attribute__((__packed__))
+{
+    uint8_t opcode;
+    union {
+        // Represents an instruction of the form OP A B
+        struct {
+            uint8_t arg1;
+            uint16_t arg2;
+        } pair;
+        // Represents an instruction of the form OP A B C
+        struct {
+            uint8_t arg1;
+            uint8_t arg2;
+            uint8_t arg3;
+        } triplet;
+    } fields;
+} Instruction;
+
 typedef struct
 {
     size_t size;
     size_t capacity;
-    uint8_t *code;
+    Instruction *code;
 } CodeBlock;
 
 CodeBlock *code_block_create();
-void code_block_write(CodeBlock *, uint8_t);
+void code_block_write(CodeBlock *, Instruction);
 void code_block_free(CodeBlock *);
 
 void code_block_print(CodeBlock *);
