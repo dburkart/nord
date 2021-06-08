@@ -72,7 +72,7 @@ VM *vm_create(CodeBlock *block)
     vm->sp = 0;
 
     vm->code = block;
-    vm->ep = 0;
+    vm->pc = 0;
 
     return vm;
 }
@@ -98,10 +98,10 @@ Value vm_stack_pop(VM *vm)
 
 void vm_execute(VM *vm)
 {
-    while (vm->ep < vm->code->size)
+    while (vm->pc < vm->code->size)
     {
         // Pull off the next opcode
-        Instruction instruction = vm->code->code[vm->ep++];
+        Instruction instruction = vm->code->code[vm->pc++];
         Value result;
 
         switch (instruction.opcode)
@@ -109,14 +109,14 @@ void vm_execute(VM *vm)
             // Load a value into the specified register
             case OP_LOAD:
 
-                memory_set(vm->stack, instruction.fields.pair.arg2, memory_get(vm->memory, instruction.fields.pair.arg1));
+                vm->registers[instruction.fields.pair.arg1] = memory_get(vm->memory, instruction.fields.pair.arg2);
                 break;
             case OP_ADD:
-                result.type = VAL_INT;
-                result.contents.number = vm->stack->contents[instruction.fields.triplet.arg1].contents.number + vm->stack->contents[instruction.fields.triplet.arg2].contents.number;
-
                 // TODO: Don't assume numbers
-                memory_set(vm->stack, instruction.fields.triplet.arg3, result);
+                result.type = VAL_INT;
+                result.contents.number = vm->registers[instruction.fields.triplet.arg2].contents.number +
+                                         vm->registers[instruction.fields.triplet.arg3].contents.number;
+                memory_set(vm->stack, instruction.fields.triplet.arg1, result);
                 break;
         }
     }

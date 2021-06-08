@@ -12,9 +12,9 @@
 
 typedef enum
 {
-    // load <address> <register>
+    // load <register> <address>
     OP_LOAD,
-    // add <register-in> <register-in> <register-out>
+    // add <register-out> <register-in> <register-in>
     OP_ADD,
     OP_RETURN
 } OpCode;

@@ -17,16 +17,16 @@ int main(int argc, char *argv[])
     CodeBlock *block = code_block_create();
     Instruction i;
 
-    i = (Instruction){OP_LOAD, 0, 1};
+    i = (Instruction){OP_LOAD, 1, 0};
     code_block_write(block, i);
 
-    i = (Instruction){OP_LOAD, 1, 2};
+    i = (Instruction){OP_LOAD, 2, 1};
     code_block_write(block, i);
 
     i.opcode = OP_ADD;
-    i.fields.triplet.arg1 = 1;
-    i.fields.triplet.arg2 = 2;
-    i.fields.triplet.arg3 = 3;
+    i.fields.triplet.arg1 = 3;
+    i.fields.triplet.arg2 = 1;
+    i.fields.triplet.arg3 = 2;
     code_block_write(block, i);
 
     code_block_print(block);

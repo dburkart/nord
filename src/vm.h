@@ -35,11 +35,16 @@ typedef struct
 
     // Stack-related data structures
     Memory *stack;
+    // Stack pointer
     int sp;
 
     // Code-related data structures
     CodeBlock *code;
-    int ep;
+    // Program counter
+    int pc;
+
+    // Registers
+    Value registers[128];
 } VM;
 
 Memory *memory_create();
