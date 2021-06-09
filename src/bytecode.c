@@ -8,7 +8,7 @@
 
 #include "bytecode.h"
 
-code_block_t *code_block_create()
+code_block_t *code_block_create(void)
 {
     return calloc(1, sizeof(code_block_t));
 }

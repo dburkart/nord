@@ -21,7 +21,7 @@ void value_print(value_t v)
     }
 }
 
-memory_t *memory_create()
+memory_t *memory_create(void)
 {
     memory_t *mem = calloc(1, sizeof(memory_t));
 

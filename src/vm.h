@@ -47,7 +47,7 @@ typedef struct
     value_t registers[128];
 } vm_t;
 
-memory_t *memory_create();
+memory_t *memory_create(void);
 void memory_free(memory_t *);
 void memory_set(memory_t *, int address, value_t val);
 value_t memory_get(memory_t *, int address);
