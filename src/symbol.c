@@ -27,7 +27,7 @@ void symbol_map_destroy(symbol_map_t *symbol_map)
     free(symbol_map);
 }
 
-void symbol_map_add(symbol_map_t *symbol_map, char *name, location_t loc)
+void symbol_map_set(symbol_map_t *symbol_map, char *name, location_t loc)
 {
     // When we are 50% full or more, we grow the map
     if (symbol_map->size / symbol_map->capacity >= .5)

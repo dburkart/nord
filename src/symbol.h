@@ -31,8 +31,9 @@ typedef struct
 
 symbol_map_t *symbol_map_create(void);
 void symbol_map_destroy(symbol_map_t *);
+
 // Adding / getting items
-void symbol_map_add(symbol_map_t *, char *, location_t);
+void symbol_map_set(symbol_map_t *, char *, location_t);
 location_t symbol_map_get(symbol_map_t *, char *);
 
 #endif
