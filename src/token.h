@@ -10,6 +10,7 @@
 #include <stdlib.h>
 #include <stdint.h>
 
+// TODO: Namespace this enum
 // Lexeme Enumeration
 enum token_type_e {
     // Delimiters

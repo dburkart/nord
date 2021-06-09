@@ -12,6 +12,7 @@
 
 typedef struct expr_t
 {
+    // TODO: Namespace this enum
     enum
     {
         ASSIGN, BINARY, DECLARE, UNARY, LITERAL, GROUP
