@@ -1,0 +1,48 @@
+    _   __                  __
+   / | / /____   _____ ____/ /
+  /  |/ // __ \ / ___// __  /
+ / /|  // /_/ // /   / /_/ /
+/_/ |_/ \____//_/    \__,_/
+
+
+Nord is an experiment in language design and compiler construction. I don't
+know where this is going yet, but it should be fun!
+
+Current State of the Project
+===============================================================================
+Last Updated: 06/09/2021
+
+The current overall state is non-working, although some of the subsystems work
+and have tests. The overall approach will be to bring each subsystem up and
+in line with the grammar, evolve the grammar, and repeat until we have a useful
+language. What follows is a bottom-up rundown of the overall status:
+
+Grammar   -- Minimal. For the current iteration, check docs/grammar.txt
+Lexer     -- Up to date with the grammar
+Parser    -- Up to date with the grammar
+Compiler  -- Doesn't exist
+VM        -- Rudimentary. Only supports a couple of opcodes
+
+Building
+===============================================================================
+
+To build the project, run:
+
+    make
+
+Doing so will produce a binary, "nord" which can then be run. What that binary
+does will eventually be to run nord scripts, but it may do something else until
+we have all subsystems up and running.
+
+Testing
+===============================================================================
+
+To test things, run:
+
+    make test
+
+Currently, the project uses python unittest to run small binaries which
+exercise a single subsystem. In the future, we might rewrite the test harness
+in C since we're not using any of the complexity of python, and it would remove
+a dependency.
+
