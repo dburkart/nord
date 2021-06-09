@@ -17,7 +17,7 @@ typedef enum
     // add <register-out> <register-in> <register-in>
     OP_ADD,
     OP_RETURN
-} OpCode;
+} opcode_t;
 
 typedef struct __attribute__((__packed__))
 {
@@ -35,19 +35,19 @@ typedef struct __attribute__((__packed__))
             uint8_t arg3;
         } triplet;
     } fields;
-} Instruction;
+} instruction_t;
 
 typedef struct
 {
     size_t size;
     size_t capacity;
-    Instruction *code;
-} CodeBlock;
+    instruction_t *code;
+} code_block_t;
 
-CodeBlock *code_block_create();
-void code_block_write(CodeBlock *, Instruction);
-void code_block_free(CodeBlock *);
+code_block_t *code_block_create();
+void code_block_write(code_block_t *, instruction_t);
+void code_block_free(code_block_t *);
 
-void code_block_print(CodeBlock *);
+void code_block_print(code_block_t *);
 
 #endif

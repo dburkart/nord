@@ -8,12 +8,12 @@
 
 #include "bytecode.h"
 
-CodeBlock *code_block_create()
+code_block_t *code_block_create()
 {
-    return calloc(1, sizeof(CodeBlock));
+    return calloc(1, sizeof(code_block_t));
 }
 
-void code_block_free(CodeBlock *block)
+void code_block_free(code_block_t *block)
 {
     // First, free code
     free(block->code);
@@ -21,32 +21,32 @@ void code_block_free(CodeBlock *block)
     free(block);
 }
 
-void code_block_write(CodeBlock *block, Instruction val)
+void code_block_write(code_block_t *block, instruction_t val)
 {
     // First, handle an empty code block
     if (block->capacity == 0)
     {
         block->capacity = 2;
-        block->code = calloc(block->capacity, sizeof(Instruction));
+        block->code = calloc(block->capacity, sizeof(instruction_t));
     }
 
     // Grow our capacity if necessary
     if (block->size >= (block->capacity - 1))
     {
         block->capacity = block->capacity * 2;
-        block->code = realloc(block->code, sizeof(Instruction) * block->capacity);
+        block->code = realloc(block->code, sizeof(instruction_t) * block->capacity);
     }
 
     block->code[block->size] = val;
     block->size = block->size + 1;
 }
 
-void code_block_print(CodeBlock *block)
+void code_block_print(code_block_t *block)
 {
     int num = 1;
     for (int i = 0; i < block->size; i++)
     {
-        Instruction instruction = block->code[i];
+        instruction_t instruction = block->code[i];
         int arg1;
         int arg2;
         int arg3;

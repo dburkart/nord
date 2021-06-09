@@ -8,15 +8,15 @@
 
 #include "token.h"
 
-TokenList token_list_create(size_t capacity)
+token_list_t token_list_create(size_t capacity)
 {
-    TokenList list;
+    token_list_t list;
 
     list.size = 0;
     list.capacity = capacity;
     if (capacity)
     {
-        list.tokens = calloc(capacity, sizeof(Token));
+        list.tokens = calloc(capacity, sizeof(token_t));
     }
     else
     {
@@ -26,7 +26,7 @@ TokenList token_list_create(size_t capacity)
     return list;
 }
 
-void token_list_destroy(TokenList list)
+void token_list_destroy(token_list_t list)
 {
     if (list.tokens)
     {
@@ -34,20 +34,20 @@ void token_list_destroy(TokenList list)
     }
 }
 
-void token_list_add(TokenList *list, Token t)
+void token_list_add(token_list_t *list, token_t t)
 {
     if (list->size == list->capacity)
     {
         // Grow our capacity by 2x
         list->capacity = list->capacity * 2;
-        list->tokens = realloc(list->tokens, sizeof(Token) * list->capacity);
+        list->tokens = realloc(list->tokens, sizeof(token_t) * list->capacity);
     }
 
     list->tokens[list->size] = t;
     list->size = list->size + 1;
 }
 
-const char *token_name(Token t)
+const char *token_name(token_t t)
 {
     switch(t.type)
     {
@@ -127,11 +127,11 @@ const char *token_name(Token t)
     return "UNKNOWN";
 }
 
-void token_list_print(TokenList list)
+void token_list_print(token_list_t list)
 {
     for (int i = 0; i < list.size; i++)
     {
-        Token t = list.tokens[i];
+        token_t t = list.tokens[i];
         printf("[%s:%llu-%llu]\n", token_name(t), t.start, t.end);
     }
 

@@ -13,14 +13,14 @@ int main(int argc, char *argv[])
 {
     int status = 0;
 
-    VM *vm;
-    CodeBlock *block = code_block_create();
-    Instruction i;
+    vm_t *vm;
+    code_block_t *block = code_block_create();
+    instruction_t i;
 
-    i = (Instruction){OP_LOAD, 1, 0};
+    i = (instruction_t){OP_LOAD, 1, 0};
     code_block_write(block, i);
 
-    i = (Instruction){OP_LOAD, 2, 1};
+    i = (instruction_t){OP_LOAD, 2, 1};
     code_block_write(block, i);
 
     i.opcode = OP_ADD;
@@ -33,8 +33,8 @@ int main(int argc, char *argv[])
 
     vm = vm_create(block);
 
-    Value a = {0, 15};
-    Value b = {0, 25};
+    value_t a = {0, 15};
+    value_t b = {0, 25};
     memory_set(vm->memory, 0, a);
     memory_set(vm->memory, 1, b);
 

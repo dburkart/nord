@@ -33,11 +33,11 @@ int main(int argc, char *argv[])
 
         input[fsize] = 0;
 
-        ScanContext context;
+        scan_context_t context;
         context.buffer = input;
         context.position = 0;
 
-        AST *syntax_tree = parse(&context);
+        ast_t *syntax_tree = parse(&context);
 
         print_ast(&context, syntax_tree);
 

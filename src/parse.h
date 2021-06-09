@@ -10,7 +10,7 @@
 #include "token.h"
 #include "lex.h"
 
-typedef struct Expr
+typedef struct expr_t
 {
     enum
     {
@@ -19,40 +19,40 @@ typedef struct Expr
 
     union
     {
-        Token literal;
+        token_t literal;
 
         struct
         {
-            Token name;
-            struct Expr* value;
+            token_t name;
+            struct expr_t* value;
         } assign;
 
         struct
         {
-            Token operator;
-            struct Expr *left;
-            struct Expr *right;
+            token_t operator;
+            struct expr_t *left;
+            struct expr_t *right;
         } binary;
 
         struct
         {
-            Token var_type;
-            Token name;
-            struct Expr *initial_value;            // NULL if not initialized
+            token_t var_type;
+            token_t name;
+            struct expr_t *initial_value;            // NULL if not initialized
         } declare;
 
         struct
         {
-            Token operator;
-            struct Expr *operand;
+            token_t operator;
+            struct expr_t *operand;
         } unary;
 
-        struct Expr *group;
+        struct expr_t *group;
     } op;
-} AST;
+} ast_t;
 
-AST *parse(ScanContext *);
+ast_t *parse(scan_context_t *);
 
-void print_ast(ScanContext *, AST *);
+void print_ast(scan_context_t *, ast_t *);
 
 #endif

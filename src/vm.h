@@ -21,42 +21,42 @@ typedef struct
         int number;
         char *string;
     } contents;
-} Value;
+} value_t;
 
 typedef struct
 {
     size_t capacity;
-    Value *contents;
-} Memory;
+    value_t *contents;
+} memory_t;
 
 typedef struct
 {
-    Memory *memory;
+    memory_t *memory;
 
     // Stack-related data structures
-    Memory *stack;
+    memory_t *stack;
     // Stack pointer
     int sp;
 
     // Code-related data structures
-    CodeBlock *code;
+    code_block_t *code;
     // Program counter
     int pc;
 
     // Registers
-    Value registers[128];
-} VM;
+    value_t registers[128];
+} vm_t;
 
-Memory *memory_create();
-void memory_free(Memory *);
-void memory_set(Memory *, int address, Value val);
-Value memory_get(Memory *, int address);
+memory_t *memory_create();
+void memory_free(memory_t *);
+void memory_set(memory_t *, int address, value_t val);
+value_t memory_get(memory_t *, int address);
 
-VM *vm_create(CodeBlock *);
-int vm_stack_push(VM *, Value val);
-Value vm_stack_pop(VM *);
+vm_t *vm_create(code_block_t *);
+int vm_stack_push(vm_t *, value_t val);
+value_t vm_stack_pop(vm_t *);
 
-void vm_execute(VM *);
-void vm_dump(VM *);
+void vm_execute(vm_t *);
+void vm_dump(vm_t *);
 
 #endif

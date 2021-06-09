@@ -179,12 +179,12 @@ int match_right_arrow(const char *c)
 /*
  * Return the next token on the input stream, without advancing the scan position
  */
-Token peek(ScanContext *context)
+token_t peek(scan_context_t *context)
 {
     int start;
     int position = context->position;
     int advance = 0;
-    Token t;
+    token_t t;
     bool token_found = true;
 
     // If our lookahead token has already been calculated, return it
@@ -377,7 +377,7 @@ Token peek(ScanContext *context)
 /*
  * Accept the next token on the input stream, consuming it.
  */
-Token accept(ScanContext *context)
+token_t accept(scan_context_t *context)
 {
     if (context->lookahead.start >= context->position && context->position > 0)
     {
@@ -386,22 +386,22 @@ Token accept(ScanContext *context)
         return context->lookahead;
     }
 
-    Token t = peek(context);
+    token_t t = peek(context);
     context->position = t.end;
     context->previous = t;
     return t;
 }
 
-void backup(ScanContext *context)
+void backup(scan_context_t *context)
 {
     context->position = context->previous.start;
     context->lookahead = context->previous;
 }
 
-bool match(ScanContext *context, int num, ...)
+bool match(scan_context_t *context, int num, ...)
 {
     bool found = false;
-    Token next = peek(context);
+    token_t next = peek(context);
 
     va_list args;
     va_start(args, num);
@@ -418,7 +418,7 @@ bool match(ScanContext *context, int num, ...)
     return found;
 }
 
-char *token_value(ScanContext *context, Token t)
+char *token_value(scan_context_t *context, token_t t)
 {
     int len = t.end - t.start;
     char *value = calloc(len + 1, sizeof(char));
@@ -431,12 +431,12 @@ char *token_value(ScanContext *context, Token t)
  * Scan a string, and return a list of corresponding tokens. This is primarily
  * for testing purposes.
  */
-TokenList scan_input(char *input)
+token_list_t scan_input(char *input)
 {
     // We just create an arbitrarily-sized token list to begin with
-    TokenList tokens = token_list_create(2);
-    Token t;
-    ScanContext context = {input, 0};
+    token_list_t tokens = token_list_create(2);
+    token_t t;
+    scan_context_t context = {input, 0};
 
     do {
         t = accept(&context);

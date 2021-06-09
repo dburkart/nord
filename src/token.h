@@ -11,7 +11,7 @@
 #include <stdint.h>
 
 // Lexeme Enumeration
-enum TokenType {
+enum token_type_e {
     // Delimiters
     L_PAREN, R_PAREN, COLON, COMMA, EOL,
 
@@ -40,23 +40,23 @@ enum TokenType {
 
 // Token specific information
 typedef struct {
-    enum TokenType type;
+    enum token_type_e type;
     // Positional data, relative to the original buffer
     uint64_t start;
     uint64_t end;
-} Token;
+} token_t;
 
 // List of tokens to be fed to the parser
 typedef struct {
     size_t size;
     size_t capacity;
-    Token *tokens;
-} TokenList;
+    token_t *tokens;
+} token_list_t;
 
-TokenList token_list_create(size_t);
-void token_list_destroy(TokenList);
-void token_list_add(TokenList *, Token);
-void token_list_print(TokenList);
-const char *token_name(Token);
+token_list_t token_list_create(size_t);
+void token_list_destroy(token_list_t);
+void token_list_add(token_list_t *, token_t);
+void token_list_print(token_list_t);
+const char *token_name(token_t);
 
 #endif

@@ -16,22 +16,22 @@
 typedef struct {
     char *buffer;
     uint64_t position;
-    Token previous;
-    Token lookahead;
-} ScanContext;
+    token_t previous;
+    token_t lookahead;
+} scan_context_t;
 
 // Return the next token for the given context
-Token accept(ScanContext *);
+token_t accept(scan_context_t *);
 // Return the next token, but don't consume it
-Token peek(ScanContext *);
+token_t peek(scan_context_t *);
 // Return whether or not the next token matches the specified tokens
-bool match(ScanContext *, int, ...);
+bool match(scan_context_t *, int, ...);
 // Rewind to the last seen token
-void backup(ScanContext *);
+void backup(scan_context_t *);
 
-char *token_value(ScanContext *, Token);
+char *token_value(scan_context_t *, token_t);
 
 // Scan an input string, and return a list of tokens.
-TokenList scan_input(char *);
+token_list_t scan_input(char *);
 
 #endif

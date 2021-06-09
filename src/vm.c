@@ -8,7 +8,7 @@
 
 #include "vm.h"
 
-void value_print(Value v)
+void value_print(value_t v)
 {
     switch (v.type)
     {
@@ -21,48 +21,48 @@ void value_print(Value v)
     }
 }
 
-Memory *memory_create()
+memory_t *memory_create()
 {
-    Memory *mem = calloc(1, sizeof(Memory));
+    memory_t *mem = calloc(1, sizeof(memory_t));
 
     return mem;
 }
 
-void memory_free(Memory *mem)
+void memory_free(memory_t *mem)
 {
     // TODO: Free values
     free(mem);
 }
 
-void memory_set(Memory *mem, int address, Value val)
+void memory_set(memory_t *mem, int address, value_t val)
 {
     // We've not stored anything in this memory block yet, so set us up
     // for a capacity of address + 1
     if (mem->capacity == 0)
     {
         mem->capacity = address + 1;
-        mem->contents = calloc(mem->capacity, sizeof(Value));
+        mem->contents = calloc(mem->capacity, sizeof(value_t));
     }
 
     if (mem->capacity <= address)
     {
         int difference = address - mem->capacity;
         mem->capacity = mem->capacity * 2;
-        mem->contents = realloc(mem->contents, mem->capacity * sizeof(Value));
+        mem->contents = realloc(mem->contents, mem->capacity * sizeof(value_t));
     }
 
     mem->contents[address] = val;
 }
 
-Value memory_get(Memory *mem, int address)
+value_t memory_get(memory_t *mem, int address)
 {
     // TODO: Error checking
     return mem->contents[address];
 }
 
-VM *vm_create(CodeBlock *block)
+vm_t *vm_create(code_block_t *block)
 {
-    VM *vm = malloc(sizeof(VM));
+    vm_t *vm = malloc(sizeof(vm_t));
 
     // Set up main memory
     vm->memory = memory_create();
@@ -77,8 +77,8 @@ VM *vm_create(CodeBlock *block)
     return vm;
 }
 
-// Push a value onto the stack of a VM, returning the register it is stored in
-int vm_stack_push(VM *vm, Value val)
+// Push a value onto the stack of a vm_t, returning the register it is stored in
+int vm_stack_push(vm_t *vm, value_t val)
 {
     int reg = vm->sp;
 
@@ -88,21 +88,21 @@ int vm_stack_push(VM *vm, Value val)
     return reg;
 }
 
-Value vm_stack_pop(VM *vm)
+value_t vm_stack_pop(vm_t *vm)
 {
-    Value val = memory_get(vm->stack, vm->sp);
+    value_t val = memory_get(vm->stack, vm->sp);
     vm->sp--;
 
     return val;
 }
 
-void vm_execute(VM *vm)
+void vm_execute(vm_t *vm)
 {
     while (vm->pc < vm->code->size)
     {
         // Pull off the next opcode
-        Instruction instruction = vm->code->code[vm->pc++];
-        Value result;
+        instruction_t instruction = vm->code->code[vm->pc++];
+        value_t result;
 
         switch (instruction.opcode)
         {
@@ -122,7 +122,7 @@ void vm_execute(VM *vm)
     }
 }
 
-void vm_dump(VM *vm)
+void vm_dump(vm_t *vm)
 {
     printf("[memory contents]\n");
     for (int i = 0; i < vm->memory->capacity; i++)

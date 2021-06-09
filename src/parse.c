@@ -10,24 +10,24 @@
 #include "parse.h"
 
 // Forward declarations
-AST *declaration(ScanContext *);
-AST *statement(ScanContext *);
-AST *variable_decl(ScanContext *);
-AST *expression(ScanContext *);
-AST *equality(ScanContext *);
-AST *assignment(ScanContext *);
-AST *comparison(ScanContext *);
-AST *term(ScanContext *);
-AST *term_md(ScanContext *);
-AST *unary(ScanContext *);
-AST *primary(ScanContext *);
+ast_t *declaration(scan_context_t *);
+ast_t *statement(scan_context_t *);
+ast_t *variable_decl(scan_context_t *);
+ast_t *expression(scan_context_t *);
+ast_t *equality(scan_context_t *);
+ast_t *assignment(scan_context_t *);
+ast_t *comparison(scan_context_t *);
+ast_t *term(scan_context_t *);
+ast_t *term_md(scan_context_t *);
+ast_t *unary(scan_context_t *);
+ast_t *primary(scan_context_t *);
 
-AST *parse(ScanContext *context)
+ast_t *parse(scan_context_t *context)
 {
     return declaration(context);
 }
 
-void print_ast_internal(ScanContext *context, AST *ast, int indent)
+void print_ast_internal(scan_context_t *context, ast_t *ast, int indent)
 {
     char *token_val;
 
@@ -80,14 +80,14 @@ void print_ast_internal(ScanContext *context, AST *ast, int indent)
     }
 }
 
-void print_ast(ScanContext *context, AST *ast)
+void print_ast(scan_context_t *context, ast_t *ast)
 {
     print_ast_internal(context, ast, 0);
 }
 
-AST* make_assign_expr(Token name, AST *value)
+ast_t* make_assign_expr(token_t name, ast_t *value)
 {
-    AST *assign_expr = (AST *)malloc(sizeof(AST));
+    ast_t *assign_expr = (ast_t *)malloc(sizeof(ast_t));
     assign_expr->type = ASSIGN;
     assign_expr->op.assign.name = name;
     assign_expr->op.assign.value = value;
@@ -95,9 +95,9 @@ AST* make_assign_expr(Token name, AST *value)
     return assign_expr;
 }
 
-AST *make_binary_expr(AST *left, Token operator, AST *right)
+ast_t *make_binary_expr(ast_t *left, token_t operator, ast_t *right)
 {
-    AST *binary_expr = (AST *)malloc(sizeof(AST));
+    ast_t *binary_expr = (ast_t *)malloc(sizeof(ast_t));
     binary_expr->type = BINARY;
     binary_expr->op.binary.operator = operator;
     binary_expr->op.binary.left = left;
@@ -106,9 +106,9 @@ AST *make_binary_expr(AST *left, Token operator, AST *right)
     return binary_expr;
 }
 
-AST *make_declare_expr(Token var_type, Token name, AST *initial_value)
+ast_t *make_declare_expr(token_t var_type, token_t name, ast_t *initial_value)
 {
-    AST *declare_expr = (AST *)malloc(sizeof(AST));
+    ast_t *declare_expr = (ast_t *)malloc(sizeof(ast_t));
     declare_expr->type = DECLARE;
     declare_expr->op.declare.var_type = var_type;
     declare_expr->op.declare.name = name;
@@ -117,9 +117,9 @@ AST *make_declare_expr(Token var_type, Token name, AST *initial_value)
     return declare_expr;
 }
 
-AST *make_unary_expr(Token operator, AST *operand)
+ast_t *make_unary_expr(token_t operator, ast_t *operand)
 {
-    AST *unary_expr = (AST *)malloc(sizeof(AST));
+    ast_t *unary_expr = (ast_t *)malloc(sizeof(ast_t));
     unary_expr->type = UNARY;
     unary_expr->op.unary.operator = operator;
     unary_expr->op.unary.operand = operand;
@@ -127,27 +127,27 @@ AST *make_unary_expr(Token operator, AST *operand)
     return unary_expr;
 }
 
-AST *make_literal_expr(Token literal)
+ast_t *make_literal_expr(token_t literal)
 {
-    AST *literal_expr = (AST *)malloc(sizeof(AST));
+    ast_t *literal_expr = (ast_t *)malloc(sizeof(ast_t));
     literal_expr->type = LITERAL;
     literal_expr->op.literal = literal;
 
     return literal_expr;
 }
 
-AST *make_group_expr(AST *expr)
+ast_t *make_group_expr(ast_t *expr)
 {
-    AST *group_expr = (AST *)malloc(sizeof(AST));
+    ast_t *group_expr = (ast_t *)malloc(sizeof(ast_t));
     group_expr->type = GROUP;
     group_expr->op.group = expr;
 
     return group_expr;
 }
 
-AST *declaration(ScanContext *context)
+ast_t *declaration(scan_context_t *context)
 {
-    AST *left = variable_decl(context);
+    ast_t *left = variable_decl(context);
 
     if (left == NULL)
         left = statement(context);
@@ -155,9 +155,9 @@ AST *declaration(ScanContext *context)
     return left;
 }
 
-AST *statement(ScanContext *context)
+ast_t *statement(scan_context_t *context)
 {
-    AST *left = expression(context);
+    ast_t *left = expression(context);
 
     if (peek(context).type == EOL)
     {
@@ -171,14 +171,14 @@ AST *statement(ScanContext *context)
     return NULL;
 }
 
-AST *variable_decl(ScanContext *context)
+ast_t *variable_decl(scan_context_t *context)
 {
-    AST *left;
+    ast_t *left;
 
     if (peek(context).type != VAR)
         return NULL;
 
-    Token var_type = accept(context);
+    token_t var_type = accept(context);
 
     if (peek(context).type != IDENTIFIER)
     {
@@ -186,8 +186,8 @@ AST *variable_decl(ScanContext *context)
         return NULL;
     }
 
-    Token name = accept(context);
-    AST *right = NULL;
+    token_t name = accept(context);
+    ast_t *right = NULL;
 
     if (peek(context).type == EQUAL)
     {
@@ -200,15 +200,15 @@ AST *variable_decl(ScanContext *context)
     return left;
 }
 
-AST *expression(ScanContext *context)
+ast_t *expression(scan_context_t *context)
 {
     return assignment(context);
 }
 
-AST *assignment(ScanContext *context)
+ast_t *assignment(scan_context_t *context)
 {
-    AST *left = NULL;
-    Token name;
+    ast_t *left = NULL;
+    token_t name;
 
     if (peek(context).type != IDENTIFIER)
         return equality(context);
@@ -225,74 +225,74 @@ AST *assignment(ScanContext *context)
     // Consume the '='
     accept(context);
 
-    AST *value = expression(context);
+    ast_t *value = expression(context);
     left = make_assign_expr(name, value);
 
     return left;
 }
 
-AST *equality(ScanContext *context)
+ast_t *equality(scan_context_t *context)
 {
-    AST *left = comparison(context);
+    ast_t *left = comparison(context);
 
     while (match(context, 2, BANG_EQUAL, EQUAL_EQUAL))
     {
-        Token operator = accept(context);
-        AST *right = comparison(context);
+        token_t operator = accept(context);
+        ast_t *right = comparison(context);
         left = make_binary_expr(left, operator, right);
     }
 
     return left;
 }
 
-AST *comparison(ScanContext *context)
+ast_t *comparison(scan_context_t *context)
 {
-    AST *left = term(context);
+    ast_t *left = term(context);
 
     while (match(context, 4, GREATER, GREATER_OR_EQUAL, LESS, LESS_OR_EQUAL))
     {
-        Token operator = accept(context);
-        AST *right = term(context);
+        token_t operator = accept(context);
+        ast_t *right = term(context);
         left = make_binary_expr(left, operator, right);
     }
 
     return left;
 }
 
-AST *term(ScanContext *context)
+ast_t *term(scan_context_t *context)
 {
-    AST *left = term_md(context);
+    ast_t *left = term_md(context);
 
     while (match(context, 2, MINUS, PLUS))
     {
-        Token operator = accept(context);
-        AST *right = term_md(context);
+        token_t operator = accept(context);
+        ast_t *right = term_md(context);
         left = make_binary_expr(left, operator, right);
     }
 
     return left;
 }
 
-AST *term_md(ScanContext *context)
+ast_t *term_md(scan_context_t *context)
 {
-    AST *left = unary(context);
+    ast_t *left = unary(context);
 
     while (match(context, 2, SLASH, ASTERISK))
     {
-        Token operator = accept(context);
-        AST *right = unary(context);
+        token_t operator = accept(context);
+        ast_t *right = unary(context);
         left = make_binary_expr(left, operator, right);
     }
 
     return left;
 }
 
-AST *unary(ScanContext *context)
+ast_t *unary(scan_context_t *context)
 {
     if (match(context, 2, BANG, MINUS))
     {
-        Token operator = accept(context);
-        AST *operand = unary(context);
+        token_t operator = accept(context);
+        ast_t *operand = unary(context);
         return make_unary_expr(operator, operand);
     }
     else
@@ -301,7 +301,7 @@ AST *unary(ScanContext *context)
     }
 }
 
-AST *primary(ScanContext *context)
+ast_t *primary(scan_context_t *context)
 {
     if (match(context, 6, IDENTIFIER, NUMBER, STRING, TRUE, FALSE, NIL))
     {
@@ -313,9 +313,9 @@ AST *primary(ScanContext *context)
         // Consume the parenthesis
         accept(context);
 
-        AST *expr = expression(context);
+        ast_t *expr = expression(context);
 
-        Token r_paren = accept(context);
+        token_t r_paren = accept(context);
         // FIXME
         assert(r_paren.type == R_PAREN);
 
