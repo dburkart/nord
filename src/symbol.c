@@ -16,6 +16,7 @@ symbol_map_t *symbol_map_create(void)
     // The capacity of a symbol map must always be a power of 2
     symbol_map->capacity = 8;
     symbol_map->size = 0;
+    // We want items to be zero'd out so that we can test for existence
     symbol_map->items = calloc(symbol_map->capacity, sizeof(symbol_t));
     return symbol_map;
 }
@@ -29,7 +30,12 @@ void symbol_map_destroy(symbol_map_t *symbol_map)
 
 void symbol_map_set(symbol_map_t *symbol_map, char *name, location_t loc)
 {
-    // When we are 50% full or more, we grow the map
+    // When we are 50% full or more, we grow the map. Why 50%? We never want
+    // our hash map to get too full since that would result in more collisions
+    // which in turn would slow down performance. 50% is nice and round, and
+    // will give us good average-case performance, at the cost of using more
+    // memory. Maybe we'll tune this if we need to squeeze out better memory
+    // performance.
     if (symbol_map->size / symbol_map->capacity >= .5)
     {
         symbol_t *new_items;
@@ -55,7 +61,7 @@ void symbol_map_set(symbol_map_t *symbol_map, char *name, location_t loc)
     // AND to compute modulo.
     uint32_t index = pjw_hash(name) & (symbol_map->capacity - 1);
 
-    // Collision handling
+    // Collision handling, simply look for the next free spot
     while (symbol_map->items[index].name != NULL)
     {
         index += 1;
@@ -73,6 +79,7 @@ location_t symbol_map_get(symbol_map_t *symbol_map, char *name)
     while (strcmp(symbol.name, name))
     {
         index += 1;
+        // TODO: Should we really be assigning here?
         symbol = symbol_map->items[index];
     }
 

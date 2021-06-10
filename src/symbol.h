@@ -7,6 +7,8 @@
 #ifndef SYMBOL_H
 #define SYMBOL_H
 
+// Location struct for a symbol. Details whether the symbol is in a register
+// or in memory, and where.
 typedef struct
 {
     enum {
@@ -16,14 +18,17 @@ typedef struct
     uint32_t address;
 } location_t;
 
+// Symbol struct, contains the symbol name and location
 typedef struct
 {
     char *name;
     location_t location;
 } symbol_t;
 
+// Symbol hash map, containing an array of symbols
 typedef struct
 {
+    // We keep track of the number of elements in our map to know when to grow
     uint32_t size;
     uint32_t capacity;
     symbol_t *items;

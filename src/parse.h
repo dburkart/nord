@@ -10,6 +10,7 @@
 #include "token.h"
 #include "lex.h"
 
+// Data structure representing a node in our abstract syntax tree.
 typedef struct expr_t
 {
     // TODO: Namespace this enum

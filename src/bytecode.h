@@ -10,6 +10,7 @@
 #include <stdint.h>
 #include <stdlib.h>
 
+// Opcodes for VM instructions
 typedef enum
 {
     // load <register> <address>
@@ -19,6 +20,7 @@ typedef enum
     OP_RETURN
 } opcode_t;
 
+// An instruction is an opcode paired with several operands
 typedef struct __attribute__((__packed__))
 {
     uint8_t opcode;
@@ -37,6 +39,7 @@ typedef struct __attribute__((__packed__))
     } fields;
 } instruction_t;
 
+// A code block is a series of instructions
 typedef struct
 {
     size_t size;
