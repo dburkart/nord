@@ -21,11 +21,15 @@ typedef struct expr_t
 
     union
     {
-        token_t literal;
+        struct
+        {
+            token_t type;
+            char *value;
+        } literal;
 
         struct
         {
-            token_t name;
+            char *name;
             struct expr_t* value;
         } assign;
 
@@ -39,7 +43,7 @@ typedef struct expr_t
         struct
         {
             token_t var_type;
-            token_t name;
+            char *name;
             struct expr_t *initial_value;            // NULL if not initialized
         } declare;
 

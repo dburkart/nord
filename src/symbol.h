@@ -12,7 +12,10 @@
 typedef struct
 {
     enum {
-        LOC_REGISTER, LOC_MEMORY
+        LOC_REGISTER,
+        LOC_MEMORY,
+        // Used to indicate a symbol has been declared but not assigned
+        LOC_NONE
     } type;
 
     uint32_t address;

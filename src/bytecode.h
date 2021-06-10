@@ -15,6 +15,8 @@ typedef enum
 {
     // load <register> <address>
     OP_LOAD,
+    // load <register> <value>
+    OP_LOADV,
     // add <register-out> <register-in> <register-in>
     OP_ADD,
     OP_RETURN

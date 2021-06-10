@@ -45,8 +45,8 @@ void print_ast_internal(scan_context_t *context, ast_t *ast, int indent)
     switch(ast->type)
     {
         case ASSIGN:
-            token_val = token_value(context, ast->op.assign.name);
-            printf("ASSIGN(%s) -> %s\n", token_name(ast->op.assign.name), token_val);
+            token_val = ast->op.assign.name;
+            printf("ASSIGN(IDENTIFIER) -> %s\n", token_val);
             free(token_val);
             print_ast_internal(context, ast->op.assign.value, indent + 2);
             break;
@@ -56,8 +56,8 @@ void print_ast_internal(scan_context_t *context, ast_t *ast, int indent)
             print_ast_internal(context, ast->op.binary.right, indent + 2);
             break;
         case DECLARE:
-            token_val = token_value(context, ast->op.declare.name);
-            printf("DECLARE(%s) -> %s\n", token_name(ast->op.declare.name), token_val);
+            token_val = ast->op.declare.name;
+            printf("DECLARE(IDENTIFIER) -> %s\n", token_val);
             free(token_val);
             if (ast->op.declare.initial_value)
             {
@@ -69,8 +69,7 @@ void print_ast_internal(scan_context_t *context, ast_t *ast, int indent)
             print_ast_internal(context, ast->op.unary.operand, indent + 2);
             break;
         case LITERAL:
-            token_val = token_value(context, ast->op.literal);
-            printf("LITERAL(%s) -> %s\n", token_name(ast->op.literal), token_val);
+            printf("LITERAL(%s) -> %s\n", token_name(ast->op.literal.type), ast->op.literal.value);
             free(token_val);
             break;
         case GROUP:
@@ -85,7 +84,7 @@ void print_ast(scan_context_t *context, ast_t *ast)
     print_ast_internal(context, ast, 0);
 }
 
-ast_t* make_assign_expr(token_t name, ast_t *value)
+ast_t* make_assign_expr(char *name, ast_t *value)
 {
     ast_t *assign_expr = (ast_t *)malloc(sizeof(ast_t));
     assign_expr->type = ASSIGN;
@@ -106,7 +105,7 @@ ast_t *make_binary_expr(ast_t *left, token_t operator, ast_t *right)
     return binary_expr;
 }
 
-ast_t *make_declare_expr(token_t var_type, token_t name, ast_t *initial_value)
+ast_t *make_declare_expr(token_t var_type, char *name, ast_t *initial_value)
 {
     ast_t *declare_expr = (ast_t *)malloc(sizeof(ast_t));
     declare_expr->type = DECLARE;
@@ -131,7 +130,7 @@ ast_t *make_literal_expr(token_t literal)
 {
     ast_t *literal_expr = (ast_t *)malloc(sizeof(ast_t));
     literal_expr->type = LITERAL;
-    literal_expr->op.literal = literal;
+    literal_expr->op.literal.type = literal;
 
     return literal_expr;
 }
@@ -195,7 +194,7 @@ ast_t *variable_decl(scan_context_t *context)
         right = expression(context);
     }
 
-    left = make_declare_expr(var_type, name, right);
+    left = make_declare_expr(var_type, token_value(context, name), right);
 
     return left;
 }
@@ -226,7 +225,7 @@ ast_t *assignment(scan_context_t *context)
     accept(context);
 
     ast_t *value = expression(context);
-    left = make_assign_expr(name, value);
+    left = make_assign_expr(token_value(context, name), value);
 
     return left;
 }
@@ -305,7 +304,9 @@ ast_t *primary(scan_context_t *context)
 {
     if (match(context, 6, IDENTIFIER, NUMBER, STRING, TRUE, FALSE, NIL))
     {
-        return make_literal_expr(accept(context));
+        ast_t *literal = make_literal_expr(accept(context));
+        literal->op.literal.value = token_value(context, literal->op.literal.type);
+        return literal;
     }
 
     if (peek(context).type == L_PAREN)

@@ -7,42 +7,44 @@
 #include <stdio.h>
 
 #include "bytecode.h"
-#include "vm.h"
+#include "compile.h"
+#include "lex.h"
+#include "parse.h"
 
 int main(int argc, char *argv[])
 {
     int status = 0;
 
-    vm_t *vm;
-    code_block_t *block = code_block_create();
-    instruction_t i;
+    if (argc == 1)
+    {
+        printf("Usage: %s <file-1> <file-2> ...\n", argv[0]);
+        goto done;
+    }
 
-    i = (instruction_t){OP_LOAD, 1, 0};
-    code_block_write(block, i);
+    for (int i = 1; i < argc; i++)
+    {
+        FILE *fp = fopen(argv[i], "r");
 
-    i = (instruction_t){OP_LOAD, 2, 1};
-    code_block_write(block, i);
+        fseek(fp, 0, SEEK_END);
+        long fsize = ftell(fp);
+        fseek(fp, 0, SEEK_SET);
 
-    i.opcode = OP_ADD;
-    i.fields.triplet.arg1 = 3;
-    i.fields.triplet.arg2 = 1;
-    i.fields.triplet.arg3 = 2;
-    code_block_write(block, i);
+        char *input = malloc(fsize + 1);
+        fread(input, 1, fsize, fp);
+        fclose(fp);
 
-    code_block_print(block);
+        input[fsize] = 0;
 
-    vm = vm_create(block);
+        scan_context_t context;
+        context.buffer = input;
+        context.position = 0;
 
-    value_t a = {0, 15};
-    value_t b = {0, 25};
-    memory_set(vm->memory, 0, a);
-    memory_set(vm->memory, 1, b);
+        ast_t *syntax_tree = parse(&context);
+        code_block_t *block = compile(syntax_tree);
+        code_block_print(block);
 
-    vm_execute(vm);
-
-    vm_dump(vm);
-
-    code_block_free(block);
+        free(input);
+    }
 
 done:
     fflush(stdout);

@@ -56,10 +56,13 @@ void code_block_print(code_block_t *block)
         switch(instruction.opcode)
         {
             case OP_LOAD:
-                printf("LOAD %04d %04d\n", instruction.fields.pair.arg1, instruction.fields.pair.arg2);
+                printf("LOAD  %04d %04d\n", instruction.fields.pair.arg1, instruction.fields.pair.arg2);
+                break;
+            case OP_LOADV:
+                printf("LOADV %04d %d\n", instruction.fields.pair.arg1, instruction.fields.pair.arg2);
                 break;
             case OP_ADD:
-                printf("ADD %04d %04d %04d\n", instruction.fields.triplet.arg1, instruction.fields.triplet.arg2, instruction.fields.triplet.arg3);
+                printf("ADD   %04d %04d %04d\n", instruction.fields.triplet.arg1, instruction.fields.triplet.arg2, instruction.fields.triplet.arg3);
                 break;
             case OP_RETURN:
                 printf("RETURN\n");
