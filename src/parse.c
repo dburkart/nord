@@ -47,7 +47,6 @@ void print_ast_internal(scan_context_t *context, ast_t *ast, int indent)
         case ASSIGN:
             token_val = ast->op.assign.name;
             printf("ASSIGN(IDENTIFIER) -> %s\n", token_val);
-            free(token_val);
             print_ast_internal(context, ast->op.assign.value, indent + 2);
             break;
         case BINARY:
@@ -58,7 +57,6 @@ void print_ast_internal(scan_context_t *context, ast_t *ast, int indent)
         case DECLARE:
             token_val = ast->op.declare.name;
             printf("DECLARE(IDENTIFIER) -> %s\n", token_val);
-            free(token_val);
             if (ast->op.declare.initial_value)
             {
                 print_ast_internal(context, ast->op.declare.initial_value, indent + 2);
@@ -70,7 +68,6 @@ void print_ast_internal(scan_context_t *context, ast_t *ast, int indent)
             break;
         case LITERAL:
             printf("LITERAL(%s) -> %s\n", token_name(ast->op.literal.type), ast->op.literal.value);
-            free(token_val);
             break;
         case GROUP:
             printf("GROUP\n");
