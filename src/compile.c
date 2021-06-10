@@ -58,6 +58,18 @@ uint8_t compile_internal(ast_t *ast, compile_context_t *context)
                     instruction.fields.triplet.arg2 = left;
                     instruction.fields.triplet.arg3 = right;
                     break;
+                case MINUS:
+                    instruction.opcode = OP_SUBTRACT;
+                    instruction.fields.triplet.arg1 = context->rp;
+                    instruction.fields.triplet.arg2 = left;
+                    instruction.fields.triplet.arg3 = right;
+                    break;
+                case ASTERISK:
+                    instruction.opcode = OP_MULTIPLY;
+                    instruction.fields.triplet.arg1 = context->rp;
+                    instruction.fields.triplet.arg2 = left;
+                    instruction.fields.triplet.arg3 = right;
+                    break;
                 default:
                     ;
             }
@@ -95,6 +107,9 @@ uint8_t compile_internal(ast_t *ast, compile_context_t *context)
                 code_block_write(context->block, instruction);
             }
             break;
+
+        case GROUP:
+            result = compile_internal(ast->op.group, context);
 
         default:
             ;

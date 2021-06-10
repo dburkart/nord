@@ -31,6 +31,14 @@ typedef enum
 
     // add <register-out> <register-in> <register-in>
     OP_ADD,
+    // subtract <register-out> <register-in> <register-in>
+    OP_SUBTRACT,
+    // multiply <register-out> <register-in> <register-in>
+    OP_MULTIPLY,
+    // divide <register-out> <register-in> <register-in>
+    OP_DIVIDE,
+
+    // -- Functions
     OP_RETURN
 } opcode_t;
 

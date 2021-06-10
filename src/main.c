@@ -41,6 +41,10 @@ int main(int argc, char *argv[])
         context.position = 0;
 
         ast_t *syntax_tree = parse(&context);
+
+        print_ast(&context, syntax_tree);
+        printf("\n");
+
         code_block_t *block = compile(syntax_tree);
         code_block_print(block);
 

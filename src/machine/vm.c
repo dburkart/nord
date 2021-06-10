@@ -93,6 +93,18 @@ void vm_execute(vm_t *vm)
                                          vm->registers[instruction.fields.triplet.arg3].contents.number;
                 vm->registers[instruction.fields.triplet.arg1] = result;
                 break;
+            case OP_SUBTRACT:
+                result.type = VAL_INT;
+                result.contents.number = vm->registers[instruction.fields.triplet.arg2].contents.number -
+                                         vm->registers[instruction.fields.triplet.arg3].contents.number;
+                vm->registers[instruction.fields.triplet.arg1] = result;
+                break;
+            case OP_MULTIPLY:
+                result.type = VAL_INT;
+                result.contents.number = vm->registers[instruction.fields.triplet.arg2].contents.number *
+                                         vm->registers[instruction.fields.triplet.arg3].contents.number;
+                vm->registers[instruction.fields.triplet.arg1] = result;
+                break;
         }
     }
 }
