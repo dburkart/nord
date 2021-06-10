@@ -7,7 +7,7 @@
 #ifndef COMPILE_H
 #define COMPILE_H
 
-#include "bytecode.h"
+#include "machine/bytecode.h"
 #include "parse.h"
 
 code_block_t *compile(ast_t *);

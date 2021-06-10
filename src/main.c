@@ -6,7 +6,7 @@
 
 #include <stdio.h>
 
-#include "bytecode.h"
+#include "machine/bytecode.h"
 #include "compile.h"
 #include "lex.h"
 #include "parse.h"

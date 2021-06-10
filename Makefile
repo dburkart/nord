@@ -1,6 +1,9 @@
 include Makefile.shared
 
-SOURCES=src/token.c src/lex.c src/parse.c src/bytecode.c src/hash.c src/symbol.c src/compile.c src/vm.c src/main.c
+SOURCES=src/token.c src/lex.c src/parse.c src/machine/bytecode.c src/hash.c \
+		src/symbol.c src/compile.c src/machine/memory.c src/machine/vm.c \
+		src/main.c
+
 BINARY=nord
 
 .PHONY: test
