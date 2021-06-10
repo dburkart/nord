@@ -77,9 +77,14 @@ void vm_execute(vm_t *vm)
             case OP_LOADV:
                 result.type = VAL_INT;
                 result.contents.number = instruction.fields.pair.arg2;
-                printf("Loading value int register %d:", instruction.fields.pair.arg1);
-                value_print(result);
                 vm->registers[instruction.fields.pair.arg1] = result;
+                break;
+            case OP_STORE:
+                memory_set(vm->memory, instruction.fields.pair.arg2, vm->registers[instruction.fields.pair.arg1]);
+                break;
+            case OP_JMP:
+                // TODO: Use both arguments to piece together the address (we have an extra 8 bits we're not using)
+                vm->pc = instruction.fields.pair.arg2;
                 break;
             case OP_ADD:
                 // TODO: Don't assume numbers

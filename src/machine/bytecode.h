@@ -13,10 +13,22 @@
 // Opcodes for VM instructions
 typedef enum
 {
+    // -- Loading to and from memory
+
     // load <register> <address>
     OP_LOAD,
     // load <register> <value>
     OP_LOADV,
+    // store <register> <address>
+    OP_STORE,
+
+    // -- Jumps
+
+    // jump <instruction #>
+    OP_JMP,
+
+    // -- Arithmetic operations
+
     // add <register-out> <register-in> <register-in>
     OP_ADD,
     OP_RETURN
