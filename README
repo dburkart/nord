@@ -20,7 +20,7 @@ language. What follows is a bottom-up rundown of the overall status:
 Grammar   -- Minimal. For the current iteration, check docs/grammar.txt
 Lexer     -- Up to date with the grammar
 Parser    -- Up to date with the grammar
-Compiler  -- Doesn't exist
+Compiler  -- Rudimentary. Only supports a few opcodes
 VM        -- Rudimentary. Only supports a couple of opcodes
 
 Building
