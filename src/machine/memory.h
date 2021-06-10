@@ -13,7 +13,7 @@ typedef struct
 {
     enum
     {
-        VAL_INT, VAL_STRING,
+        VAL_NONE, VAL_INT, VAL_STRING
     } type;
 
     union

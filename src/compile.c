@@ -48,21 +48,22 @@ uint8_t compile_internal(ast_t *ast, compile_context_t *context)
             left = compile_internal(ast->op.binary.left, context);
             context->rp += 1;
             right = compile_internal(ast->op.binary.right, context);
+            context->rp -= 1;
 
             switch (ast->op.binary.operator.type)
             {
                 case PLUS:
                     instruction.opcode = OP_ADD;
-                    instruction.fields.triplet.arg1 = context->rp - 1;
+                    instruction.fields.triplet.arg1 = context->rp;
                     instruction.fields.triplet.arg2 = left;
                     instruction.fields.triplet.arg3 = right;
+                    break;
                 default:
                     ;
             }
 
             code_block_write(context->block, instruction);
-
-            context->rp -= 1;
+            result = context->rp;
             break;
 
         case DECLARE:

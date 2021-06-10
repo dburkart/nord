@@ -18,6 +18,9 @@ void value_print(value_t v)
         case VAL_STRING:
             printf("{STRING:%s}\n", v.contents.string);
             break;
+        case VAL_NONE:
+            printf("{NONE}\n");
+            break;
     }
 }
 
@@ -61,7 +64,7 @@ void vm_execute(vm_t *vm)
 {
     while (vm->pc < vm->code->size)
     {
-        // Pull off the next opcode
+        // Pull off the next instruction
         instruction_t instruction = vm->code->code[vm->pc++];
         value_t result;
 
@@ -69,15 +72,21 @@ void vm_execute(vm_t *vm)
         {
             // Load a value into the specified register
             case OP_LOAD:
-
                 vm->registers[instruction.fields.pair.arg1] = memory_get(vm->memory, instruction.fields.pair.arg2);
+                break;
+            case OP_LOADV:
+                result.type = VAL_INT;
+                result.contents.number = instruction.fields.pair.arg2;
+                printf("Loading value int register %d:", instruction.fields.pair.arg1);
+                value_print(result);
+                vm->registers[instruction.fields.pair.arg1] = result;
                 break;
             case OP_ADD:
                 // TODO: Don't assume numbers
                 result.type = VAL_INT;
                 result.contents.number = vm->registers[instruction.fields.triplet.arg2].contents.number +
                                          vm->registers[instruction.fields.triplet.arg3].contents.number;
-                memory_set(vm->stack, instruction.fields.triplet.arg1, result);
+                vm->registers[instruction.fields.triplet.arg1] = result;
                 break;
         }
     }
@@ -92,12 +101,22 @@ void vm_dump(vm_t *vm)
         value_print(vm->memory->contents[i]);
     }
 
-    printf("\n[register contents]\n");
+    printf("\n[stack contents]\n");
     for (int i = 0; i < vm->stack->capacity; i++)
     {
         printf("   %04d ", i);
         value_print(vm->stack->contents[i]);
     }
 
-    printf("\nstack pointer: %d", vm->sp);
+    printf("\n[register contents]\n");
+    for (int i = 1; i < VM_NUM_REGISTERS; i++)
+    {
+        if (vm->registers[i].type == VAL_NONE)
+            break;
+
+        printf("   %04d ", i);
+        value_print(vm->registers[i]);
+    }
+
+    printf("\nstack pointer: %d\n", vm->sp);
 }

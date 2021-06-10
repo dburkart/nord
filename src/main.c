@@ -7,6 +7,7 @@
 #include <stdio.h>
 
 #include "machine/bytecode.h"
+#include "machine/vm.h"
 #include "compile.h"
 #include "lex.h"
 #include "parse.h"
@@ -42,6 +43,12 @@ int main(int argc, char *argv[])
         ast_t *syntax_tree = parse(&context);
         code_block_t *block = compile(syntax_tree);
         code_block_print(block);
+
+        printf("\n");
+
+        vm_t *vm = vm_create(block);
+        vm_execute(vm);
+        vm_dump(vm);
 
         free(input);
     }

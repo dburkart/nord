@@ -10,6 +10,8 @@
 #include "memory.h"
 #include "bytecode.h"
 
+#define VM_NUM_REGISTERS 128
+
 typedef struct
 {
     memory_t *memory;
@@ -25,7 +27,7 @@ typedef struct
     int pc;
 
     // Registers
-    value_t registers[128];
+    value_t registers[VM_NUM_REGISTERS];
 } vm_t;
 
 vm_t *vm_create(code_block_t *);
