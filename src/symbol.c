@@ -36,7 +36,7 @@ void symbol_map_set(symbol_map_t *symbol_map, char *name, location_t loc)
     // will give us good average-case performance, at the cost of using more
     // memory. Maybe we'll tune this if we need to squeeze out better memory
     // performance.
-    if (symbol_map->size / symbol_map->capacity >= .5)
+    if ((symbol_map->size + 1) / (float)symbol_map->capacity >= .5)
     {
         symbol_t *new_items;
         uint32_t new_capacity = symbol_map->capacity * 2;

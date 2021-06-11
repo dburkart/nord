@@ -55,6 +55,9 @@ int main(int argc, char *argv[])
 
         printf("\n");
 
+        printf("Size of input text (in bytes): %lu\n", fsize);
+        printf("Size of compiled program (in bytes): %lu\n\n", sizeof(instruction_t) * block->size);
+
         vm_t *vm = vm_create(block);
         vm_execute(vm);
 
