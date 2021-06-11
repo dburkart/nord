@@ -1,3 +1,2 @@
-Found statement!
 PROGRAM
   ↳ DECLARE(IDENTIFIER) -> foo

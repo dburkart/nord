@@ -1,4 +1,3 @@
-Found statement!
 PROGRAM
   ↳ DECLARE(IDENTIFIER) -> foo
   ⋅ ↳ ASSIGN(IDENTIFIER) -> x
