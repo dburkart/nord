@@ -43,6 +43,23 @@ uint8_t compile_internal(ast_t *ast, compile_context_t *context)
 
     switch (ast->type)
     {
+        case UNARY:
+            right = compile_internal(ast->op.unary.operand, context);
+
+            switch (ast->op.unary.operator.type)
+            {
+                case MINUS:
+                    instruction.opcode = OP_NEGATE;
+                    instruction.fields.pair.arg1 = context->rp;
+                    instruction.fields.pair.arg2 = right;
+                    break;
+                default:
+                    ;
+            }
+
+            code_block_write(context->block, instruction);
+            result = context->rp;
+            break;
         case BINARY:
             // First get our left and right values
             left = compile_internal(ast->op.binary.left, context);
@@ -70,6 +87,7 @@ uint8_t compile_internal(ast_t *ast, compile_context_t *context)
                     instruction.fields.triplet.arg2 = left;
                     instruction.fields.triplet.arg3 = right;
                     break;
+                // TODO: Handle division (also handle floats!)
                 default:
                     ;
             }

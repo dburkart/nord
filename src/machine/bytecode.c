@@ -70,6 +70,9 @@ void code_block_print(code_block_t *block)
             case OP_MULTIPLY:
                 printf("MULTIPLY %#04x %#04x %#04x\n", instruction.fields.triplet.arg1, instruction.fields.triplet.arg2, instruction.fields.triplet.arg3);
                 break;
+            case OP_NEGATE:
+                printf("NEGATE   %#04x %#04x\n", instruction.fields.pair.arg1, instruction.fields.pair.arg2);
+                break;
             case OP_RETURN:
                 printf("RETURN\n");
                 break;

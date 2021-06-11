@@ -37,6 +37,8 @@ typedef enum
     OP_MULTIPLY,
     // divide <register-out> <register-in> <register-in>
     OP_DIVIDE,
+    // negate <register-out> <register-in>
+    OP_NEGATE,
 
     // -- Functions
     OP_RETURN

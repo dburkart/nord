@@ -74,18 +74,22 @@ void vm_execute(vm_t *vm)
             case OP_LOAD:
                 vm->registers[instruction.fields.pair.arg1] = memory_get(vm->memory, instruction.fields.pair.arg2);
                 break;
+
             case OP_LOADV:
                 result.type = VAL_INT;
                 result.contents.number = instruction.fields.pair.arg2;
                 vm->registers[instruction.fields.pair.arg1] = result;
                 break;
+
             case OP_STORE:
                 memory_set(vm->memory, instruction.fields.pair.arg2, vm->registers[instruction.fields.pair.arg1]);
                 break;
+
             case OP_JMP:
                 // TODO: Use both arguments to piece together the address (we have an extra 8 bits we're not using)
                 vm->pc = instruction.fields.pair.arg2;
                 break;
+
             case OP_ADD:
                 // TODO: Don't assume numbers
                 result.type = VAL_INT;
@@ -93,17 +97,25 @@ void vm_execute(vm_t *vm)
                                          vm->registers[instruction.fields.triplet.arg3].contents.number;
                 vm->registers[instruction.fields.triplet.arg1] = result;
                 break;
+
             case OP_SUBTRACT:
                 result.type = VAL_INT;
                 result.contents.number = vm->registers[instruction.fields.triplet.arg2].contents.number -
                                          vm->registers[instruction.fields.triplet.arg3].contents.number;
                 vm->registers[instruction.fields.triplet.arg1] = result;
                 break;
+
             case OP_MULTIPLY:
                 result.type = VAL_INT;
                 result.contents.number = vm->registers[instruction.fields.triplet.arg2].contents.number *
                                          vm->registers[instruction.fields.triplet.arg3].contents.number;
                 vm->registers[instruction.fields.triplet.arg1] = result;
+                break;
+
+            case OP_NEGATE:
+                result.type = VAL_INT;
+                result.contents.number = -vm->registers[instruction.fields.pair.arg2].contents.number;
+                vm->registers[instruction.fields.pair.arg1] = result;
                 break;
         }
     }
