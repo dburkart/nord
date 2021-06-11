@@ -106,10 +106,25 @@ uint8_t compile_internal(ast_t *ast, compile_context_t *context)
 
                 code_block_write(context->block, instruction);
             }
+
+            if (ast->op.literal.type.type == IDENTIFIER)
+            {
+                loc = symbol_map_get(context->symbols, ast->op.literal.value);
+                // TODO: Handle memory addresses
+                result = loc.address;
+            }
             break;
 
         case GROUP:
             result = compile_internal(ast->op.group, context);
+            break;
+
+        case STATEMENT_LIST:
+            for (int i = 0; i < ast->op.list.size; i++)
+            {
+                compile_internal(ast->op.list.statements[i], context);
+            }
+            break;
 
         default:
             ;

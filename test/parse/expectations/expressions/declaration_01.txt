@@ -1,1 +1,3 @@
-DECLARE(IDENTIFIER) -> foo
+Found statement!
+PROGRAM
+  ↳ DECLARE(IDENTIFIER) -> foo

@@ -7,6 +7,8 @@
 #ifndef PARSE_H
 #define PARSE_H
 
+#include <stdint.h>
+
 #include "token.h"
 #include "lex.h"
 
@@ -16,7 +18,7 @@ typedef struct expr_t
     // TODO: Namespace this enum
     enum
     {
-        ASSIGN, BINARY, DECLARE, UNARY, LITERAL, GROUP
+        ASSIGN, BINARY, DECLARE, UNARY, LITERAL, GROUP, STATEMENT_LIST
     } type;
 
     union
@@ -52,6 +54,12 @@ typedef struct expr_t
             token_t operator;
             struct expr_t *operand;
         } unary;
+
+        struct
+        {
+            size_t size;
+            struct expr_t **statements;
+        } list;
 
         struct expr_t *group;
     } op;

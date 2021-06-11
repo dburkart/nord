@@ -42,16 +42,24 @@ int main(int argc, char *argv[])
 
         ast_t *syntax_tree = parse(&context);
 
+        printf("Abstract Syntax Tree\n");
+        printf("====================\n\n");
         print_ast(&context, syntax_tree);
         printf("\n");
 
         code_block_t *block = compile(syntax_tree);
+
+        printf("Instructions\n");
+        printf("============\n\n");
         code_block_print(block);
 
         printf("\n");
 
         vm_t *vm = vm_create(block);
         vm_execute(vm);
+
+        printf("Virtual Machine Dump\n");
+        printf("====================\n\n");
         vm_dump(vm);
 
         free(input);

@@ -1,6 +1,8 @@
-DECLARE(IDENTIFIER) -> foo
-  ↳ ASSIGN(IDENTIFIER) -> x
-  ⋅ ↳ ASSIGN(IDENTIFIER) -> y
-  ⋅ ⋅ ↳ BINARY(PLUS)
-  ⋅ ⋅ ⋅ ↳ LITERAL(NUMBER) -> 1
-  ⋅ ⋅ ⋅ ↳ LITERAL(NUMBER) -> 3
+Found statement!
+PROGRAM
+  ↳ DECLARE(IDENTIFIER) -> foo
+  ⋅ ↳ ASSIGN(IDENTIFIER) -> x
+  ⋅ ⋅ ↳ ASSIGN(IDENTIFIER) -> y
+  ⋅ ⋅ ⋅ ↳ BINARY(PLUS)
+  ⋅ ⋅ ⋅ ⋅ ↳ LITERAL(NUMBER) -> 1
+  ⋅ ⋅ ⋅ ⋅ ↳ LITERAL(NUMBER) -> 3

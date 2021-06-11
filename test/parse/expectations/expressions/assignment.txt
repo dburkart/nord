@@ -1,2 +1,3 @@
-ASSIGN(IDENTIFIER) -> foo
-  ↳ LITERAL(STRING) -> "bar"
+PROGRAM
+  ↳ ASSIGN(IDENTIFIER) -> foo
+  ⋅ ↳ LITERAL(STRING) -> "bar"

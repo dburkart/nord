@@ -10,7 +10,7 @@
 #include "parse.h"
 
 // Forward declarations
-ast_t *declaration(scan_context_t *);
+ast_t *statement_list(scan_context_t *);
 ast_t *statement(scan_context_t *);
 ast_t *variable_decl(scan_context_t *);
 ast_t *expression(scan_context_t *);
@@ -24,7 +24,7 @@ ast_t *primary(scan_context_t *);
 
 ast_t *parse(scan_context_t *context)
 {
-    return declaration(context);
+    return statement_list(context);
 }
 
 void print_ast_internal(scan_context_t *context, ast_t *ast, int indent)
@@ -72,6 +72,13 @@ void print_ast_internal(scan_context_t *context, ast_t *ast, int indent)
         case GROUP:
             printf("GROUP\n");
             print_ast_internal(context, ast->op.group, indent + 2);
+            break;
+        case STATEMENT_LIST:
+            printf("PROGRAM\n");
+            for (int i = 0; i < ast->op.list.size; i++)
+            {
+                print_ast_internal(context, ast->op.list.statements[i], indent + 2);
+            }
             break;
     }
 }
@@ -141,30 +148,73 @@ ast_t *make_group_expr(ast_t *expr)
     return group_expr;
 }
 
-ast_t *declaration(scan_context_t *context)
+ast_t *statement_list(scan_context_t* context)
 {
-    ast_t *left = variable_decl(context);
+    ast_t *statements = (ast_t *)malloc(sizeof(ast_t));
+    size_t size = 0;
+    size_t capacity = 10;
 
-    if (left == NULL)
-        left = statement(context);
+    statements->type = STATEMENT_LIST;
+    statements->op.list.statements = (ast_t **)malloc(sizeof(ast_t) * capacity);
 
-    return left;
+    ast_t *current = statement(context);
+
+    if (current == NULL)
+    {
+        free(statements->op.list.statements);
+        free(statements);
+        return NULL;
+    }
+
+    statements->op.list.statements[size++] = current;
+
+    while (peek(context).type != EOF_CHAR)
+    {
+        // If the next token is and EOL, consume it
+        if (peek(context).type == EOL)
+            accept(context);
+
+        // Check if we need to grow our statement list
+        if (size >= capacity - 1)
+        {
+            capacity *= 2;
+            statements->op.list.statements = (ast_t **)realloc(statements->op.list.statements, sizeof(ast_t) * capacity);
+        }
+
+        // Now pull off the next statement
+        current = statement(context);
+
+        if (current != NULL)
+            statements->op.list.statements[size++] = current;
+    }
+
+    statements->op.list.size = size;
+
+    return statements;
 }
 
 ast_t *statement(scan_context_t *context)
 {
-    ast_t *left = expression(context);
+    ast_t *left = variable_decl(context);
 
-    if (peek(context).type == EOL)
+    if (left == NULL)
     {
-        accept(context);
-        return left;
+        ast_t *left = expression(context);
+
+        if (left == NULL)
+            return left;
+
+        if (peek(context).type == EOL)
+        {
+            accept(context);
+            return left;
+        }
+
+        if (peek(context).type == EOF_CHAR)
+            return left;
     }
 
-    if (peek(context).type == EOF_CHAR)
-        return left;
-
-    return NULL;
+    return left;
 }
 
 ast_t *variable_decl(scan_context_t *context)

@@ -1,8 +1,9 @@
-BINARY(SLASH)
-  ↳ BINARY(ASTERISK)
-  ⋅ ↳ LITERAL(NUMBER) -> 3
-  ⋅ ↳ GROUP
-  ⋅ ⋅ ↳ BINARY(PLUS)
-  ⋅ ⋅ ⋅ ↳ LITERAL(NUMBER) -> 4
-  ⋅ ⋅ ⋅ ↳ LITERAL(NUMBER) -> 7
-  ↳ LITERAL(IDENTIFIER) -> factor
+PROGRAM
+  ↳ BINARY(SLASH)
+  ⋅ ↳ BINARY(ASTERISK)
+  ⋅ ⋅ ↳ LITERAL(NUMBER) -> 3
+  ⋅ ⋅ ↳ GROUP
+  ⋅ ⋅ ⋅ ↳ BINARY(PLUS)
+  ⋅ ⋅ ⋅ ⋅ ↳ LITERAL(NUMBER) -> 4
+  ⋅ ⋅ ⋅ ⋅ ↳ LITERAL(NUMBER) -> 7
+  ⋅ ↳ LITERAL(IDENTIFIER) -> factor

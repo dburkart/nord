@@ -1,9 +1,14 @@
 # Grammar reference for Nord. Documented in roughly BNF form.
 
+program         -> statement_list ;
+
+statement_list  -> statement EOF
+                 | statement statement_list;
+
+
 # Statements
-declaration     -> variable_decl
-                 | statement ;
-statement       -> expression "\n" ;
+statement       -> variable_decl
+                 | expression "\n" ;
 variable_decl   -> "var" IDENTIFIER ( "=" expression ) "\n" ;
 
 # Expressions

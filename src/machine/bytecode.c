@@ -51,24 +51,24 @@ void code_block_print(code_block_t *block)
         int arg2;
         int arg3;
 
-        printf("%04d ", num);
+        printf("%#06x ", num);
 
         switch(instruction.opcode)
         {
             case OP_LOAD:
-                printf("LOAD     %04d %04d\n", instruction.fields.pair.arg1, instruction.fields.pair.arg2);
+                printf("LOAD     %#04x %#04x\n", instruction.fields.pair.arg1, instruction.fields.pair.arg2);
                 break;
             case OP_LOADV:
-                printf("LOADV    %04d %d\n", instruction.fields.pair.arg1, instruction.fields.pair.arg2);
+                printf("LOADV    %#04x %d\n", instruction.fields.pair.arg1, instruction.fields.pair.arg2);
                 break;
             case OP_ADD:
-                printf("ADD      %04d %04d %04d\n", instruction.fields.triplet.arg1, instruction.fields.triplet.arg2, instruction.fields.triplet.arg3);
+                printf("ADD      %#04x %#04x %#04x\n", instruction.fields.triplet.arg1, instruction.fields.triplet.arg2, instruction.fields.triplet.arg3);
                 break;
             case OP_SUBTRACT:
-                printf("SUBTRACT %04d %04d %04d\n", instruction.fields.triplet.arg1, instruction.fields.triplet.arg2, instruction.fields.triplet.arg3);
+                printf("SUBTRACT %#04x %#04x %#04x\n", instruction.fields.triplet.arg1, instruction.fields.triplet.arg2, instruction.fields.triplet.arg3);
                 break;
             case OP_MULTIPLY:
-                printf("MULTIPLY %04d %04d %04d\n", instruction.fields.triplet.arg1, instruction.fields.triplet.arg2, instruction.fields.triplet.arg3);
+                printf("MULTIPLY %#04x %#04x %#04x\n", instruction.fields.triplet.arg1, instruction.fields.triplet.arg2, instruction.fields.triplet.arg3);
                 break;
             case OP_RETURN:
                 printf("RETURN\n");
