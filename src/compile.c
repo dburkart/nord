@@ -113,6 +113,23 @@ uint8_t compile_internal(ast_t *ast, compile_context_t *context)
             symbol_map_set(context->symbols, ast->op.declare.name, loc);
             break;
 
+        case ASSIGN:
+            result = compile_internal(ast->op.assign.value, context);
+            // Right now, since we assign registers in a stack-like manner, we
+            // use a move instruction for assignment so that register usage
+            // stays compact. If we used a different method for register
+            // assignment, a more efficient (at runtime) approach would be to
+            // simply change the location of the variable in the symbol map.
+            //
+            // TODO: Handle variables in memory
+            loc = symbol_map_get(context->symbols, ast->op.assign.name);
+            instruction.opcode = OP_MOVE;
+            instruction.fields.pair.arg1 = loc.address;
+            instruction.fields.pair.arg2 = result;
+
+            code_block_write(context->block, instruction);
+            break;
+
         case LITERAL:
             // For now, only handle small ints, because we don't have memory yet
             if (ast->op.literal.type.type == NUMBER)

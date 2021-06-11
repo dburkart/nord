@@ -85,6 +85,10 @@ void vm_execute(vm_t *vm)
                 memory_set(vm->memory, instruction.fields.pair.arg2, vm->registers[instruction.fields.pair.arg1]);
                 break;
 
+            case OP_MOVE:
+                vm->registers[instruction.fields.pair.arg1] = vm->registers[instruction.fields.pair.arg2];
+                break;
+
             case OP_JMP:
                 // TODO: Use both arguments to piece together the address (we have an extra 8 bits we're not using)
                 vm->pc = instruction.fields.pair.arg2;

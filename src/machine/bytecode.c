@@ -61,6 +61,9 @@ void code_block_print(code_block_t *block)
             case OP_LOADV:
                 printf("LOADV    %#04x %d\n", instruction.fields.pair.arg1, instruction.fields.pair.arg2);
                 break;
+            case OP_MOVE:
+                printf("MOVE     %#04x %#04x\n", instruction.fields.pair.arg1, instruction.fields.pair.arg2);
+                break;
             case OP_ADD:
                 printf("ADD      %#04x %#04x %#04x\n", instruction.fields.triplet.arg1, instruction.fields.triplet.arg2, instruction.fields.triplet.arg3);
                 break;
