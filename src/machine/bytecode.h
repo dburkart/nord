@@ -77,6 +77,4 @@ code_block_t *code_block_create(void);
 void code_block_write(code_block_t *, instruction_t);
 void code_block_free(code_block_t *);
 
-void code_block_print(code_block_t *);
-
 #endif

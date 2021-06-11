@@ -7,6 +7,7 @@
 #include <stdio.h>
 
 #include "machine/bytecode.h"
+#include "machine/disassemble.h"
 #include "machine/vm.h"
 #include "compile.h"
 #include "lex.h"
@@ -51,7 +52,9 @@ int main(int argc, char *argv[])
 
         printf("Instructions\n");
         printf("============\n\n");
-        code_block_print(block);
+        char *listing = disassemble(block);
+        printf("%s", listing);
+        free(listing);
 
         printf("\n");
 
