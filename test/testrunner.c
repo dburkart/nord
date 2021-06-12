@@ -10,6 +10,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 #include <unistd.h>
 
 #define SUBSYSTEM_COUNT 3
@@ -160,6 +161,8 @@ void usage(char *name)
 int main(int argc, char *argv[])
 {
     bool rebase = false;
+    int all_passes, all_fails;
+    unsigned long start_time;
 
     if (argc == 2)
     {
@@ -176,6 +179,7 @@ int main(int argc, char *argv[])
     if (argc > 2)
         usage(argv[0]);
 
+    start_time = time(NULL);
     for (int i = 0; i < SUBSYSTEM_COUNT; i++)
     {
         const char *subsystem = subsystems[i];
@@ -278,7 +282,14 @@ int main(int argc, char *argv[])
 
         int pass_rate = (int)(passes / (float) (passes + fails) * 100);
         printf("\nSummary: %d%% pass rate (%d/%d) \n\n", pass_rate, passes, passes + fails);
+        all_passes += passes;
+        all_fails += fails;
     }
 
+    printf(HRULE);
+    int pass_rate = (int)(all_passes / (float) (all_passes + all_fails) * 100);
+    printf("Ran %d tests in %lu seconds, with a pass rate of %d%%\n",
+            all_passes + all_fails, time(NULL) - start_time, pass_rate
+          );
     return 0;
 }
