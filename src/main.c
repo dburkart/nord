@@ -52,7 +52,7 @@ int main(int argc, char *argv[])
 
         printf("Instructions\n");
         printf("============\n\n");
-        char *listing = disassemble(binary->code);
+        char *listing = disassemble(binary);
         printf("%s", listing);
         free(listing);
 
