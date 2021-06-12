@@ -422,7 +422,17 @@ char *token_value(scan_context_t *context, token_t t)
 {
     int len = t.end - t.start;
     char *value = calloc(len + 1, sizeof(char));
-    memcpy(value, context->buffer + t.start, len);
+
+    // If the token is a string, omit the quotes
+    if (t.type == STRING)
+    {
+        memcpy(value, context->buffer + t.start + 1, len - 2);
+        value[len-2] = 0;
+    }
+    else
+    {
+        memcpy(value, context->buffer + t.start, len);
+    }
 
     return value;
 }

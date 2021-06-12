@@ -7,9 +7,9 @@
 #ifndef DISASSEMBLE_H
 #define DISASSEMBLE_H
 
-#include "bytecode.h"
+#include "binary.h"
 
 // Given a block of code, disassemble it into a human-readable string
-char *disassemble(code_block_t *);
+char *disassemble(binary_t *);
 
 #endif

@@ -17,6 +17,7 @@ typedef struct
     symbol_map_t *symbols;
     binary_t *binary;
     uint8_t rp;
+    uint64_t mp;
 } compile_context_t;
 
 compile_context_t *context_create(void)
@@ -28,6 +29,7 @@ compile_context_t *context_create(void)
     context->binary->text = memory_create();
     context->binary->code = code_block_create();
     context->rp = 1;
+    context->mp = 0;
 
     return context;
 }
@@ -45,6 +47,7 @@ uint8_t compile_internal(ast_t *ast, compile_context_t *context)
     uint8_t result = 0, left, right;
     location_t loc;
     instruction_t instruction;
+    value_t val;
 
     switch (ast->type)
     {
@@ -149,7 +152,7 @@ uint8_t compile_internal(ast_t *ast, compile_context_t *context)
             break;
 
         case LITERAL:
-            // For now, only handle small ints, because we don't have memory yet
+            // TODO: Support ints which are larger than 16-bit
             if (ast->op.literal.type.type == NUMBER)
             {
                 result = context->rp;
@@ -158,6 +161,24 @@ uint8_t compile_internal(ast_t *ast, compile_context_t *context)
                 instruction.fields.pair.arg2 = atoi(ast->op.literal.value);
 
                 code_block_write(context->binary->code, instruction);
+            }
+
+            if (ast->op.literal.type.type == STRING)
+            {
+                result = context->rp;
+
+                // First, set the constant in the text section of our binary
+                val.type = VAL_STRING;
+                val.contents.string = ast->op.literal.value;
+                memory_set(context->binary->text, context->mp, val);
+
+                // Now, write out an instruction to load it into a register
+                instruction.opcode = OP_LOAD;
+                instruction.fields.pair.arg1 = result;
+                instruction.fields.pair.arg2 = context->mp;
+
+                code_block_write(context->binary->code, instruction);
+                context->mp += 1;
             }
 
             if (ast->op.literal.type.type == IDENTIFIER)

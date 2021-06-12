@@ -9,15 +9,17 @@
 #include <string.h>
 
 #include "disassemble.h"
+#include "memory.h"
 
-#define FORMAT_PAIR         "%-10s $%d $%d\n"
-#define FORMAT_PAIR_ADDR    "%-10s $%d @%d\n"
-#define FORMAT_PAIR_CONST   "%-10s $%d %d\n"
-#define FORMAT_TRIPLET      "%-10s $%d $%d $%d\n"
+#define FORMAT_PAIR             "%-10s $%d $%d\n"
+#define FORMAT_PAIR_ADDR        "%-10s $%d @%d\n"
+#define FORMAT_PAIR_CONST_NUM   "%-10s $%d %d\n"
+#define FORMAT_PAIR_CONST_STR   "%-10s $%d %s\n"
+#define FORMAT_TRIPLET          "%-10s $%d $%d $%d\n"
 
-char *disassemble_instruction(instruction_t);
+char *disassemble_instruction(memory_t *mem, instruction_t);
 
-char *disassemble(code_block_t *block)
+char *disassemble(binary_t *binary)
 {
     char *assembly;
     size_t size = 32;
@@ -25,9 +27,9 @@ char *disassemble(code_block_t *block)
 
     assembly = calloc(size, sizeof(char));
 
-    for (int i = 0; i < block->size; i++)
+    for (int i = 0; i < binary->code->size; i++)
     {
-        char *new_instruction = disassemble_instruction(block->code[i]);
+        char *new_instruction = disassemble_instruction(binary->text, binary->code->code[i]);
 
         if (new_instruction == NULL)
             continue;
@@ -48,24 +50,43 @@ char *disassemble(code_block_t *block)
     return assembly;
 }
 
-char *disassemble_instruction(instruction_t instruction)
+char *disassemble_instruction(memory_t *mem, instruction_t instruction)
 {
     char *assembly;
+    char *str;
+    value_t value;
 
     switch (instruction.opcode)
     {
         // load <register> <address>
         case OP_LOAD:
-            asprintf(&assembly, FORMAT_PAIR_ADDR,
-                     "load",
+            // When disassembling a load instruction, we instead output a
+            // pseudo-instruction, "set", which sets values directly to
+            // registers.
+            value = memory_get(mem, instruction.fields.pair.arg2);
+
+
+            if (value.type == VAL_INT)
+            {
+                asprintf(&str, "%d", value.contents.number);
+            }
+            else if (value.type == VAL_STRING)
+            {
+                asprintf(&str, "\"%s\"", value.contents.string);
+            }
+
+            asprintf(&assembly, FORMAT_PAIR_CONST_STR,
+                     "set",
                      instruction.fields.pair.arg1,
-                     instruction.fields.pair.arg2
-                    );
+                     str
+                     );
+
+            free(str);
             break;
 
         // load <register> <value>
         case OP_LOADV:
-            asprintf(&assembly, FORMAT_PAIR_CONST,
+            asprintf(&assembly, FORMAT_PAIR_CONST_NUM,
                      "loadv",
                      instruction.fields.triplet.arg1,
                      instruction.fields.triplet.arg3

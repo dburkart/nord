@@ -44,7 +44,7 @@ int main(int argc, char *argv[])
         ast_t *syntax_tree = parse(&context);
         binary_t *binary = compile(syntax_tree);
 
-        char *listing = disassemble(binary->code);
+        char *listing = disassemble(binary);
         printf("%s", listing);
 
         free(listing);
