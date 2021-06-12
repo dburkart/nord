@@ -139,7 +139,7 @@ char *disassemble_instruction(instruction_t instruction)
             asprintf(&assembly, FORMAT_PAIR,
                      "negate",
                      instruction.fields.triplet.arg1,
-                     instruction.fields.triplet.arg2
+                     instruction.fields.triplet.arg3
                     );
             break;
 

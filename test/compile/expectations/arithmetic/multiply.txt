@@ -1,0 +1,4 @@
+loadv      $1 4
+loadv      $2 2
+negate     $2 $2
+multiply   $1 $1 $2

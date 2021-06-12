@@ -227,6 +227,8 @@ int main(int argc, char *argv[])
                 }
                 else
                 {
+                    if (access(expectation_path, F_OK))
+                        close(open(expectation_path, O_WRONLY | O_CREAT));
                     memset(temp_name, 0, sizeof(temp_name));
                     strncpy(temp_name, "/tmp/testrunner-XXXXXX", 22);
                     fd = mkstemp(temp_name);
@@ -274,7 +276,7 @@ int main(int argc, char *argv[])
         free(run_cmd);
         test_list_destroy(list);
 
-        int pass_rate = (int)(passes / (float) (passes + fails)) * 100;
+        int pass_rate = (int)(passes / (float) (passes + fails) * 100);
         printf("\nSummary: %d%% pass rate (%d/%d) \n\n", pass_rate, passes, passes + fails);
     }
 
