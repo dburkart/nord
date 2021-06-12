@@ -41,8 +41,3 @@ To test things, run:
 
     make test
 
-Currently, the project uses python unittest to run small binaries which
-exercise a single subsystem. In the future, we might rewrite the test harness
-in C since we're not using any of the complexity of python, and it would remove
-a dependency.
-
