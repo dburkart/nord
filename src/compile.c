@@ -4,6 +4,8 @@
  * SPDX-License-Identifier: BSD-2-Clause
  */
 
+#include <stdio.h>
+
 #include "compile.h"
 
 #include "parse.h"
@@ -105,8 +107,21 @@ uint8_t compile_internal(ast_t *ast, compile_context_t *context)
             else
             {
                 result = compile_internal(ast->op.declare.initial_value, context);
+
+                if (result < context->rp)
+                {
+                    instruction.opcode = OP_MOVE;
+                    instruction.fields.pair.arg1 = context->rp;
+                    instruction.fields.pair.arg2 = result;
+                    code_block_write(context->block, instruction);
+                    loc.address = context->rp;
+                }
+                else
+                {
+                    loc.address = result;
+                }
+
                 loc.type = LOC_REGISTER;
-                loc.address = result;
                 context->rp += 1;
             }
 
