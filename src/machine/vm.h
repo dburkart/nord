@@ -8,7 +8,7 @@
 #define VM_H
 
 #include "memory.h"
-#include "bytecode.h"
+#include "binary.h"
 
 #define VM_NUM_REGISTERS 128
 
@@ -30,7 +30,7 @@ typedef struct
     value_t registers[VM_NUM_REGISTERS];
 } vm_t;
 
-vm_t *vm_create(code_block_t *);
+vm_t *vm_create(binary_t *);
 int vm_stack_push(vm_t *, value_t val);
 value_t vm_stack_pop(vm_t *);
 

@@ -1,0 +1,5 @@
+loadv      $1 1
+loadv      $2 3
+add        $1 $1 $2
+loadv      $2 100
+multiply   $1 $1 $2

@@ -6,7 +6,7 @@
 
 #include <stdio.h>
 
-#include "machine/bytecode.h"
+#include "machine/binary.h"
 #include "machine/disassemble.h"
 #include "machine/vm.h"
 #include "compile.h"
@@ -42,9 +42,9 @@ int main(int argc, char *argv[])
         context.position = 0;
 
         ast_t *syntax_tree = parse(&context);
-        code_block_t *block = compile(syntax_tree);
+        binary_t *binary = compile(syntax_tree);
 
-        char *listing = disassemble(block);
+        char *listing = disassemble(binary->code);
         printf("%s", listing);
 
         free(listing);

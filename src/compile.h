@@ -8,8 +8,9 @@
 #define COMPILE_H
 
 #include "machine/bytecode.h"
+#include "machine/binary.h"
 #include "parse.h"
 
-code_block_t *compile(ast_t *);
+binary_t *compile(ast_t *);
 
 #endif

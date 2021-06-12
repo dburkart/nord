@@ -6,7 +6,7 @@
 
 #include <stdio.h>
 
-#include "machine/bytecode.h"
+#include "machine/binary.h"
 #include "machine/disassemble.h"
 #include "machine/vm.h"
 #include "compile.h"
@@ -48,20 +48,20 @@ int main(int argc, char *argv[])
         print_ast(&context, syntax_tree);
         printf("\n");
 
-        code_block_t *block = compile(syntax_tree);
+        binary_t *binary = compile(syntax_tree);
 
         printf("Instructions\n");
         printf("============\n\n");
-        char *listing = disassemble(block);
+        char *listing = disassemble(binary->code);
         printf("%s", listing);
         free(listing);
 
         printf("\n");
 
         printf("Size of input text (in bytes): %lu\n", fsize);
-        printf("Size of compiled program (in bytes): %lu\n\n", sizeof(instruction_t) * block->size);
+        printf("Size of compiled program (in bytes): %lu\n\n", sizeof(instruction_t) * binary->code->size);
 
-        vm_t *vm = vm_create(block);
+        vm_t *vm = vm_create(binary);
         vm_execute(vm);
 
         printf("Virtual Machine Dump\n");

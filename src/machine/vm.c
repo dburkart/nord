@@ -6,6 +6,7 @@
 
 #include <stdio.h>
 
+#include "bytecode.h"
 #include "vm.h"
 
 void value_print(value_t v)
@@ -24,18 +25,18 @@ void value_print(value_t v)
     }
 }
 
-vm_t *vm_create(code_block_t *block)
+vm_t *vm_create(binary_t *binary)
 {
     vm_t *vm = malloc(sizeof(vm_t));
 
     // Set up main memory
-    vm->memory = memory_create();
+    vm->memory = binary->text;
 
     // Set up the stack
     vm->stack = memory_create();
     vm->sp = 0;
 
-    vm->code = block;
+    vm->code = binary->code;
     vm->pc = 0;
 
     return vm;

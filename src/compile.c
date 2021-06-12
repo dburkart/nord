@@ -8,13 +8,14 @@
 
 #include "compile.h"
 
+#include "memory.h"
 #include "parse.h"
 #include "symbol.h"
 
 typedef struct
 {
     symbol_map_t *symbols;
-    code_block_t *block;
+    binary_t *binary;
     uint8_t rp;
 } compile_context_t;
 
@@ -23,7 +24,9 @@ compile_context_t *context_create(void)
     compile_context_t *context = malloc(sizeof(compile_context_t));
 
     context->symbols = symbol_map_create();
-    context->block = code_block_create();
+    context->binary = binary_create();
+    context->binary->text = memory_create();
+    context->binary->code = code_block_create();
     context->rp = 1;
 
     return context;
@@ -59,7 +62,7 @@ uint8_t compile_internal(ast_t *ast, compile_context_t *context)
                     ;
             }
 
-            code_block_write(context->block, instruction);
+            code_block_write(context->binary->code, instruction);
             result = context->rp;
             break;
         case BINARY:
@@ -94,7 +97,7 @@ uint8_t compile_internal(ast_t *ast, compile_context_t *context)
                     ;
             }
 
-            code_block_write(context->block, instruction);
+            code_block_write(context->binary->code, instruction);
             result = context->rp;
             break;
 
@@ -113,7 +116,7 @@ uint8_t compile_internal(ast_t *ast, compile_context_t *context)
                     instruction.opcode = OP_MOVE;
                     instruction.fields.pair.arg1 = context->rp;
                     instruction.fields.pair.arg2 = result;
-                    code_block_write(context->block, instruction);
+                    code_block_write(context->binary->code, instruction);
                     loc.address = context->rp;
                 }
                 else
@@ -142,7 +145,7 @@ uint8_t compile_internal(ast_t *ast, compile_context_t *context)
             instruction.fields.pair.arg1 = loc.address;
             instruction.fields.pair.arg2 = result;
 
-            code_block_write(context->block, instruction);
+            code_block_write(context->binary->code, instruction);
             break;
 
         case LITERAL:
@@ -154,7 +157,7 @@ uint8_t compile_internal(ast_t *ast, compile_context_t *context)
                 instruction.fields.pair.arg1 = result;
                 instruction.fields.pair.arg2 = atoi(ast->op.literal.value);
 
-                code_block_write(context->block, instruction);
+                code_block_write(context->binary->code, instruction);
             }
 
             if (ast->op.literal.type.type == IDENTIFIER)
@@ -183,11 +186,11 @@ uint8_t compile_internal(ast_t *ast, compile_context_t *context)
     return result;
 }
 
-code_block_t *compile(ast_t *ast)
+binary_t *compile(ast_t *ast)
 {
     compile_context_t *context = context_create();
     compile_internal(ast, context);
-    code_block_t *block = context->block;
+    binary_t *binary = context->binary;
     context_destroy(context);
-    return block;
+    return binary;
 }
