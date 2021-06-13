@@ -71,10 +71,16 @@ void symbol_map_set(symbol_map_t *symbol_map, char *name, location_t loc)
     symbol_map->size += 1;
 }
 
+#include <stdio.h>
+
 location_t symbol_map_get(symbol_map_t *symbol_map, char *name)
 {
     uint32_t index = pjw_hash(name) & (symbol_map->capacity - 1);
     symbol_t symbol = symbol_map->items[index];
+
+    if (symbol.location.type == LOC_UNDEF)
+        return symbol.location;
+
     // If we have a collision, advance until we find the correct symbol
     while (strcmp(symbol.name, name))
     {

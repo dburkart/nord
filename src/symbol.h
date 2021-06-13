@@ -12,6 +12,7 @@
 typedef struct
 {
     enum {
+        LOC_UNDEF,
         LOC_REGISTER,
         LOC_MEMORY,
         // Used to indicate a symbol has been declared but not assigned

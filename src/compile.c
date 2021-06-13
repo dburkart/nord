@@ -4,6 +4,7 @@
  * SPDX-License-Identifier: BSD-2-Clause
  */
 
+#include <assert.h>
 #include <stdio.h>
 
 #include "compile.h"
@@ -238,6 +239,10 @@ uint8_t compile_internal(ast_t *ast, compile_context_t *context)
             //
             // TODO: Handle variables in memory
             loc = symbol_map_get(context->symbols, ast->op.assign.name);
+
+            // TODO: Proper error handling please!
+            assert(loc.type != LOC_UNDEF);
+
             instruction.opcode = OP_MOVE;
             instruction.fields.pair.arg1 = loc.address;
             instruction.fields.pair.arg2 = result;
@@ -295,6 +300,8 @@ uint8_t compile_internal(ast_t *ast, compile_context_t *context)
             if (ast->op.literal.token.type == IDENTIFIER)
             {
                 loc = symbol_map_get(context->symbols, ast->op.literal.value);
+                // TODO: Proper error handling please!
+                assert(loc.type != LOC_UNDEF);
                 // TODO: Handle memory addresses
                 result = loc.address;
             }

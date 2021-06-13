@@ -205,6 +205,12 @@ ast_t *statement(scan_context_t *context)
         if (left == NULL)
             return left;
 
+        if (!match(context, 2, EOL, EOF_CHAR))
+        {
+            // TODO: Proper error handling please!
+            assert(false);
+        }
+
         if (peek(context).type == EOL)
         {
             accept(context);
@@ -344,6 +350,8 @@ ast_t *unary(scan_context_t *context)
     }
     else
     {
+        // TODO: Proper error handling please!
+        assert(peek(context).type != INVALID);
         return primary(context);
     }
 }
