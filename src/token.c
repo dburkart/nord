@@ -102,6 +102,8 @@ const char *token_name(token_t t)
             return "STRING";
         case NUMBER:
             return "NUMBER";
+        case FLOAT:
+            return "FLOAT";
 
         // Keywords
         case TRUE:

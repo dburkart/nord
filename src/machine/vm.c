@@ -9,6 +9,10 @@
 #include "bytecode.h"
 #include "vm.h"
 
+#define REG_TYPE3(a, t) vm->registers[instruction.fields.triplet.a].type == t
+#define NUM3(a) vm->registers[instruction.fields.triplet.a].contents.number
+#define NUM_OR_FLOAT3(a) ((vm->registers[instruction.fields.triplet.a].type == VAL_INT) ? vm->registers[instruction.fields.triplet.a].contents.number : vm->registers[instruction.fields.triplet.a].contents.real)
+
 void value_print(value_t v)
 {
     switch (v.type)
@@ -18,6 +22,9 @@ void value_print(value_t v)
             break;
         case VAL_STRING:
             printf("{STRING:%s}\n", v.contents.string);
+            break;
+        case VAL_FLOAT:
+            printf("{FLOAT:%f}\n", v.contents.real);
             break;
         case VAL_NONE:
             printf("{NONE}\n");
@@ -97,23 +104,50 @@ void vm_execute(vm_t *vm)
 
             case OP_ADD:
                 // TODO: Don't assume numbers
-                result.type = VAL_INT;
-                result.contents.number = vm->registers[instruction.fields.triplet.arg2].contents.number +
-                                         vm->registers[instruction.fields.triplet.arg3].contents.number;
+                if (REG_TYPE3(arg2, VAL_FLOAT) || REG_TYPE3(arg3, VAL_FLOAT))
+                {
+                    result.type = VAL_FLOAT;
+                    result.contents.real = NUM_OR_FLOAT3(arg2) + NUM_OR_FLOAT3(arg3);
+                }
+                else
+                {
+                    result.type = VAL_INT;
+                    result.contents.number = NUM3(arg2) + NUM3(arg3);
+                }
                 vm->registers[instruction.fields.triplet.arg1] = result;
                 break;
 
             case OP_SUBTRACT:
-                result.type = VAL_INT;
-                result.contents.number = vm->registers[instruction.fields.triplet.arg2].contents.number -
-                                         vm->registers[instruction.fields.triplet.arg3].contents.number;
+                if (REG_TYPE3(arg2, VAL_FLOAT) || REG_TYPE3(arg3, VAL_FLOAT))
+                {
+                    result.type = VAL_FLOAT;
+                    result.contents.real = NUM_OR_FLOAT3(arg2) - NUM_OR_FLOAT3(arg3);
+                }
+                else
+                {
+                    result.type = VAL_INT;
+                    result.contents.number = NUM3(arg2) - NUM3(arg3);
+                }
                 vm->registers[instruction.fields.triplet.arg1] = result;
                 break;
 
             case OP_MULTIPLY:
-                result.type = VAL_INT;
-                result.contents.number = vm->registers[instruction.fields.triplet.arg2].contents.number *
-                                         vm->registers[instruction.fields.triplet.arg3].contents.number;
+                if (REG_TYPE3(arg2, VAL_FLOAT) || REG_TYPE3(arg3, VAL_FLOAT))
+                {
+                    result.type = VAL_FLOAT;
+                    result.contents.real = (NUM_OR_FLOAT3(arg2)) * (NUM_OR_FLOAT3(arg3));
+                }
+                else
+                {
+                    result.type = VAL_INT;
+                    result.contents.number = NUM3(arg2) * NUM3(arg3);
+                }
+                vm->registers[instruction.fields.triplet.arg1] = result;
+                break;
+
+            case OP_DIVIDE:
+                result.type = VAL_FLOAT;
+                result.contents.real = NUM_OR_FLOAT3(arg2) / (float) NUM_OR_FLOAT3(arg3);
                 vm->registers[instruction.fields.triplet.arg1] = result;
                 break;
 

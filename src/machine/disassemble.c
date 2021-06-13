@@ -67,13 +67,11 @@ char *disassemble_instruction(memory_t *mem, instruction_t instruction)
 
 
             if (value.type == VAL_INT)
-            {
                 asprintf(&str, "%d", value.contents.number);
-            }
             else if (value.type == VAL_STRING)
-            {
                 asprintf(&str, "\"%s\"", value.contents.string);
-            }
+            else if (value.type == VAL_FLOAT)
+                asprintf(&str, "%f", value.contents.real);
 
             asprintf(&assembly, FORMAT_PAIR_CONST_STR,
                      "set",

@@ -95,7 +95,11 @@ uint8_t compile_internal(ast_t *ast, compile_context_t *context)
                     instruction.fields.triplet.arg2 = left;
                     instruction.fields.triplet.arg3 = right;
                     break;
-                // TODO: Handle division (also handle floats!)
+                case SLASH:
+                    instruction.opcode = OP_DIVIDE;
+                    instruction.fields.triplet.arg1 = context->rp;
+                    instruction.fields.triplet.arg2 = left;
+                    instruction.fields.triplet.arg3 = right;
                 default:
                     ;
             }
@@ -161,6 +165,23 @@ uint8_t compile_internal(ast_t *ast, compile_context_t *context)
                 instruction.fields.pair.arg2 = atoi(ast->op.literal.value);
 
                 code_block_write(context->binary->code, instruction);
+            }
+
+            if (ast->op.literal.type.type == FLOAT)
+            {
+                result = context->rp;
+
+                // First, set the constant in the text section of our binary
+                val.type = VAL_FLOAT;
+                val.contents.real = atof(ast->op.literal.value);
+                memory_set(context->binary->text, context->mp, val);
+
+                instruction.opcode = OP_LOAD;
+                instruction.fields.pair.arg1 = result;
+                instruction.fields.pair.arg2 = context->mp;
+
+                code_block_write(context->binary->code, instruction);
+                context->mp += 1;
             }
 
             if (ast->op.literal.type.type == STRING)

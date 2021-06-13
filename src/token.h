@@ -28,7 +28,7 @@ enum token_type_e {
     R_ARROW,
 
     // Literals
-    IDENTIFIER, STRING, NUMBER,
+    IDENTIFIER, STRING, NUMBER, FLOAT,
 
     // Keywords
     VAR, FUNCTION, TRUE, FALSE, NIL,

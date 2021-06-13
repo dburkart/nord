@@ -349,7 +349,7 @@ ast_t *unary(scan_context_t *context)
 
 ast_t *primary(scan_context_t *context)
 {
-    if (match(context, 6, IDENTIFIER, NUMBER, STRING, TRUE, FALSE, NIL))
+    if (match(context, 6, IDENTIFIER, NUMBER, FLOAT, STRING, TRUE, FALSE, NIL))
     {
         ast_t *literal = make_literal_expr(accept(context));
         literal->op.literal.value = token_value(context, literal->op.literal.type);

@@ -148,6 +148,34 @@ int match_number(const char *c)
 }
 
 /*
+ * Match a floating point number.
+ */
+int match_float(const char *c)
+{
+    int len = 0;
+    bool seen_dot = false;
+
+    while (!is_whitespace(*c) && *c != 0 && !is_reserved(*c))
+    {
+        if ((*c < '0' || *c > '9') && *c != '.')
+            return 0;
+
+        if (*c == '.' && seen_dot == false)
+            seen_dot = true;
+        else if (*c == '.')
+            return 0;
+
+        len = len + 1;
+        c = c + 1;
+    }
+
+    if (!seen_dot)
+        return 0;
+
+    return len;
+}
+
+/*
  * Match a string.
  */
 int match_string(const char *c)
@@ -350,6 +378,13 @@ token_t peek(scan_context_t *context)
                 if (advance)
                 {
                     t.type = NUMBER;
+                    break;
+                }
+
+                advance = match_float(c);
+                if (advance)
+                {
+                    t.type = FLOAT;
                     break;
                 }
 

@@ -13,12 +13,13 @@ typedef struct
 {
     enum
     {
-        VAL_NONE, VAL_INT, VAL_STRING
+        VAL_NONE, VAL_INT, VAL_STRING, VAL_FLOAT
     } type;
 
     union
     {
         int number;
+        float real;
         char *string;
     } contents;
 } value_t;

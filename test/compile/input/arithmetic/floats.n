@@ -1,0 +1,4 @@
+var foo = 3 / 4
+var bar = foo * 10
+var baz = bar - foo
+var bleh = 1 + 2.4
