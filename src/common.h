@@ -11,4 +11,8 @@
 #define _BSD_SRC 1
 #endif
 
+#ifndef _GNU_SRC
+#define _GNU_SRC 1
+#endif
+
 #endif
