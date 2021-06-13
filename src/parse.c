@@ -295,7 +295,7 @@ ast_t *comparison(scan_context_t *context)
 {
     ast_t *left = term(context);
 
-    while (match(context, 4, GREATER, GREATER_OR_EQUAL, LESS, LESS_OR_EQUAL))
+    while (match(context, 4, GREATER, GREATER_EQUAL, LESS, LESS_EQUAL))
     {
         token_t operator = accept(context);
         ast_t *right = term(context);

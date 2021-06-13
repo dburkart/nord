@@ -48,6 +48,8 @@ typedef enum
     OP_EQUAL,
     // lt <value-desired> <register-in> <register-in>
     OP_LESSTHAN,
+    // or <register-out> <register-in> <register-in>
+    OP_OR,
 
     // -- Functions
 

@@ -74,12 +74,12 @@ const char *token_name(token_t t)
             return "EQUAL_EQUAL";
         case LESS:
             return "LESS";
-        case LESS_OR_EQUAL:
-            return "LESS_OR_EQUAL";
+        case LESS_EQUAL:
+            return "LESS_EQUAL";
         case GREATER:
             return "GREATER";
-        case GREATER_OR_EQUAL:
-            return "GREATER_OR_EQUAL";
+        case GREATER_EQUAL:
+            return "GREATER_EQUAL";
 
         // MATH
         case MINUS:

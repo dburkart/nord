@@ -47,6 +47,30 @@ void context_destroy(compile_context_t *context)
     free(context);
 }
 
+void compile_comparison(compile_context_t *context, uint8_t reg, uint8_t opcode, uint8_t condition, uint8_t left, uint8_t right)
+{
+    instruction_t instruction;
+
+    // First, write the false case
+    instruction.opcode = OP_LOADV;
+    instruction.fields.pair.arg1 = reg;
+    instruction.fields.pair.arg2 = 0;
+    code_block_write(context->binary->code, instruction);
+
+    // Now, write out the comparison instruction
+    instruction.opcode = opcode;
+    instruction.fields.triplet.arg1 = condition;
+    instruction.fields.triplet.arg2 = left;
+    instruction.fields.triplet.arg3 = right;
+    code_block_write(context->binary->code, instruction);
+
+    // Finally, write out the true case
+    instruction.opcode = OP_LOADV;
+    instruction.fields.pair.arg1 = reg;
+    instruction.fields.pair.arg2 = 1;
+    code_block_write(context->binary->code, instruction);
+}
+
 uint8_t compile_internal(ast_t *ast, compile_context_t *context)
 {
     uint8_t result = 0, left, right;
@@ -110,108 +134,56 @@ uint8_t compile_internal(ast_t *ast, compile_context_t *context)
 
                 // -- Logic
                 case EQUAL_EQUAL:
-                    // Since this is a multi-instruction operation, advance rp by 2 to save left / right
-                    context->rp += 2;
-                    // First, write the false case
-                    instruction.opcode = OP_LOADV;
-                    instruction.fields.pair.arg1 = context->rp;
-                    instruction.fields.pair.arg2 = 0;
-                    code_block_write(context->binary->code, instruction);
-                    // Now, write out the equal instruction
-                    instruction.opcode = OP_EQUAL;
-                    instruction.fields.triplet.arg1 = 1;
-                    instruction.fields.triplet.arg2 = left;
-                    instruction.fields.triplet.arg3 = right;
-                    code_block_write(context->binary->code, instruction);
-                    // Finally, write out the true case
-                    instruction.opcode = OP_LOADV;
-                    instruction.fields.pair.arg1 = context->rp;
-                    instruction.fields.pair.arg2 = 1;
-                    code_block_write(context->binary->code, instruction);
+                    compile_comparison(context, context->rp + 2, OP_EQUAL, 1, left, right);
                     // Because we don't have proper register allocation, we need an extra instruction
                     // to move the result to a compact register
                     instruction.opcode = OP_MOVE;
-                    instruction.fields.pair.arg1 = context->rp - 2;
-                    instruction.fields.pair.arg2 = context->rp;
-                    context->rp -= 2;
+                    instruction.fields.pair.arg1 = context->rp;
+                    instruction.fields.pair.arg2 = context->rp + 2;
                     break;
                 case BANG_EQUAL:
-                    // Since this is a multi-instruction operation, advance rp by 2 to save left / right
-                    context->rp += 2;
-                    // First, write the false case
-                    instruction.opcode = OP_LOADV;
-                    instruction.fields.pair.arg1 = context->rp;
-                    instruction.fields.pair.arg2 = 0;
-                    code_block_write(context->binary->code, instruction);
-                    // Now, write out the equal instruction
-                    instruction.opcode = OP_EQUAL;
-                    instruction.fields.triplet.arg1 = 0;
-                    instruction.fields.triplet.arg2 = left;
-                    instruction.fields.triplet.arg3 = right;
-                    code_block_write(context->binary->code, instruction);
-                    // Finally, write out the true case
-                    instruction.opcode = OP_LOADV;
-                    instruction.fields.pair.arg1 = context->rp;
-                    instruction.fields.pair.arg2 = 1;
-                    code_block_write(context->binary->code, instruction);
+                    compile_comparison(context, context->rp + 2, OP_EQUAL, 0, left, right);
                     // Because we don't have proper register allocation, we need an extra instruction
                     // to move the result to a compact register
                     instruction.opcode = OP_MOVE;
-                    instruction.fields.pair.arg1 = context->rp - 2;
-                    instruction.fields.pair.arg2 = context->rp;
-                    context->rp -= 2;
+                    instruction.fields.pair.arg1 = context->rp;
+                    instruction.fields.pair.arg2 = context->rp + 2;
                     break;
                 case LESS:
-                    // Since this is a multi-instruction operation, advance rp by 2 to save left / right
-                    context->rp += 2;
-                    // First, write the false case
-                    instruction.opcode = OP_LOADV;
-                    instruction.fields.pair.arg1 = context->rp;
-                    instruction.fields.pair.arg2 = 0;
-                    code_block_write(context->binary->code, instruction);
-                    // Now, write out the equal instruction
-                    instruction.opcode = OP_LESSTHAN;
-                    instruction.fields.triplet.arg1 = 1;
-                    instruction.fields.triplet.arg2 = left;
-                    instruction.fields.triplet.arg3 = right;
-                    code_block_write(context->binary->code, instruction);
-                    // Finally, write out the true case
-                    instruction.opcode = OP_LOADV;
-                    instruction.fields.pair.arg1 = context->rp;
-                    instruction.fields.pair.arg2 = 1;
-                    code_block_write(context->binary->code, instruction);
+                    compile_comparison(context, context->rp + 2, OP_LESSTHAN, 1, left, right);
                     // Because we don't have proper register allocation, we need an extra instruction
                     // to move the result to a compact register
                     instruction.opcode = OP_MOVE;
-                    instruction.fields.pair.arg1 = context->rp - 2;
-                    instruction.fields.pair.arg2 = context->rp;
-                    context->rp -= 2;
+                    instruction.fields.pair.arg1 = context->rp;
+                    instruction.fields.pair.arg2 = context->rp + 2;
+                    break;
+                case LESS_EQUAL:
+                    compile_comparison(context, context->rp + 2, OP_LESSTHAN, 1, left, right);
+                    compile_comparison(context, context->rp + 3, OP_EQUAL, 1, left, right);
+                    // Because we don't have proper register allocation, we need an extra instruction
+                    // to move the result to a compact register
+                    instruction.opcode = OP_OR;
+                    instruction.fields.triplet.arg1 = context->rp;
+                    instruction.fields.triplet.arg2 = context->rp + 2;
+                    instruction.fields.triplet.arg3 = context->rp + 3;
                     break;
                 case GREATER:
-                    // Since this is a multi-instruction operation, advance rp by 2 to save left / right
-                    context->rp += 2;
-                    // First, write the false case
-                    instruction.opcode = OP_LOADV;
-                    instruction.fields.pair.arg1 = context->rp;
-                    instruction.fields.pair.arg2 = 0;
-                    code_block_write(context->binary->code, instruction);
-                    // Now, write out the equal instruction
-                    instruction.opcode = OP_LESSTHAN;
-                    instruction.fields.triplet.arg1 = 0;
-                    instruction.fields.triplet.arg2 = left;
-                    instruction.fields.triplet.arg3 = right;
-                    code_block_write(context->binary->code, instruction);
-                    // Finally, write out the true case
-                    instruction.opcode = OP_LOADV;
-                    instruction.fields.pair.arg1 = context->rp;
-                    instruction.fields.pair.arg2 = 1;
-                    code_block_write(context->binary->code, instruction);
+                    compile_comparison(context, context->rp + 2, OP_LESSTHAN, 0, left, right);
                     // Because we don't have proper register allocation, we need an extra instruction
                     // to move the result to a compact register
                     instruction.opcode = OP_MOVE;
-                    instruction.fields.pair.arg1 = context->rp - 2;
-                    instruction.fields.pair.arg2 = context->rp;
-                    context->rp -= 2;
+                    instruction.fields.pair.arg1 = context->rp;
+                    instruction.fields.pair.arg2 = context->rp + 2;
+                    break;
+                case GREATER_EQUAL:
+                    compile_comparison(context, context->rp + 2, OP_LESSTHAN, 0, left, right);
+                    compile_comparison(context, context->rp + 3, OP_EQUAL, 1, left, right);
+                    // Because we don't have proper register allocation, we need an extra instruction
+                    // to move the result to a compact register
+                    instruction.opcode = OP_OR;
+                    instruction.fields.triplet.arg1 = context->rp;
+                    instruction.fields.triplet.arg2 = context->rp + 2;
+                    instruction.fields.triplet.arg3 = context->rp + 3;
                     break;
                 default:
                     ;

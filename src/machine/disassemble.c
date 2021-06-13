@@ -173,6 +173,15 @@ char *disassemble_instruction(memory_t *mem, instruction_t instruction)
                     );
             break;
 
+        case OP_OR:
+            asprintf(&assembly, FORMAT_TRIPLET,
+                     "or",
+                     instruction.fields.triplet.arg1,
+                     instruction.fields.triplet.arg2,
+                     instruction.fields.triplet.arg3
+                    );
+            break;
+
         // negate <register-out> <register-in>
         case OP_NEGATE:
             asprintf(&assembly, FORMAT_PAIR,

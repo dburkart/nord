@@ -265,7 +265,7 @@ token_t peek(scan_context_t *context)
             case '>':
                 if (*(c+1) == '=')
                 {
-                    t.type = GREATER_OR_EQUAL;
+                    t.type = GREATER_EQUAL;
                     advance = 2;
                     break;
                 }
@@ -276,7 +276,7 @@ token_t peek(scan_context_t *context)
             case '<':
                 if (*(c+1) == '=')
                 {
-                    t.type = LESS_OR_EQUAL;
+                    t.type = LESS_EQUAL;
                     advance = 2;
                     break;
                 }
