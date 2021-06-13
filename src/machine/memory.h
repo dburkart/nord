@@ -7,13 +7,14 @@
 #ifndef MEMORY_H
 #define MEMORY_H
 
+#include <stdbool.h>
 #include <stdlib.h>
 
 typedef struct
 {
     enum
     {
-        VAL_NONE, VAL_INT, VAL_STRING, VAL_FLOAT
+        VAL_NONE, VAL_INT, VAL_STRING, VAL_FLOAT, VAL_BOOLEAN
     } type;
 
     union
@@ -21,6 +22,7 @@ typedef struct
         int number;
         float real;
         char *string;
+        bool boolean;
     } contents;
 } value_t;
 

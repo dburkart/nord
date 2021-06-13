@@ -29,7 +29,12 @@ compile_context_t *context_create(void)
     context->binary->text = memory_create();
     context->binary->code = code_block_create();
     context->rp = 1;
-    context->mp = 0;
+
+    // Set up true and false
+    memory_set(context->binary->text, 0, (value_t){VAL_BOOLEAN, false});
+    memory_set(context->binary->text, 1, (value_t){VAL_BOOLEAN, true});
+
+    context->mp = 2;
 
     return context;
 }
@@ -157,7 +162,7 @@ uint8_t compile_internal(ast_t *ast, compile_context_t *context)
 
         case LITERAL:
             // TODO: Support ints which are larger than 16-bit
-            if (ast->op.literal.type.type == NUMBER)
+            if (ast->op.literal.token.type == NUMBER)
             {
                 result = context->rp;
                 instruction.opcode = OP_LOADV;
@@ -167,7 +172,7 @@ uint8_t compile_internal(ast_t *ast, compile_context_t *context)
                 code_block_write(context->binary->code, instruction);
             }
 
-            if (ast->op.literal.type.type == FLOAT)
+            if (ast->op.literal.token.type == FLOAT)
             {
                 result = context->rp;
 
@@ -184,7 +189,7 @@ uint8_t compile_internal(ast_t *ast, compile_context_t *context)
                 context->mp += 1;
             }
 
-            if (ast->op.literal.type.type == STRING)
+            if (ast->op.literal.token.type == STRING)
             {
                 result = context->rp;
 
@@ -202,11 +207,20 @@ uint8_t compile_internal(ast_t *ast, compile_context_t *context)
                 context->mp += 1;
             }
 
-            if (ast->op.literal.type.type == IDENTIFIER)
+            if (ast->op.literal.token.type == IDENTIFIER)
             {
                 loc = symbol_map_get(context->symbols, ast->op.literal.value);
                 // TODO: Handle memory addresses
                 result = loc.address;
+            }
+
+            if (ast->op.literal.token.type == TRUE || ast->op.literal.token.type == FALSE)
+            {
+                result = context->rp;
+                instruction.opcode = OP_LOAD;
+                instruction.fields.pair.arg1 = result;
+                instruction.fields.pair.arg2 = (ast->op.literal.token.type == TRUE) ? 1 : 0;
+                code_block_write(context->binary->code, instruction);
             }
             break;
 

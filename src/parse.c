@@ -67,7 +67,7 @@ void print_ast_internal(scan_context_t *context, ast_t *ast, int indent)
             print_ast_internal(context, ast->op.unary.operand, indent + 2);
             break;
         case LITERAL:
-            printf("LITERAL(%s) -> %s\n", token_name(ast->op.literal.type), ast->op.literal.value);
+            printf("LITERAL(%s) -> %s\n", token_name(ast->op.literal.token), ast->op.literal.value);
             break;
         case GROUP:
             printf("GROUP\n");
@@ -134,7 +134,7 @@ ast_t *make_literal_expr(token_t literal)
 {
     ast_t *literal_expr = (ast_t *)malloc(sizeof(ast_t));
     literal_expr->type = LITERAL;
-    literal_expr->op.literal.type = literal;
+    literal_expr->op.literal.token = literal;
 
     return literal_expr;
 }
@@ -352,7 +352,7 @@ ast_t *primary(scan_context_t *context)
     if (match(context, 6, IDENTIFIER, NUMBER, FLOAT, STRING, TRUE, FALSE, NIL))
     {
         ast_t *literal = make_literal_expr(accept(context));
-        literal->op.literal.value = token_value(context, literal->op.literal.type);
+        literal->op.literal.value = token_value(context, literal->op.literal.token);
         return literal;
     }
 

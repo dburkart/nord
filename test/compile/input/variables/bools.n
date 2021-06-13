@@ -1,0 +1,2 @@
+var foo = false
+var bar = 2 * foo

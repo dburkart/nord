@@ -25,7 +25,7 @@ typedef struct expr_t
     {
         struct
         {
-            token_t type;
+            token_t token;
             char *value;
         } literal;
 

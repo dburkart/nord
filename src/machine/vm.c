@@ -26,6 +26,9 @@ void value_print(value_t v)
         case VAL_FLOAT:
             printf("{FLOAT:%f}\n", v.contents.real);
             break;
+        case VAL_BOOLEAN:
+            printf("{BOOLEAN:%s}\n", (v.contents.boolean) ? "true" : "false");
+            break;
         case VAL_NONE:
             printf("{NONE}\n");
             break;

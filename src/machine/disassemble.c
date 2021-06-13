@@ -72,6 +72,8 @@ char *disassemble_instruction(memory_t *mem, instruction_t instruction)
                 asprintf(&str, "\"%s\"", value.contents.string);
             else if (value.type == VAL_FLOAT)
                 asprintf(&str, "%f", value.contents.real);
+            else if (value.type == VAL_BOOLEAN)
+                asprintf(&str, "%s", (value.contents.boolean == true) ? "true" : "false");
 
             asprintf(&assembly, FORMAT_PAIR_CONST_STR,
                      "set",
