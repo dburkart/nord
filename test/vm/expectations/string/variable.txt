@@ -1,0 +1,12 @@
+[memory contents]
+   0000 {BOOLEAN:false}
+   0001 {BOOLEAN:true}
+   0002 {STRING:The quick brown fox jumped over the lazy dog}
+   0003 {NONE}
+
+[stack contents]
+
+[register contents]
+   0001 {STRING:The quick brown fox jumped over the lazy dog}
+
+stack pointer: 0

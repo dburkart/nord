@@ -14,7 +14,7 @@
 #define NUM3(a) vm->registers[instruction.fields.triplet.a].contents.number
 #define NUM_OR_FLOAT3(a) ((vm->registers[instruction.fields.triplet.a].type == VAL_FLOAT) ? vm->registers[instruction.fields.triplet.a].contents.real : vm->registers[instruction.fields.triplet.a].contents.number)
 #define IS_NUMBERISH3(a) (vm->registers[instruction.fields.triplet.a].type == VAL_INT || vm->registers[instruction.fields.triplet.a].type == VAL_FLOAT || vm->registers[instruction.fields.triplet.a].type == VAL_BOOLEAN)
-#define IS_STRING3(a) (vm->registers[instruction.fields.triplet.a].type == VAL_STRING)
+#define STRING3(a) vm->registers[instruction.fields.triplet.a].contents.string
 
 void value_print(value_t v)
 {
@@ -118,7 +118,7 @@ void vm_execute(vm_t *vm)
                 {
                     result.contents.boolean = false;
                 }
-                else if (IS_STRING3(arg2) && IS_STRING3(arg3))
+                else if (REG_TYPE3(arg2, VAL_STRING) && REG_TYPE3(arg3, VAL_STRING))
                 {
                     result.contents.boolean = !strcmp(vm->registers[instruction.fields.triplet.arg2].contents.string,
                                                       vm->registers[instruction.fields.triplet.arg3].contents.string);
@@ -135,6 +135,11 @@ void vm_execute(vm_t *vm)
                 {
                     result.type = VAL_FLOAT;
                     result.contents.real = NUM_OR_FLOAT3(arg2) + NUM_OR_FLOAT3(arg3);
+                }
+                else if (REG_TYPE3(arg2, VAL_STRING) || REG_TYPE3(arg3, VAL_STRING))
+                {
+                    result.type = VAL_STRING;
+                    asprintf(&result.contents.string, "%s%s", STRING3(arg2), STRING3(arg3));
                 }
                 else
                 {

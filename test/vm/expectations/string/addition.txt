@@ -1,0 +1,14 @@
+[memory contents]
+   0000 {BOOLEAN:false}
+   0001 {BOOLEAN:true}
+   0002 {STRING:foo}
+   0003 {STRING:bar}
+
+[stack contents]
+
+[register contents]
+   0001 {STRING:foo}
+   0002 {STRING:bar}
+   0003 {STRING:foobar}
+
+stack pointer: 0
