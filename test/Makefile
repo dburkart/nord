@@ -8,7 +8,7 @@ all: runner lex/run parse/run compile/run vm/run
 	@./testrunner
 
 runner: testrunner.c
-	$(CC) $(CFLAGS) testrunner.c -o testrunner
+	$(CC) $(CFLAGS) -I$(BASE)/src testrunner.c -o testrunner
 
 lex/run: $(BASE)/src/lex.c $(BASE)/src/lex.h $(BASE)/src/token.c $(BASE)/src/token.h lex/run.c
 	$(CC) $(CFLAGS) -I$(BASE)/src $(BASE)/src/lex.c $(BASE)/src/token.c lex/run.c -o lex/run

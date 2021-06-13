@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: BSD-2-Clause
  */
 
-#define _BSD_SRC
+#include "common.h"
 
 /*
  * This test runner takes any number of files as inputs, and prints out a
