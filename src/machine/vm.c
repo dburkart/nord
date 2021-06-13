@@ -260,6 +260,7 @@ void vm_dump(vm_t *vm)
     {
         if (vm->memory->contents[i].type == VAL_NONE)
             break;
+
         printf("   %04d ", i);
         value_print(vm->memory->contents[i]);
     }

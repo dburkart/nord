@@ -25,9 +25,16 @@ void memory_set(memory_t *mem, int address, value_t val)
 
     if (mem->capacity <= address)
     {
+        int old = mem->capacity;
         int difference = address - mem->capacity;
         mem->capacity = mem->capacity * 2;
         mem->contents = realloc(mem->contents, mem->capacity * sizeof(value_t));
+
+        // Ensure that we zero out our new memory
+        for (int i = old; i < mem->capacity; i++)
+        {
+            mem->contents[i].type = VAL_NONE;
+        }
     }
 
     mem->contents[address] = val;
