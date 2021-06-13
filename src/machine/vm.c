@@ -5,13 +5,16 @@
  */
 
 #include <stdio.h>
+#include <string.h>
 
 #include "bytecode.h"
 #include "vm.h"
 
 #define REG_TYPE3(a, t) vm->registers[instruction.fields.triplet.a].type == t
 #define NUM3(a) vm->registers[instruction.fields.triplet.a].contents.number
-#define NUM_OR_FLOAT3(a) ((vm->registers[instruction.fields.triplet.a].type == VAL_INT) ? vm->registers[instruction.fields.triplet.a].contents.number : vm->registers[instruction.fields.triplet.a].contents.real)
+#define NUM_OR_FLOAT3(a) ((vm->registers[instruction.fields.triplet.a].type == VAL_FLOAT) ? vm->registers[instruction.fields.triplet.a].contents.real : vm->registers[instruction.fields.triplet.a].contents.number)
+#define IS_NUMBERISH3(a) (vm->registers[instruction.fields.triplet.a].type == VAL_INT || vm->registers[instruction.fields.triplet.a].type == VAL_FLOAT || vm->registers[instruction.fields.triplet.a].type == VAL_BOOLEAN)
+#define IS_STRING3(a) (vm->registers[instruction.fields.triplet.a].type == VAL_STRING)
 
 void value_print(value_t v)
 {
@@ -103,6 +106,27 @@ void vm_execute(vm_t *vm)
             case OP_JMP:
                 // TODO: Use both arguments to piece together the address (we have an extra 8 bits we're not using)
                 vm->pc = instruction.fields.pair.arg2;
+                break;
+
+            case OP_EQUAL:
+                if (IS_NUMBERISH3(arg2) && IS_NUMBERISH3(arg3))
+                {
+                    result.contents.boolean = NUM_OR_FLOAT3(arg2) == NUM_OR_FLOAT3(arg3);
+                }
+                // If both aren't number-like things, than differing types naturally mean they're not equal
+                else if (vm->registers[instruction.fields.triplet.arg2].type != vm->registers[instruction.fields.triplet.arg3].type)
+                {
+                    result.contents.boolean = false;
+                }
+                else if (IS_STRING3(arg2) && IS_STRING3(arg3))
+                {
+                    result.contents.boolean = !strcmp(vm->registers[instruction.fields.triplet.arg2].contents.string,
+                                                      vm->registers[instruction.fields.triplet.arg3].contents.string);
+                }
+
+                if (result.contents.boolean != instruction.fields.triplet.arg1)
+                    vm->pc += 1;
+
                 break;
 
             case OP_ADD:

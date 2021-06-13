@@ -16,6 +16,7 @@
 #define FORMAT_PAIR_CONST_NUM   "%-10s $%d %d\n"
 #define FORMAT_PAIR_CONST_STR   "%-10s $%d %s\n"
 #define FORMAT_TRIPLET          "%-10s $%d $%d $%d\n"
+#define FORMAT_TRIPLET_CMP      "%-10s %d $%d $%d\n"
 
 char *disassemble_instruction(memory_t *mem, instruction_t);
 
@@ -150,6 +151,14 @@ char *disassemble_instruction(memory_t *mem, instruction_t instruction)
         case OP_DIVIDE:
             asprintf(&assembly, FORMAT_TRIPLET,
                      "divide",
+                     instruction.fields.triplet.arg1,
+                     instruction.fields.triplet.arg2,
+                     instruction.fields.triplet.arg3
+                    );
+            break;
+        case OP_EQUAL:
+            asprintf(&assembly, FORMAT_TRIPLET_CMP,
+                     "equal",
                      instruction.fields.triplet.arg1,
                      instruction.fields.triplet.arg2,
                      instruction.fields.triplet.arg3

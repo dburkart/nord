@@ -42,7 +42,13 @@ typedef enum
     // negate <register-out> <register-in>
     OP_NEGATE,
 
+    // -- Logic
+
+    // equal <value-desired> <register-in> <register-in>
+    OP_EQUAL,
+
     // -- Functions
+
     OP_RETURN
 } opcode_t;
 
