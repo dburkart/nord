@@ -52,7 +52,7 @@ void compile_comparison(compile_context_t *context, uint8_t reg, uint8_t opcode,
     instruction_t instruction;
 
     // First, write the false case
-    instruction.opcode = OP_LOADV;
+    instruction.opcode = OP_LOAD;
     instruction.fields.pair.arg1 = reg;
     instruction.fields.pair.arg2 = 0;
     code_block_write(context->binary->code, instruction);
@@ -65,7 +65,7 @@ void compile_comparison(compile_context_t *context, uint8_t reg, uint8_t opcode,
     code_block_write(context->binary->code, instruction);
 
     // Finally, write out the true case
-    instruction.opcode = OP_LOADV;
+    instruction.opcode = OP_LOAD;
     instruction.fields.pair.arg1 = reg;
     instruction.fields.pair.arg2 = 1;
     code_block_write(context->binary->code, instruction);
@@ -90,6 +90,10 @@ uint8_t compile_internal(ast_t *ast, compile_context_t *context)
                     instruction.fields.pair.arg1 = context->rp;
                     instruction.fields.pair.arg2 = right;
                     break;
+                case BANG:
+                    instruction.opcode = OP_NOT;
+                    instruction.fields.pair.arg1 = context->rp;
+                    instruction.fields.pair.arg2 = right;
                 default:
                     ;
             }

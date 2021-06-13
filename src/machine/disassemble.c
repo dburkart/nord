@@ -186,8 +186,16 @@ char *disassemble_instruction(memory_t *mem, instruction_t instruction)
         case OP_NEGATE:
             asprintf(&assembly, FORMAT_PAIR,
                      "negate",
-                     instruction.fields.triplet.arg1,
-                     instruction.fields.triplet.arg3
+                     instruction.fields.pair.arg1,
+                     instruction.fields.pair.arg2
+                    );
+            break;
+
+        case OP_NOT:
+            asprintf(&assembly, FORMAT_PAIR,
+                     "not",
+                     instruction.fields.pair.arg1,
+                     instruction.fields.pair.arg2
                     );
             break;
 

@@ -1,0 +1,2 @@
+loadv      $1 12
+negate     $2 $1

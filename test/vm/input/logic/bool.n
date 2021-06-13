@@ -1,0 +1,10 @@
+var a = 1
+a = a == true
+var b = 0
+b = b == false
+var c = 1.2
+c = !!c
+var d = "Not Empty"
+d = !!d
+var e = ""
+e = !!e

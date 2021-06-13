@@ -9,7 +9,7 @@
    0002 {BOOLEAN:true}
    0003 {BOOLEAN:false}
    0004 {INT:3}
-   0005 {INT:0}
-   0006 {INT:0}
+   0005 {BOOLEAN:false}
+   0006 {BOOLEAN:false}
 
 stack pointer: 0

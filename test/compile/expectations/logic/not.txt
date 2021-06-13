@@ -1,0 +1,2 @@
+set        $1 true
+not        $2 $1

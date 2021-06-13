@@ -1,14 +1,20 @@
 [memory contents]
    0000 {BOOLEAN:false}
    0001 {BOOLEAN:true}
+   0002 {FLOAT:1.200000}
+   0003 {STRING:Not Empty}
+   0004 {STRING:}
+   0005 {NONE}
+   0006 {NONE}
+   0007 {NONE}
 
 [stack contents]
 
 [register contents]
    0001 {BOOLEAN:true}
    0002 {BOOLEAN:true}
-   0003 {BOOLEAN:false}
-   0004 {INT:2}
+   0003 {BOOLEAN:true}
+   0004 {BOOLEAN:true}
    0005 {BOOLEAN:false}
    0006 {BOOLEAN:false}
 

@@ -1,27 +1,27 @@
 loadv      $1 1
 loadv      $2 2
-loadv      $3 0
+set        $3 false
 lt         1 $1 $2
-loadv      $3 1
-loadv      $4 0
+set        $3 true
+set        $4 false
 eq         1 $1 $2
-loadv      $4 1
+set        $4 true
 or         $1 $3 $4
 loadv      $2 1
 loadv      $3 1
-loadv      $4 0
+set        $4 false
 lt         1 $2 $3
-loadv      $4 1
-loadv      $5 0
+set        $4 true
+set        $5 false
 eq         1 $2 $3
-loadv      $5 1
+set        $5 true
 or         $2 $4 $5
 loadv      $3 3
 loadv      $4 2
-loadv      $5 0
+set        $5 false
 lt         1 $3 $4
-loadv      $5 1
-loadv      $6 0
+set        $5 true
+set        $6 false
 eq         1 $3 $4
-loadv      $6 1
+set        $6 true
 or         $3 $5 $6

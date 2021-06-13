@@ -7,10 +7,10 @@
 [stack contents]
 
 [register contents]
-   0001 {INT:0}
-   0002 {INT:1}
-   0003 {INT:1}
+   0001 {BOOLEAN:false}
+   0002 {BOOLEAN:true}
+   0003 {BOOLEAN:true}
    0004 {FLOAT:4.500000}
-   0005 {INT:1}
+   0005 {BOOLEAN:true}
 
 stack pointer: 0

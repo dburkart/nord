@@ -50,6 +50,8 @@ typedef enum
     OP_LESSTHAN,
     // or <register-out> <register-in> <register-in>
     OP_OR,
+    // not <register-out> <register-in>
+    OP_NOT,
 
     // -- Functions
 

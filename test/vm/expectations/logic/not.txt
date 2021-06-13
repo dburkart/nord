@@ -1,7 +1,7 @@
 [memory contents]
    0000 {BOOLEAN:false}
    0001 {BOOLEAN:true}
-   0002 {FLOAT:5.100000}
+   0002 {STRING:}
    0003 {NONE}
 
 [stack contents]
@@ -9,8 +9,12 @@
 [register contents]
    0001 {BOOLEAN:true}
    0002 {BOOLEAN:false}
-   0003 {BOOLEAN:true}
-   0004 {INT:5}
+   0003 {INT:12}
+   0004 {BOOLEAN:false}
    0005 {BOOLEAN:true}
+   0006 {BOOLEAN:true}
+   0007 {STRING:}
+   0008 {BOOLEAN:true}
+   0009 {BOOLEAN:false}
 
 stack pointer: 0

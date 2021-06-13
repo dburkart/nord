@@ -10,10 +10,19 @@
 #include "bytecode.h"
 #include "vm.h"
 
+// Defines to make handling type information less verbose
 #define REG_TYPE3(a, t) vm->registers[instruction.fields.triplet.a].type == t
+#define BOOL2(a) vm->registers[instruction.fields.pair.a].contents.boolean
+#define FLOAT2(a) vm->registers[instruction.fields.pair.a].contents.real
+#define NUM2(a) vm->registers[instruction.fields.pair.a].contents.number
+#define STR2(a) vm->registers[instruction.fields.pair.a].contents.string
 #define NUM3(a) vm->registers[instruction.fields.triplet.a].contents.number
 #define NUM_OR_FLOAT3(a) ((vm->registers[instruction.fields.triplet.a].type == VAL_FLOAT) ? vm->registers[instruction.fields.triplet.a].contents.real : vm->registers[instruction.fields.triplet.a].contents.number)
+#define NUM_OR_FLOAT_OR_BOOL3(a) ((vm->registers[instruction.fields.triplet.a].type == VAL_FLOAT) ? vm->registers[instruction.fields.triplet.a].contents.real : \
+                                 ((vm->registers[instruction.fields.triplet.a].type == VAL_INT) ? vm->registers[instruction.fields.triplet.a].contents.number : \
+                                   vm->registers[instruction.fields.triplet.a].contents.boolean))
 #define IS_NUMBERISH3(a) (vm->registers[instruction.fields.triplet.a].type == VAL_INT || vm->registers[instruction.fields.triplet.a].type == VAL_FLOAT || vm->registers[instruction.fields.triplet.a].type == VAL_BOOLEAN)
+#define IS_NUMBERISH2(a) (vm->registers[instruction.fields.pair.a].type == VAL_INT || vm->registers[instruction.fields.pair.a].type == VAL_FLOAT || vm->registers[instruction.fields.pair.a].type == VAL_BOOLEAN)
 #define STRING3(a) vm->registers[instruction.fields.triplet.a].contents.string
 
 void value_print(value_t v)
@@ -111,7 +120,7 @@ void vm_execute(vm_t *vm)
             case OP_EQUAL:
                 if (IS_NUMBERISH3(arg2) && IS_NUMBERISH3(arg3))
                 {
-                    result.contents.boolean = NUM_OR_FLOAT3(arg2) == NUM_OR_FLOAT3(arg3);
+                    result.contents.boolean = (NUM_OR_FLOAT_OR_BOOL3(arg2) == NUM_OR_FLOAT_OR_BOOL3(arg3));
                 }
                 // If both aren't number-like things, than differing types naturally mean they're not equal
                 else if (vm->registers[instruction.fields.triplet.arg2].type != vm->registers[instruction.fields.triplet.arg3].type)
@@ -215,6 +224,29 @@ void vm_execute(vm_t *vm)
             case OP_NEGATE:
                 result.type = VAL_INT;
                 result.contents.number = -vm->registers[instruction.fields.pair.arg2].contents.number;
+                vm->registers[instruction.fields.pair.arg1] = result;
+                break;
+
+            case OP_NOT:
+                result.type = VAL_BOOLEAN;
+                switch(vm->registers[instruction.fields.pair.arg2].type)
+                {
+                    case VAL_INT:
+                        result.contents.boolean = !NUM2(arg2);
+                        break;
+                    case VAL_FLOAT:
+                        result.contents.boolean = !FLOAT2(arg2);
+                        break;
+                    case VAL_BOOLEAN:
+                        result.contents.boolean = !BOOL2(arg2);
+                        break;
+                    case VAL_NONE:
+                        result.contents.boolean = true;
+                        break;
+                    case VAL_STRING:
+                        result.contents.boolean = (bool)!strlen(STR2(arg2));
+                        break;
+                }
                 vm->registers[instruction.fields.pair.arg1] = result;
                 break;
         }
