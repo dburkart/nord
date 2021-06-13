@@ -292,5 +292,5 @@ int main(int argc, char *argv[])
     printf("Ran %d tests in %lu seconds, with a pass rate of %d%%\n",
             all_passes + all_fails, time(NULL) - start_time, pass_rate
           );
-    return 0;
+    return all_fails;
 }
