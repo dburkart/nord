@@ -129,6 +129,36 @@ void vm_execute(vm_t *vm)
 
                 break;
 
+            case OP_LESSTHAN:
+                if (IS_NUMBERISH3(arg2) && IS_NUMBERISH3(arg3))
+                {
+                    result.contents.boolean = NUM_OR_FLOAT3(arg2) < NUM_OR_FLOAT3(arg3);
+                }
+                else
+                {
+                    // Error?
+                }
+
+                if (result.contents.boolean != instruction.fields.triplet.arg1)
+                    vm->pc += 1;
+
+                break;
+
+            case OP_GREATERTHAN:
+                if (IS_NUMBERISH3(arg2) && IS_NUMBERISH3(arg3))
+                {
+                    result.contents.boolean = NUM_OR_FLOAT3(arg2) > NUM_OR_FLOAT3(arg3);
+                }
+                else
+                {
+                    // Error?
+                }
+
+                if (result.contents.boolean != instruction.fields.triplet.arg1)
+                    vm->pc += 1;
+
+                break;
+
             case OP_ADD:
                 // TODO: Don't assume numbers
                 if (REG_TYPE3(arg2, VAL_FLOAT) || REG_TYPE3(arg3, VAL_FLOAT))

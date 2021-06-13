@@ -158,12 +158,29 @@ char *disassemble_instruction(memory_t *mem, instruction_t instruction)
             break;
         case OP_EQUAL:
             asprintf(&assembly, FORMAT_TRIPLET_CMP,
-                     "equal",
+                     "eq",
                      instruction.fields.triplet.arg1,
                      instruction.fields.triplet.arg2,
                      instruction.fields.triplet.arg3
                     );
             break;
+        case OP_LESSTHAN:
+            asprintf(&assembly, FORMAT_TRIPLET_CMP,
+                     "lt",
+                     instruction.fields.triplet.arg1,
+                     instruction.fields.triplet.arg2,
+                     instruction.fields.triplet.arg3
+                    );
+            break;
+        case OP_GREATERTHAN:
+            asprintf(&assembly, FORMAT_TRIPLET_CMP,
+                     "gt",
+                     instruction.fields.triplet.arg1,
+                     instruction.fields.triplet.arg2,
+                     instruction.fields.triplet.arg3
+                    );
+            break;
+
         // negate <register-out> <register-in>
         case OP_NEGATE:
             asprintf(&assembly, FORMAT_PAIR,

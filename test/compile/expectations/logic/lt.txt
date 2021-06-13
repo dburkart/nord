@@ -1,0 +1,12 @@
+loadv      $1 1
+loadv      $2 2
+loadv      $3 0
+lt         1 $1 $2
+loadv      $3 1
+move       $1 $3
+loadv      $2 2
+loadv      $3 1
+loadv      $4 0
+lt         1 $2 $3
+loadv      $4 1
+move       $2 $4

@@ -1,0 +1,16 @@
+[memory contents]
+   0000 {BOOLEAN:false}
+   0001 {BOOLEAN:true}
+   0002 {FLOAT:5.100000}
+   0003 {NONE}
+
+[stack contents]
+
+[register contents]
+   0001 {INT:1}
+   0002 {INT:0}
+   0003 {INT:1}
+   0004 {INT:5}
+   0005 {INT:1}
+
+stack pointer: 0

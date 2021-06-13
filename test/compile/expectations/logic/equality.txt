@@ -1,6 +1,6 @@
 loadv      $1 1
 loadv      $2 2
 loadv      $3 0
-equal      1 $1 $2
+eq         1 $1 $2
 loadv      $3 1
 move       $1 $3
