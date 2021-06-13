@@ -13,3 +13,7 @@ all: $(SOURCES)
 
 test:
 	make -C test
+
+clean:
+	make -C test clean
+	rm nord

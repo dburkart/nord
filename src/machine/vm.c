@@ -258,6 +258,8 @@ void vm_dump(vm_t *vm)
     printf("[memory contents]\n");
     for (int i = 0; i < vm->memory->capacity; i++)
     {
+        if (vm->memory->contents[i].type == VAL_NONE)
+            break;
         printf("   %04d ", i);
         value_print(vm->memory->contents[i]);
     }

@@ -4,9 +4,6 @@
    0002 {FLOAT:4.200000}
    0003 {FLOAT:4.200000}
    0004 {FLOAT:4.200000}
-   0005 {NONE}
-   0006 {NONE}
-   0007 {NONE}
 
 [stack contents]
 

@@ -2,7 +2,6 @@
    0000 {BOOLEAN:false}
    0001 {BOOLEAN:true}
    0002 {FLOAT:5.100000}
-   0003 {NONE}
 
 [stack contents]
 

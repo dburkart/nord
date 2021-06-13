@@ -21,3 +21,9 @@ compile/run: $(BASE)/src/lex.c $(BASE)/src/lex.h $(BASE)/src/token.c $(BASE)/src
 
 vm/run: $(BASE)/src/lex.c $(BASE)/src/lex.h $(BASE)/src/token.c $(BASE)/src/token.h $(BASE)/src/parse.c $(BASE)/src/parse.h $(BASE)/src/symbol.c $(BASE)/src/compile.c $(BASE)/src/machine/disassemble.c $(BASE)/src/hash.c $(BASE)/src/machine/bytecode.c $(BASE)/src/machine/vm.c vm/run.c
 	$(CC) $(CFLAGS) -I$(BASE)/src $(BASE)/src/lex.c $(BASE)/src/token.c $(BASE)/src/parse.c $(BASE)/src/symbol.c $(BASE)/src/compile.c $(BASE)/src/machine/disassemble.c $(BASE)/src/hash.c $(BASE)/src/machine/bytecode.c $(BASE)/src/machine/binary.c $(BASE)/src/machine/memory.c $(BASE)/src/machine/vm.c vm/run.c -o vm/run
+
+clean:
+	rm lex/run
+	rm parse/run
+	rm compile/run
+	rm vm/run
