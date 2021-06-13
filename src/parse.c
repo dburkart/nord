@@ -31,6 +31,9 @@ void print_ast_internal(scan_context_t *context, ast_t *ast, int indent)
 {
     char *token_val;
 
+    if (ast == NULL)
+        return;
+
     for (int i = 0; i < indent; i++)
     {
         if (i > 0 && i % 2 == 0)
@@ -161,9 +164,7 @@ ast_t *statement_list(scan_context_t* context)
 
     if (current == NULL)
     {
-        free(statements->op.list.statements);
-        free(statements);
-        return NULL;
+        return statements;
     }
 
     statements->op.list.statements[size++] = current;
