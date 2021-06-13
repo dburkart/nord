@@ -11,9 +11,9 @@
 #include "machine/binary.h"
 #include "machine/disassemble.h"
 #include "machine/vm.h"
-#include "compile.h"
-#include "lex.h"
-#include "parse.h"
+#include "compiler/compile.h"
+#include "compiler/lex.h"
+#include "compiler/parse.h"
 
 int main(int argc, char *argv[])
 {

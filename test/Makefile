@@ -10,17 +10,21 @@ all: runner lex/run parse/run compile/run vm/run
 runner: testrunner.c
 	$(CC) $(CFLAGS) -I$(BASE)/src testrunner.c -o testrunner
 
-lex/run: $(BASE)/src/lex.c $(BASE)/src/lex.h $(BASE)/src/token.c $(BASE)/src/token.h lex/run.c
-	$(CC) $(CFLAGS) -I$(BASE)/src $(BASE)/src/lex.c $(BASE)/src/token.c lex/run.c -o lex/run
+lex/run:
+	$(CC) -c $(CFLAGS) -I$(BASE)/src $@.c -o $@.o
+	$(CC) $(CFLAGS) -I$(BASE)/src -o $@ $(OBJECTS) $@.o
 
-parse/run: $(BASE)/src/lex.c $(BASE)/src/lex.h $(BASE)/src/token.c $(BASE)/src/token.h $(BASE)/src/parse.c $(BASE)/src/parse.h parse/run.c
-	$(CC) $(CFLAGS) -I$(BASE)/src $(BASE)/src/lex.c $(BASE)/src/token.c $(BASE)/src/parse.c parse/run.c -o parse/run
+parse/run:
+	$(CC) -c $(CFLAGS) -I$(BASE)/src $@.c -o $@.o
+	$(CC) $(CFLAGS) -I$(BASE)/src -o $@ $(OBJECTS) $@.o
 
-compile/run: $(BASE)/src/lex.c $(BASE)/src/lex.h $(BASE)/src/token.c $(BASE)/src/token.h $(BASE)/src/parse.c $(BASE)/src/parse.h $(BASE)/src/symbol.c $(BASE)/src/compile.c $(BASE)/src/machine/disassemble.c $(BASE)/src/hash.c $(BASE)/src/machine/bytecode.c compile/run.c
-	$(CC) $(CFLAGS) -I$(BASE)/src $(BASE)/src/lex.c $(BASE)/src/token.c $(BASE)/src/parse.c $(BASE)/src/symbol.c $(BASE)/src/compile.c $(BASE)/src/machine/disassemble.c $(BASE)/src/hash.c $(BASE)/src/machine/bytecode.c $(BASE)/src/machine/binary.c $(BASE)/src/machine/memory.c compile/run.c -o compile/run
+compile/run:
+	$(CC) -c $(CFLAGS) -I$(BASE)/src $@.c -o $@.o
+	$(CC) $(CFLAGS) -I$(BASE)/src -o $@ $(OBJECTS) $@.o
 
-vm/run: $(BASE)/src/lex.c $(BASE)/src/lex.h $(BASE)/src/token.c $(BASE)/src/token.h $(BASE)/src/parse.c $(BASE)/src/parse.h $(BASE)/src/symbol.c $(BASE)/src/compile.c $(BASE)/src/machine/disassemble.c $(BASE)/src/hash.c $(BASE)/src/machine/bytecode.c $(BASE)/src/machine/vm.c vm/run.c
-	$(CC) $(CFLAGS) -I$(BASE)/src $(BASE)/src/lex.c $(BASE)/src/token.c $(BASE)/src/parse.c $(BASE)/src/symbol.c $(BASE)/src/compile.c $(BASE)/src/machine/disassemble.c $(BASE)/src/hash.c $(BASE)/src/machine/bytecode.c $(BASE)/src/machine/binary.c $(BASE)/src/machine/memory.c $(BASE)/src/machine/vm.c vm/run.c -o vm/run
+vm/run:
+	$(CC) -c $(CFLAGS) -I$(BASE)/src $@.c -o $@.o
+	$(CC) $(CFLAGS) -I$(BASE)/src -o $@ $(OBJECTS) $@.o
 
 clean:
 	rm lex/run

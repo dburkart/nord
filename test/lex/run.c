@@ -13,7 +13,7 @@
 
 #include <stdio.h>
 
-#include "lex.h"
+#include "compiler/lex.h"
 
 int main(int argc, char *argv[])
 {

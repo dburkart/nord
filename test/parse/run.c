@@ -8,8 +8,8 @@
 
 #include <stdio.h>
 
-#include "lex.h"
-#include "parse.h"
+#include "compiler/lex.h"
+#include "compiler/parse.h"
 
 int main(int argc, char *argv[])
 {

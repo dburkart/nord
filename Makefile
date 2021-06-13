@@ -1,19 +1,24 @@
-include Makefile.shared
+BASE=.
 
-SOURCES=src/token.c src/lex.c src/parse.c src/machine/bytecode.c src/hash.c \
-		src/symbol.c src/compile.c src/machine/memory.c src/machine/vm.c \
-		src/machine/disassemble.c src/machine/binary.c src/main.c
+include Makefile.shared
 
 BINARY=nord
 
 .PHONY: test
 
-all: $(SOURCES)
-	$(CC) $(CFLAGS) $(SOURCES) -o $(BINARY)
+all: $(OBJECTS) $(BINARY)
 
-test:
+$(OBJECTS): %.o: %.c
+	$(CC) -c $(CFLAGS) $< -o $@
+
+$(BINARY): $(BASE)/src/main.c
+	$(CC) -c $(CFLAGS) $(BASE)/src/main.c -o $(BASE)/src/main.o
+	$(CC) $(CFLAGS) -o $(BINARY) $(OBJECTS) $(BASE)/src/main.o
+
+test: $(OBJECTS)
 	make -C test
 
 clean:
 	make -C test clean
 	rm nord
+	rm $(OBJECTS)

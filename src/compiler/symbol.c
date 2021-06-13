@@ -7,7 +7,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "hash.h"
+#include "util/hash.h"
 #include "symbol.h"
 
 symbol_map_t *symbol_map_create(void)

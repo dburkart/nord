@@ -1,2 +1,16 @@
 CC=clang
 CFLAGS=-Werror -std=gnu99 -Isrc
+
+SOURCES=$(BASE)/src/compiler/token.c \
+        $(BASE)/src/compiler/lex.c \
+        $(BASE)/src/compiler/parse.c \
+        $(BASE)/src/machine/bytecode.c \
+        $(BASE)/src/util/hash.c \
+        $(BASE)/src/compiler/symbol.c \
+        $(BASE)/src/compiler/compile.c \
+        $(BASE)/src/machine/memory.c \
+        $(BASE)/src/machine/vm.c \
+        $(BASE)/src/machine/disassemble.c \
+        $(BASE)/src/machine/binary.c
+
+OBJECTS=$(SOURCES:.c=.o)

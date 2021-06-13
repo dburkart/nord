@@ -2,6 +2,7 @@
 nord
 testrunner
 run
+*.o
 
 # macOS-related ignores
 .DS_Store
