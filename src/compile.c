@@ -170,8 +170,8 @@ uint8_t compile_internal(ast_t *ast, compile_context_t *context)
                     instruction.fields.pair.arg2 = 0;
                     code_block_write(context->binary->code, instruction);
                     // Now, write out the equal instruction
-                    instruction.opcode = OP_GREATERTHAN;
-                    instruction.fields.triplet.arg1 = 1;
+                    instruction.opcode = OP_LESSTHAN;
+                    instruction.fields.triplet.arg1 = 0;
                     instruction.fields.triplet.arg2 = left;
                     instruction.fields.triplet.arg3 = right;
                     code_block_write(context->binary->code, instruction);
