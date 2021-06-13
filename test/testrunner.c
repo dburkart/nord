@@ -4,6 +4,8 @@
  * SPDX-License-Identifier: BSD-2-Clause
  */
 
+#define _BSD_SRC
+
 #include <dirent.h>
 #include <fcntl.h>
 #include <stdbool.h>

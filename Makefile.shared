@@ -1,2 +1,2 @@
 CC=clang
-CFLAGS=-Werror -std=c99 -Isrc
+CFLAGS=-Werror -std=gnu99 -Isrc
