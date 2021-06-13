@@ -7,7 +7,8 @@
 #ifndef COMMON_H
 #define COMMON_H
 
-#define _BSD_SRC
-#define _GNU_SRC
+#ifndef _BSD_SRC
+#define _BSD_SRC 1
+#endif
 
 #endif
