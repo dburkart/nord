@@ -1,8 +1,10 @@
 Nord's bytecode is a simplified RISC assembly-like instruction set. It's
 inspired by MIPS and Lua. The first argument to an instruction (if applicable)
 is the destination register. Registers are denoted by a dollar-sign ("$")
-followed by a number. Addresses are written as the at-symbol followed by
+followed by a number. Addresses are written as the at-symbol ("@") followed by
 the memory address.
+
+For more information on how addresses work, see docs/vm.txt
 
 Moving data in / out of registers
 =================================

@@ -1,0 +1,30 @@
+The nord virtual machine is a basic execution loop that emulates a simplified
+machine with the following characteristics:
+
+    - 256 numbered registers, which each hold a "value" (more on this below)
+    - pseudo memory which is a dynamic array of values
+    - stack memory which is also a dynamic array of values
+
+Values
+======
+
+A value in the virtual machine is a composite type which can be any of the
+following:
+
+    - integer
+    - float
+    - boolean
+    - string
+
+A value object contains the type information, and either the value or a pointer
+to the value.
+
+Pseudo Memory
+=============
+
+Currently, all memory represented in the virtual machine is "pseudo memory".
+This is essentially a dynamic array of values, the index of which is the
+"address". So the value indicated by @2 is the 3rd value in the machine's
+main memory.
+
+Note: @0 and @1 are special addresses which hold false and true respectively.
