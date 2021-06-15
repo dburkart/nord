@@ -1,5 +1,4 @@
-# Grammar reference for Nord. Documented in roughly BNF form.
-
+# Grammar reference for Nord. Documented in roughly BNF.
 program         -> statement_list ;
 
 statement_list  -> statement EOF

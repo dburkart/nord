@@ -18,9 +18,19 @@
  */
 bool is_reserved(char c)
 {
-    if (c == '(' || c == ')' || c == ':' || c == ',' || c == '*' || c == '+' ||
-        c == '/' || c == '-' || c == '=')
-        return true;
+    switch (c)
+    {
+        case '(':
+        case ')':
+        case ':':
+        case ',':
+        case '*':
+        case '+':
+        case '/':
+        case '-':
+        case '=':
+            return true;
+    }
     return false;
 }
 
@@ -37,65 +47,16 @@ bool is_whitespace(char c)
 ///---- Matching functions
 
 /*
- * Match 'var' keyword
+ * Match a keyword
  */
-int match_var(const char *c)
+int match_keyword(const char *to_match, const char *c, int len)
 {
-    if (*c != 'v') return 0;
-    if (*(c+1) != 'a') return 0;
-    if (*(c+2) != 'r') return 0;
+    if (memcmp(to_match, c, len) == 0)
+    {
+        return len;
+    }
 
-    return 3;
-}
-
-/*
- * Match 'true' keyword
- */
-int match_true(const char *c)
-{
-    if (*c != 't') return 0;
-    if (*(c+1) != 'r') return 0;
-    if (*(c+2) != 'u') return 0;
-    if (*(c+3) != 'e') return 0;
-
-    return 4;
-}
-
-/*
- * Match 'false' keyword
- */
-int match_false(const char *c)
-{
-    if (*c != 'f') return 0;
-    if (*(c+1) != 'a') return 0;
-    if (*(c+2) != 'l') return 0;
-    if (*(c+3) != 's') return 0;
-    if (*(c+4) != 'e') return 0;
-
-    return 5;
-}
-
-/*
- * Match 'nil' keyword
- */
-int match_nil(const char *c)
-{
-    if (*c != 'n') return 0;
-    if (*(c+1) != 'i') return 0;
-    if (*(c+2) != 'l') return 0;
-
-    return 3;
-}
-
-/*
- * Match 'fn' keyword
- */
-int match_fn(const char *c)
-{
-    if (*c != 'f') return 0;
-    if (*(c+1) != 'n') return 0;
-
-    return 2;
+    return 0;
 }
 
 /*
@@ -331,35 +292,34 @@ token_t peek(scan_context_t *context)
                     break;
                 }
             case 'f':
-                advance = match_fn(c);
-                if (advance)
-                {
+                if (*(c + 1) == 'n') {
+                    advance = 2;
                     t.type = FUNCTION;
                     break;
                 }
 
-                advance = match_false(c);
+                advance = match_keyword("false", c, 5);
                 if (advance)
                 {
                     t.type = FALSE;
                     break;
                 }
             case 'n':
-                advance = match_nil(c);
+                advance = match_keyword("nil", c, 3);
                 if (advance)
                 {
                     t.type = NIL;
                     break;
                 }
             case 't':
-                advance = match_true(c);
+                advance = match_keyword("true", c, 4);
                 if (advance)
                 {
                     t.type = TRUE;
                     break;
                 }
             case 'v':
-                advance = match_var(c);
+                advance = match_keyword("var", c, 3);
                 if (advance)
                 {
                     t.type = VAR;
