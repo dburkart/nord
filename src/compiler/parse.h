@@ -12,6 +12,12 @@
 #include "token.h"
 #include "lex.h"
 
+typedef struct
+{
+    uint64_t start;
+    uint64_t end;
+} location_t;
+
 // Data structure representing a node in our abstract syntax tree.
 typedef struct expr_t
 {
@@ -63,6 +69,8 @@ typedef struct expr_t
 
         struct expr_t *group;
     } op;
+
+    location_t location;
 } ast_t;
 
 ast_t *parse(scan_context_t *);

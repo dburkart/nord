@@ -249,6 +249,8 @@ ast_t *variable_decl(scan_context_t *context)
     }
 
     left = make_declare_expr(var_type, token_value(context, name), right);
+    left->location.start = var_type.start;
+    left->location.end = (right) ? right->location.end : name.end;
 
     return left;
 }
@@ -280,6 +282,8 @@ ast_t *assignment(scan_context_t *context)
 
     ast_t *value = expression(context);
     left = make_assign_expr(token_value(context, name), value);
+    left->location.start = name.start;
+    left->location.end = name.end;
 
     return left;
 }
@@ -292,7 +296,10 @@ ast_t *equality(scan_context_t *context)
     {
         token_t operator = accept(context);
         ast_t *right = comparison(context);
-        left = make_binary_expr(left, operator, right);
+        ast_t *new_left = make_binary_expr(left, operator, right);
+        new_left->location.start = left->location.start;
+        new_left->location.end = right->location.end;
+        left = new_left;
     }
 
     return left;
@@ -306,7 +313,10 @@ ast_t *comparison(scan_context_t *context)
     {
         token_t operator = accept(context);
         ast_t *right = term(context);
-        left = make_binary_expr(left, operator, right);
+        ast_t *new_left = make_binary_expr(left, operator, right);
+        new_left->location.start = left->location.start;
+        new_left->location.end = right->location.end;
+        left = new_left;
     }
 
     return left;
@@ -320,7 +330,10 @@ ast_t *term(scan_context_t *context)
     {
         token_t operator = accept(context);
         ast_t *right = term_md(context);
-        left = make_binary_expr(left, operator, right);
+        ast_t *new_left = make_binary_expr(left, operator, right);
+        new_left->location.start = left->location.start;
+        new_left->location.end = right->location.end;
+        left = new_left;
     }
 
     return left;
@@ -334,7 +347,10 @@ ast_t *term_md(scan_context_t *context)
     {
         token_t operator = accept(context);
         ast_t *right = unary(context);
-        left = make_binary_expr(left, operator, right);
+        ast_t *new_left = make_binary_expr(left, operator, right);
+        new_left->location.start = left->location.start;
+        new_left->location.end = right->location.end;
+        left = new_left;
     }
 
     return left;
@@ -346,7 +362,10 @@ ast_t *unary(scan_context_t *context)
     {
         token_t operator = accept(context);
         ast_t *operand = unary(context);
-        return make_unary_expr(operator, operand);
+        ast_t *unary = make_unary_expr(operator, operand);
+        unary->location.start = operator.start;
+        unary->location.end = operand->location.end;
+        return unary;
     }
     else
     {
@@ -360,21 +379,27 @@ ast_t *primary(scan_context_t *context)
 {
     if (match(context, 6, IDENTIFIER, NUMBER, FLOAT, STRING, TRUE, FALSE, NIL))
     {
-        ast_t *literal = make_literal_expr(accept(context));
+        token_t tok = accept(context);
+        ast_t *literal = make_literal_expr(tok);
         literal->op.literal.value = token_value(context, literal->op.literal.token);
+        literal->location.start = tok.start;
+        literal->location.end = tok.end;
         return literal;
     }
 
     if (peek(context).type == L_PAREN)
     {
         // Consume the parenthesis
-        accept(context);
+        token_t paren = accept(context);
 
         ast_t *expr = expression(context);
+        expr->location.start = paren.start;
 
-        token_t r_paren = accept(context);
+        paren = accept(context);
         // FIXME
-        assert(r_paren.type == R_PAREN);
+        assert(paren.type == R_PAREN);
+
+        expr->location.end = paren.end;
 
         return make_group_expr(expr);
     }
