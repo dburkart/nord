@@ -1,0 +1,60 @@
+Nord's bytecode is a simplified RISC assembly-like instruction set. It's
+inspired by MIPS and Lua. The first argument to an instruction (if applicable)
+is the destination register. Registers are denoted by a dollar-sign ("$")
+followed by a number. Addresses are written as the at-symbol followed by
+the memory address.
+
+Moving data in / out of registers
+=================================
+
+# Load the value at <address> into register <dest>
+load $<dest> @<address>
+
+# Load the wide value specified by <immediate> into register <dest>
+loadv $<dest> <immediate>
+
+# Pseudo instruction. When assembled, this will take the value specified,
+# store it in the binary's data section, and write out the load instruction.
+set $<dest> <value>
+
+# Move instruction from <src> to <dest>
+move $<dest> $<src>
+
+Arithmetic
+==========
+
+# Add the value at <reg-1> to <reg-2> and put the result in <dest>
+add $<dest> $<reg-1> $<reg-2>
+
+# Subtract the value at <reg-2> from <reg-1> and put the result in <dest>
+subtract $<dest> $<reg-1> $<reg-2>
+
+# Multiply the value at <reg-1> with <reg-2> and put the result in <dest>
+multiply $<dest> $<reg-1> $<reg-2>
+
+# Divide the value at <reg-1> by <reg-2> and put the result in <dest>
+divide $<dest> $<reg-1> $<reg-2>
+
+# Negate the value at <reg-1> and put the result in <dest>
+negate $<dest> $<reg-1>
+
+Logic
+=====
+
+The idea for these comparison functions take wholesale from Lua.
+
+# Compare the values in <reg-2> and <reg-3> and if the equality result matches
+# <reg-1>, execute the next instruction. Otherwise jump over the next 
+# instruction.
+eq $<reg-1> $<reg-2> $<reg-3>
+
+# Compare the values in <reg-2> and <reg-3> and if the '<' result matches
+# <reg-1>, execute the next instruction. Otherwise jump over the next
+# instruction.
+lt $<reg-1> $<reg-2> $<reg-3>
+
+# Logical or. Put the result of <reg-1> || <reg-2> in <dest>
+or $<reg-1> $<reg-2> $<reg-3>
+
+# Logical not. Put the result of !<reg-1> in <dest>
+not $<dest> $<reg-1>
