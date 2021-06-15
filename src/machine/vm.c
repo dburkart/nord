@@ -52,7 +52,7 @@ vm_t *vm_create(binary_t *binary)
     vm_t *vm = malloc(sizeof(vm_t));
 
     // Set up main memory
-    vm->memory = binary->text;
+    vm->memory = binary->data;
 
     // Set up the stack
     vm->stack = memory_create();

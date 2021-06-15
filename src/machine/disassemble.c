@@ -30,7 +30,7 @@ char *disassemble(binary_t *binary)
 
     for (int i = 0; i < binary->code->size; i++)
     {
-        char *new_instruction = disassemble_instruction(binary->text, binary->code->code[i]);
+        char *new_instruction = disassemble_instruction(binary->data, binary->code->code[i]);
 
         if (new_instruction == NULL)
             continue;

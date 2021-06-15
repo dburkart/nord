@@ -23,16 +23,18 @@ typedef struct
     // The 'sections' structure is used for serialization / deserialization of
     // binaries. When creating a new binary, this field can be ignored.
     struct {
-        uint32_t text_offset;
+        uint32_t data_offset;
         uint32_t code_offset;
         uint32_t reserved_1;
         uint32_t reserved_2;
     } sections;
     // The following fields are filled in on deserialization
-    memory_t *text;
+    memory_t *data;
     code_block_t *code;
 } binary_t;
 
 binary_t *binary_create(void);
+binary_t *binary_load(const char *);
+void binary_write(binary_t *binary, const char *);
 
 #endif

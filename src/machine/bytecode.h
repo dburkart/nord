@@ -59,7 +59,7 @@ typedef enum
 } opcode_t;
 
 // An instruction is an opcode paired with several operands
-typedef struct __attribute__((__packed__))
+typedef struct
 {
     uint8_t opcode;
     union {

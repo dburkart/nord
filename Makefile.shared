@@ -1,5 +1,5 @@
 CC=clang
-CFLAGS=-Werror -std=gnu99 -Isrc
+CFLAGS=-Werror -Isrc -std=gnu99
 
 SOURCES=$(BASE)/src/compiler/token.c \
         $(BASE)/src/compiler/lex.c \

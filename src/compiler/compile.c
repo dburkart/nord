@@ -27,13 +27,13 @@ compile_context_t *context_create(void)
 
     context->symbols = symbol_map_create();
     context->binary = binary_create();
-    context->binary->text = memory_create();
+    context->binary->data = memory_create();
     context->binary->code = code_block_create();
     context->rp = 1;
 
     // Set up true and false
-    memory_set(context->binary->text, 0, (value_t){VAL_BOOLEAN, false});
-    memory_set(context->binary->text, 1, (value_t){VAL_BOOLEAN, true});
+    memory_set(context->binary->data, 0, (value_t){VAL_BOOLEAN, false});
+    memory_set(context->binary->data, 1, (value_t){VAL_BOOLEAN, true});
 
     context->mp = 2;
 
@@ -269,7 +269,7 @@ uint8_t compile_internal(ast_t *ast, compile_context_t *context)
                 // First, set the constant in the text section of our binary
                 val.type = VAL_FLOAT;
                 val.contents.real = atof(ast->op.literal.value);
-                memory_set(context->binary->text, context->mp, val);
+                memory_set(context->binary->data, context->mp, val);
 
                 instruction.opcode = OP_LOAD;
                 instruction.fields.pair.arg1 = result;
@@ -286,7 +286,7 @@ uint8_t compile_internal(ast_t *ast, compile_context_t *context)
                 // First, set the constant in the text section of our binary
                 val.type = VAL_STRING;
                 val.contents.string = ast->op.literal.value;
-                memory_set(context->binary->text, context->mp, val);
+                memory_set(context->binary->data, context->mp, val);
 
                 // Now, write out an instruction to load it into a register
                 instruction.opcode = OP_LOAD;

@@ -4,14 +4,14 @@ include Makefile.shared
 
 BINARY=nord
 
-.PHONY: test
+.PHONY: test $(BINARY)
 
 all: $(OBJECTS) $(BINARY)
 
 $(OBJECTS): %.o: %.c
 	$(CC) -c $(CFLAGS) $< -o $@
 
-$(BINARY): $(BASE)/src/main.c
+$(BINARY):
 	$(CC) -c $(CFLAGS) $(BASE)/src/main.c -o $(BASE)/src/main.o
 	$(CC) $(CFLAGS) -o $(BINARY) $(OBJECTS) $(BASE)/src/main.o
 
