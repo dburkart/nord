@@ -1,0 +1,5 @@
+(null):1:20: Mismatched parenthesis. Expected ")", but found "
+".
+
+var foo = (1 + 2 * 3
+                    ^ Found here.

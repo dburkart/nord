@@ -1,0 +1,4 @@
+compile/input/errors/undef01.n:1:0: Use of undeclared identifier "foo"
+
+foo = 100
+^~~ Found here.

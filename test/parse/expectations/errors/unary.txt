@@ -1,0 +1,4 @@
+(null):1:0: Unexpected token. Expected keyword, number, string, or identifier, but found "1foobar"
+
+1foobar = 100
+^~~~~~~ Found here.
