@@ -1,4 +1,4 @@
-(null):1:4: Expected identifier in declaration, but found "1foobar".
+parse/input/errors/invalid.n:1:4: Expected identifier in declaration, but found "1foobar".
 
 var 1foobar = 100
     ^~~~~~~ Found here.
