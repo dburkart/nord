@@ -79,7 +79,7 @@ void compile_comparison(compile_context_t *context, uint8_t reg, uint8_t opcode,
 uint8_t compile_internal(ast_t *ast, compile_context_t *context)
 {
     uint8_t result = 0, left, right;
-    sym_pointer_t loc;
+    symbol_t sym;
     instruction_t instruction;
     value_t val;
 
@@ -207,7 +207,7 @@ uint8_t compile_internal(ast_t *ast, compile_context_t *context)
             // Handle declaration with no assignment
             if (ast->op.declare.initial_value == NULL)
             {
-                loc.type = LOC_NONE;
+                sym.location.type = LOC_NONE;
             }
             else
             {
@@ -219,18 +219,20 @@ uint8_t compile_internal(ast_t *ast, compile_context_t *context)
                     instruction.fields.pair.arg1 = context->rp;
                     instruction.fields.pair.arg2 = result;
                     code_block_write(context->binary->code, instruction);
-                    loc.address = context->rp;
+                    sym.location.address = context->rp;
                 }
                 else
                 {
-                    loc.address = result;
+                    sym.location.address = result;
                 }
 
-                loc.type = LOC_REGISTER;
+                sym.location.type = LOC_REGISTER;
                 context->rp += 1;
             }
 
-            symbol_map_set(context->symbols, ast->op.declare.name, loc);
+            sym.name = ast->op.declare.name;
+            sym.type = SYM_VAR;
+            symbol_map_set(context->symbols, sym);
             break;
 
         case ASSIGN:
@@ -242,9 +244,9 @@ uint8_t compile_internal(ast_t *ast, compile_context_t *context)
             // simply change the location of the variable in the symbol map.
             //
             // TODO: Handle variables in memory
-            loc = symbol_map_get(context->symbols, ast->op.assign.name);
+            sym = symbol_map_get(context->symbols, ast->op.assign.name);
 
-            if (loc.type == LOC_UNDEF)
+            if (sym.location.type == LOC_UNDEF)
             {
                 char *error;
                 location_t loc = {ast->location.start, ast->location.end};
@@ -254,7 +256,7 @@ uint8_t compile_internal(ast_t *ast, compile_context_t *context)
             }
 
             instruction.opcode = OP_MOVE;
-            instruction.fields.pair.arg1 = loc.address;
+            instruction.fields.pair.arg1 = sym.location.address;
             instruction.fields.pair.arg2 = result;
 
             code_block_write(context->binary->code, instruction);
@@ -309,8 +311,8 @@ uint8_t compile_internal(ast_t *ast, compile_context_t *context)
 
             if (ast->op.literal.token.type == IDENTIFIER)
             {
-                loc = symbol_map_get(context->symbols, ast->op.literal.value);
-                if (loc.type == LOC_UNDEF)
+                sym = symbol_map_get(context->symbols, ast->op.literal.value);
+                if (sym.location.type == LOC_UNDEF)
                 {
                     char *error;
                     location_t loc = {ast->location.start, ast->location.end};
@@ -319,7 +321,7 @@ uint8_t compile_internal(ast_t *ast, compile_context_t *context)
                     exit(1);
                 }
                 // TODO: Handle memory addresses
-                result = loc.address;
+                result = sym.location.address;
             }
 
             if (ast->op.literal.token.type == TRUE || ast->op.literal.token.type == FALSE)

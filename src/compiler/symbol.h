@@ -7,6 +7,11 @@
 #ifndef SYMBOL_H
 #define SYMBOL_H
 
+typedef enum {
+    SYM_VAR,
+    SYM_FN
+} sym_type_e;
+
 // Location struct for a symbol. Details whether the symbol is in a register
 // or in memory, and where.
 typedef struct
@@ -26,6 +31,7 @@ typedef struct
 typedef struct
 {
     char *name;
+    sym_type_e type;
     sym_pointer_t location;
 } symbol_t;
 
@@ -42,7 +48,7 @@ symbol_map_t *symbol_map_create(void);
 void symbol_map_destroy(symbol_map_t *);
 
 // Adding / getting items
-void symbol_map_set(symbol_map_t *, char *, sym_pointer_t);
-sym_pointer_t symbol_map_get(symbol_map_t *, char *);
+void symbol_map_set(symbol_map_t *, symbol_t);
+symbol_t symbol_map_get(symbol_map_t *, char *);
 
 #endif

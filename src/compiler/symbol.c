@@ -28,7 +28,7 @@ void symbol_map_destroy(symbol_map_t *symbol_map)
     free(symbol_map);
 }
 
-void symbol_map_set(symbol_map_t *symbol_map, char *name, sym_pointer_t p)
+void symbol_map_set(symbol_map_t *symbol_map, symbol_t symbol)
 {
     // When we are 50% full or more, we grow the map. Why 50%? We never want
     // our hash map to get too full since that would result in more collisions
@@ -56,10 +56,9 @@ void symbol_map_set(symbol_map_t *symbol_map, char *name, sym_pointer_t p)
         symbol_map->items = new_items;
     }
 
-    symbol_t symbol = {name, p};
     // Because our capacity will always be a power of 2, we can use a bitwise
     // AND to compute modulo.
-    uint32_t index = pjw_hash(name) & (symbol_map->capacity - 1);
+    uint32_t index = pjw_hash(symbol.name) & (symbol_map->capacity - 1);
 
     // Collision handling, simply look for the next free spot
     while (symbol_map->items[index].name != NULL)
@@ -71,13 +70,13 @@ void symbol_map_set(symbol_map_t *symbol_map, char *name, sym_pointer_t p)
     symbol_map->size += 1;
 }
 
-sym_pointer_t symbol_map_get(symbol_map_t *symbol_map, char *name)
+symbol_t symbol_map_get(symbol_map_t *symbol_map, char *name)
 {
     uint32_t index = pjw_hash(name) & (symbol_map->capacity - 1);
     symbol_t symbol = symbol_map->items[index];
 
     if (symbol.location.type == LOC_UNDEF)
-        return symbol.location;
+        return symbol;
 
     // If we have a collision, advance until we find the correct symbol
     while (strcmp(symbol.name, name))
@@ -87,5 +86,5 @@ sym_pointer_t symbol_map_get(symbol_map_t *symbol_map, char *name)
         symbol = symbol_map->items[index];
     }
 
-    return symbol.location;
+    return symbol;
 }
