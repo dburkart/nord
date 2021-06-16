@@ -75,7 +75,7 @@ void compile_comparison(compile_context_t *context, uint8_t reg, uint8_t opcode,
 uint8_t compile_internal(ast_t *ast, compile_context_t *context)
 {
     uint8_t result = 0, left, right;
-    location_t loc;
+    sym_pointer_t loc;
     instruction_t instruction;
     value_t val;
 

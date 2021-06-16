@@ -28,7 +28,7 @@ void symbol_map_destroy(symbol_map_t *symbol_map)
     free(symbol_map);
 }
 
-void symbol_map_set(symbol_map_t *symbol_map, char *name, location_t loc)
+void symbol_map_set(symbol_map_t *symbol_map, char *name, sym_pointer_t p)
 {
     // When we are 50% full or more, we grow the map. Why 50%? We never want
     // our hash map to get too full since that would result in more collisions
@@ -56,7 +56,7 @@ void symbol_map_set(symbol_map_t *symbol_map, char *name, location_t loc)
         symbol_map->items = new_items;
     }
 
-    symbol_t symbol = {name, loc};
+    symbol_t symbol = {name, p};
     // Because our capacity will always be a power of 2, we can use a bitwise
     // AND to compute modulo.
     uint32_t index = pjw_hash(name) & (symbol_map->capacity - 1);
@@ -71,9 +71,7 @@ void symbol_map_set(symbol_map_t *symbol_map, char *name, location_t loc)
     symbol_map->size += 1;
 }
 
-#include <stdio.h>
-
-location_t symbol_map_get(symbol_map_t *symbol_map, char *name)
+sym_pointer_t symbol_map_get(symbol_map_t *symbol_map, char *name)
 {
     uint32_t index = pjw_hash(name) & (symbol_map->capacity - 1);
     symbol_t symbol = symbol_map->items[index];

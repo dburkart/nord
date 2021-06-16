@@ -20,13 +20,13 @@ typedef struct
     } type;
 
     uint32_t address;
-} location_t;
+} sym_pointer_t;
 
 // Symbol struct, contains the symbol name and location
 typedef struct
 {
     char *name;
-    location_t location;
+    sym_pointer_t location;
 } symbol_t;
 
 // Symbol hash map, containing an array of symbols
@@ -42,7 +42,7 @@ symbol_map_t *symbol_map_create(void);
 void symbol_map_destroy(symbol_map_t *);
 
 // Adding / getting items
-void symbol_map_set(symbol_map_t *, char *, location_t);
-location_t symbol_map_get(symbol_map_t *, char *);
+void symbol_map_set(symbol_map_t *, char *, sym_pointer_t);
+sym_pointer_t symbol_map_get(symbol_map_t *, char *);
 
 #endif

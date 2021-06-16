@@ -20,5 +20,6 @@ test: $(OBJECTS)
 
 clean:
 	make -C test clean
-	rm nord
-	rm $(OBJECTS)
+	rm -f nord
+	rm -f src/main.o
+	rm -f $(OBJECTS)

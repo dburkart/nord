@@ -14,6 +14,7 @@
 
 // State for a single instance of a lexical scanner.
 typedef struct {
+    char *name;
     char *buffer;
     uint64_t position;
     token_t previous;
@@ -32,6 +33,6 @@ void backup(scan_context_t *);
 char *token_value(scan_context_t *, token_t);
 
 // Scan an input string, and return a list of tokens.
-token_list_t scan_input(char *);
+token_list_t scan_input(char *, char *);
 
 #endif

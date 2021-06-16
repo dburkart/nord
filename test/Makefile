@@ -27,7 +27,7 @@ vm/run:
 	$(CC) $(CFLAGS) -I$(BASE)/src -o $@ $(OBJECTS) $@.o
 
 clean:
-	rm lex/run
-	rm parse/run
-	rm compile/run
-	rm vm/run
+	rm -f lex/run{,.o}
+	rm -f parse/run{,.o}
+	rm -f compile/run{,.o}
+	rm -f vm/run{,.o}

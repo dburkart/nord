@@ -436,12 +436,12 @@ char *token_value(scan_context_t *context, token_t t)
  * Scan a string, and return a list of corresponding tokens. This is primarily
  * for testing purposes.
  */
-token_list_t scan_input(char *input)
+token_list_t scan_input(char *path, char *input)
 {
     // We just create an arbitrarily-sized token list to begin with
     token_list_t tokens = token_list_create(2);
     token_t t;
-    scan_context_t context = {input, 0};
+    scan_context_t context = {path, input, 0};
 
     do {
         t = accept(&context);

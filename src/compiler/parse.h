@@ -11,12 +11,7 @@
 
 #include "token.h"
 #include "lex.h"
-
-typedef struct
-{
-    uint64_t start;
-    uint64_t end;
-} location_t;
+#include "util/location.h"
 
 // Data structure representing a node in our abstract syntax tree.
 typedef struct expr_t

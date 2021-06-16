@@ -3,6 +3,7 @@ nord
 testrunner
 run
 *.o
+*.dSYM
 
 # macOS-related ignores
 .DS_Store

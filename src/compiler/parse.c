@@ -8,6 +8,7 @@
 #include <stdio.h>
 
 #include "parse.h"
+#include "util/error.h"
 
 // Forward declarations
 ast_t *statement_list(scan_context_t *);
@@ -394,12 +395,17 @@ ast_t *primary(scan_context_t *context)
 
         ast_t *expr = expression(context);
         expr->location.start = paren.start;
-
         paren = accept(context);
-        // FIXME
-        assert(paren.type == R_PAREN);
-
         expr->location.end = paren.end;
+
+        if (paren.type != R_PAREN)
+        {
+            char *error;
+            location_t loc = {paren.start, paren.end};
+            asprintf(&error, "Mismatched parenthesis. Expected ')', but found '%s'.", token_value(context, paren));
+            printf("%s", format_error(context->name, context->buffer, error, loc));
+            exit(1);
+        }
 
         return make_group_expr(expr);
     }
