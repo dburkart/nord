@@ -11,9 +11,12 @@
 #include "util/error.h"
 
 // Forward declarations
+ast_t *statement_block(scan_context_t *);
 ast_t *statement_list(scan_context_t *);
 ast_t *statement(scan_context_t *);
+ast_t *function(scan_context_t *);
 ast_t *variable_decl(scan_context_t *);
+ast_t *expression_list(scan_context_t *);
 ast_t *expression(scan_context_t *);
 ast_t *equality(scan_context_t *);
 ast_t *assignment(scan_context_t *);
@@ -78,12 +81,28 @@ void print_ast_internal(scan_context_t *context, ast_t *ast, int indent)
             print_ast_internal(context, ast->op.group, indent + 2);
             break;
         case STATEMENT_LIST:
-            printf("PROGRAM\n");
+            printf("STMT LIST\n");
             for (int i = 0; i < ast->op.list.size; i++)
             {
-                print_ast_internal(context, ast->op.list.statements[i], indent + 2);
+                print_ast_internal(context, ast->op.list.items[i], indent + 2);
             }
             break;
+        case FUNCTION:
+            printf("FUNCTION(%s)\n", ast->op.fn.name);
+            if (ast->op.fn.args != NULL)
+            {
+                print_ast_internal(context, ast->op.fn.args, indent + 2);
+            }
+            print_ast_internal(context, ast->op.fn.body, indent + 2);
+            break;
+        case EXPRESSION_LIST:
+            printf("ARGUMENTS\n");
+            for (int i = 0; i < ast->op.list.size; i++)
+            {
+                print_ast_internal(context, ast->op.list.items[i], indent + 2);
+            }
+            break;
+
     }
 }
 
@@ -152,14 +171,60 @@ ast_t *make_group_expr(ast_t *expr)
     return group_expr;
 }
 
+ast_t *make_fn_expr(char *name, ast_t *args, ast_t *body)
+{
+    ast_t *fn_expr = (ast_t *)malloc(sizeof(ast_t));
+    fn_expr->type = FUNCTION;
+    fn_expr->op.fn.name = name;
+    fn_expr->op.fn.args = args;
+    fn_expr->op.fn.body = body;
+    return fn_expr;
+}
+
+// List handling
+ast_t *make_list_expr(size_t capacity)
+{
+    ast_t *list_expr = (ast_t *)malloc(sizeof(ast_t));
+    list_expr->type = STATEMENT_LIST;
+    list_expr->op.list.size = 0;
+    list_expr->op.list.capacity = capacity;
+    list_expr->op.list.items = (ast_t **)malloc(sizeof(ast_t) * capacity);
+    return list_expr;
+}
+
+void list_expr_append(ast_t *list, ast_t *item)
+{
+    if (list->op.list.size >= list->op.list.capacity - 1)
+    {
+        list->op.list.capacity *= 2;
+        list->op.list.items = (ast_t **)realloc(list->op.list.items, sizeof(ast_t) * list->op.list.capacity);
+    }
+
+    list->op.list.items[list->op.list.size++] = item;
+}
+
+ast_t *statement_block(scan_context_t* context)
+{
+    ast_t *left;
+
+    // TODO: Proper error handling
+    assert(accept(context).type == L_BRACE);
+
+    while (peek(context).type == EOL)
+        accept(context);
+
+    left = statement_list(context);
+
+    // TODO: Proper error handling
+    assert(left != NULL);
+    assert(accept(context).type == R_BRACE);
+
+    return left;
+}
+
 ast_t *statement_list(scan_context_t* context)
 {
-    ast_t *statements = (ast_t *)malloc(sizeof(ast_t));
-    size_t size = 0;
-    size_t capacity = 10;
-
-    statements->type = STATEMENT_LIST;
-    statements->op.list.statements = (ast_t **)malloc(sizeof(ast_t) * capacity);
+    ast_t *statements = make_list_expr(10);
 
     ast_t *current = statement(context);
 
@@ -168,29 +233,22 @@ ast_t *statement_list(scan_context_t* context)
         return statements;
     }
 
-    statements->op.list.statements[size++] = current;
+    list_expr_append(statements, current);
 
-    while (peek(context).type != EOF_CHAR)
+    while (peek(context).type != EOF_CHAR && peek(context).type != EOF_CHAR)
     {
         // If the next token is and EOL, consume it
         if (peek(context).type == EOL)
             accept(context);
 
-        // Check if we need to grow our statement list
-        if (size >= capacity - 1)
-        {
-            capacity *= 2;
-            statements->op.list.statements = (ast_t **)realloc(statements->op.list.statements, sizeof(ast_t) * capacity);
-        }
-
         // Now pull off the next statement
         current = statement(context);
 
         if (current != NULL)
-            statements->op.list.statements[size++] = current;
+            list_expr_append(statements, current);
+        else
+            break;
     }
-
-    statements->op.list.size = size;
 
     return statements;
 }
@@ -200,27 +258,55 @@ ast_t *statement(scan_context_t *context)
     ast_t *left = variable_decl(context);
 
     if (left == NULL)
+        left = expression(context);
+
+    if (left == NULL)
+        left = function(context);
+
+    if (peek(context).type == EOL)
     {
-        ast_t *left = expression(context);
-
-        if (left == NULL)
-            return left;
-
-        if (!match(context, 2, EOL, EOF_CHAR))
-        {
-            // TODO: Proper error handling please!
-            assert(false);
-        }
-
-        if (peek(context).type == EOL)
-        {
-            accept(context);
-            return left;
-        }
-
-        if (peek(context).type == EOF_CHAR)
-            return left;
+        accept(context);
+        return left;
     }
+
+    if (peek(context).type == EOF_CHAR)
+        return left;
+
+    return left;
+}
+
+ast_t *function(scan_context_t *context)
+{
+    ast_t *left, *args = NULL, *body;
+    char *name;
+
+    if (peek(context).type != FN)
+        return NULL;
+
+    accept(context);
+
+    if (peek(context).type == IDENTIFIER)
+    {
+        name = token_value(context, accept(context));
+    }
+    else
+    {
+        name = "__anonymous";
+    }
+
+    if (peek(context).type == L_PAREN)
+    {
+        accept(context);
+        args = expression_list(context);
+        // TODO: Handle error
+        assert(accept(context).type == R_PAREN);
+    }
+
+    body = statement_block(context);
+    // TODO: Handle error
+    assert(body != NULL);
+
+    left = make_fn_expr(name, args, body);
 
     return left;
 }
@@ -256,6 +342,31 @@ ast_t *variable_decl(scan_context_t *context)
     left = make_declare_expr(var_type, token_value(context, name), right);
     left->location.start = var_type.start;
     left->location.end = (right) ? right->location.end : name.end;
+
+    return left;
+}
+
+ast_t *expression_list(scan_context_t *context)
+{
+    ast_t *left = make_list_expr(10);
+    ast_t *expr = expression(context);
+
+    // TODO: Handle error
+    assert(expr != NULL);
+
+    list_expr_append(left, expr);
+    left->type = EXPRESSION_LIST;
+
+    while (peek(context).type == COMMA)
+    {
+        // Pull off the comma
+        accept(context);
+
+        expr = expression(context);
+        // TODO: Handle error
+        assert(expr != NULL);
+        list_expr_append(left, expr);
+    }
 
     return left;
 }

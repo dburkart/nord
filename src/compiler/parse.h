@@ -19,7 +19,7 @@ typedef struct expr_t
     // TODO: Namespace this enum
     enum
     {
-        ASSIGN, BINARY, DECLARE, UNARY, LITERAL, GROUP, STATEMENT_LIST
+        ASSIGN, BINARY, DECLARE, UNARY, LITERAL, GROUP, STATEMENT_LIST, FUNCTION, EXPRESSION_LIST
     } type;
 
     union
@@ -59,8 +59,16 @@ typedef struct expr_t
         struct
         {
             size_t size;
-            struct expr_t **statements;
+            size_t capacity;
+            struct expr_t **items;
         } list;
+
+        struct
+        {
+            char *name;
+            struct expr_t *args;
+            struct expr_t *body;
+        } fn;
 
         struct expr_t *group;
     } op;

@@ -14,7 +14,7 @@
 // Lexeme Enumeration
 enum token_type_e {
     // Delimiters
-    L_PAREN, R_PAREN, COLON, COMMA, EOL,
+    L_PAREN, R_PAREN, L_BRACE, R_BRACE, COLON, COMMA, EOL,
 
     EQUAL, BANG,
 
@@ -31,7 +31,7 @@ enum token_type_e {
     IDENTIFIER, STRING, NUMBER, FLOAT,
 
     // Keywords
-    VAR, FUNCTION, TRUE, FALSE, NIL,
+    VAR, FN, TRUE, FALSE, NIL,
 
     // Invalid token
     INVALID,

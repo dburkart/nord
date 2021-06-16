@@ -22,6 +22,8 @@ bool is_reserved(char c)
     {
         case '(':
         case ')':
+        case '{':
+        case '}':
         case ':':
         case ',':
         case '*':
@@ -253,6 +255,14 @@ token_t peek(scan_context_t *context)
                 t.type = R_PAREN;
                 advance = 1;
                 break;
+            case '{':
+                t.type = L_BRACE;
+                advance = 1;
+                break;
+            case '}':
+                t.type = R_BRACE;
+                advance = 1;
+                break;
             case ':':
                 t.type = COLON;
                 advance = 1;
@@ -294,7 +304,7 @@ token_t peek(scan_context_t *context)
             case 'f':
                 if (*(c + 1) == 'n') {
                     advance = 2;
-                    t.type = FUNCTION;
+                    t.type = FN;
                     break;
                 }
 

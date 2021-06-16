@@ -339,7 +339,7 @@ uint8_t compile_internal(ast_t *ast, compile_context_t *context)
         case STATEMENT_LIST:
             for (int i = 0; i < ast->op.list.size; i++)
             {
-                compile_internal(ast->op.list.statements[i], context);
+                compile_internal(ast->op.list.items[i], context);
             }
             break;
 

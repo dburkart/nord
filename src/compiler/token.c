@@ -58,6 +58,10 @@ const char *token_name(token_t t)
             return "L_PAREN";
         case R_PAREN:
             return "R_PAREN";
+        case L_BRACE:
+            return "L_BRACE";
+        case R_BRACE:
+            return "R_BRACE";
         case COLON:
             return "COLON";
         case COMMA:
@@ -114,8 +118,8 @@ const char *token_name(token_t t)
             return "NIL";
         case VAR:
             return "VAR";
-        case FUNCTION:
-            return "FUNCTION";
+        case FN:
+            return "FN";
         case INVALID:
             return "INVALID";
 

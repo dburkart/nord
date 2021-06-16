@@ -1,16 +1,20 @@
 # Grammar reference for Nord. Documented in roughly BNF.
 program         -> statement_list ;
 
-statement_list  -> statement EOF
+statement_block -> "{" statement_list "}"
+statement_list  -> statement
                  | statement statement_list;
 
 
 # Statements
 statement       -> variable_decl
-                 | expression "\n" ;
+                 | expression "\n"
+                 | function ;
+function        -> "fn" ( IDENTIFIER )? ( "(" expression_list ")" )* statement_block
 variable_decl   -> "var" IDENTIFIER ( "=" expression ) "\n" ;
 
 # Expressions
+expression_list -> expression ( "," expression_list )* ;
 expression      -> assignment ;
 assignment      -> IDENTIFIER "=" assignment
                  | equality ;

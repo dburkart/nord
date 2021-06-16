@@ -1,0 +1,7 @@
+fn generate_incr {
+    var i = 0
+
+    fn {
+        i = i + 1
+    }
+}
