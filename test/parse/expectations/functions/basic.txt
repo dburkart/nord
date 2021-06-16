@@ -1,0 +1,9 @@
+STMT LIST
+  ↳ FUNCTION(add)
+  ⋅ ↳ ARGUMENTS
+  ⋅ ⋅ ↳ LITERAL(IDENTIFIER) -> first
+  ⋅ ⋅ ↳ LITERAL(IDENTIFIER) -> second
+  ⋅ ↳ STMT LIST
+  ⋅ ⋅ ↳ BINARY(PLUS)
+  ⋅ ⋅ ⋅ ↳ LITERAL(IDENTIFIER) -> first
+  ⋅ ⋅ ⋅ ↳ LITERAL(IDENTIFIER) -> second

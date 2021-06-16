@@ -1,0 +1,11 @@
+STMT LIST
+  ↳ FUNCTION(generate_incr)
+  ⋅ ↳ STMT LIST
+  ⋅ ⋅ ↳ DECLARE(IDENTIFIER) -> i
+  ⋅ ⋅ ⋅ ↳ LITERAL(NUMBER) -> 0
+  ⋅ ⋅ ↳ FUNCTION(__anonymous)
+  ⋅ ⋅ ⋅ ↳ STMT LIST
+  ⋅ ⋅ ⋅ ⋅ ↳ ASSIGN(IDENTIFIER) -> i
+  ⋅ ⋅ ⋅ ⋅ ⋅ ↳ BINARY(PLUS)
+  ⋅ ⋅ ⋅ ⋅ ⋅ ⋅ ↳ LITERAL(IDENTIFIER) -> i
+  ⋅ ⋅ ⋅ ⋅ ⋅ ⋅ ↳ LITERAL(NUMBER) -> 1
