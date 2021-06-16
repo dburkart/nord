@@ -1,0 +1,4 @@
+compile/input/errors/undef02.n:1:14: Use of undeclared identifier "bar"
+
+var foo = 2 * bar
+              ^~~ Found here.

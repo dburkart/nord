@@ -36,6 +36,7 @@ int main(int argc, char *argv[])
         input[fsize] = 0;
 
         scan_context_t context;
+        context.name = argv[i];
         context.buffer = input;
         context.position = 0;
 
