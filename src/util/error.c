@@ -41,14 +41,16 @@ char *format_error(const char *listing_name, const char *listing, const char *st
     spacing[loc.start - position + 1] = 0;
 
     char *caret_pointer = malloc(loc.end - loc.start + 1);
-    for (int i = 0; i < loc.end - loc.start; i++)
+    caret_pointer[0] = '^';
+    for (int i = 1; i < loc.end - loc.start; i++)
     {
-        caret_pointer[i] = '^';
+        caret_pointer[i] = '~';
     }
     caret_pointer[loc.end - loc.start + 1] = 0;
 
     asprintf(&error,
-             "%d:%llu: %s\n\n%s\n%s%s___ Found here.\n",
+             "%s:%d:%llu: %s\n\n%s\n%s%s Found here.\n",
+             listing_name,
              lineno,
              loc.start - position,
              str,

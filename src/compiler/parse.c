@@ -370,9 +370,16 @@ ast_t *unary(scan_context_t *context)
     }
     else
     {
-        // TODO: Proper error handling please!
-        assert(peek(context).type != INVALID);
-        return primary(context);
+        ast_t *p = primary(context);
+        if (p == NULL && peek(context).type == INVALID)
+        {
+            char *error;
+            location_t loc = {peek(context).start, peek(context).end};
+            asprintf(&error, "Unexpected token. Expected keyword, number, string, or identifier, but found '%s'", token_value(context, peek(context)));
+            printf("%s", format_error(context->name, context->buffer, error, loc));
+            exit(1);
+        }
+        return p;
     }
 }
 
