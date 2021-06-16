@@ -11,6 +11,6 @@
 #include "machine/binary.h"
 #include "parse.h"
 
-binary_t *compile(ast_t *);
+binary_t *compile(const char *, const char *, ast_t *);
 
 #endif

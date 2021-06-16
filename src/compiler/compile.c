@@ -8,23 +8,27 @@
 #include <stdio.h>
 
 #include "compile.h"
-
-#include "memory.h"
 #include "parse.h"
 #include "symbol.h"
+#include "machine/memory.h"
+#include "util/error.h"
 
 typedef struct
 {
+    const char *name;
+    const char *listing;
     symbol_map_t *symbols;
     binary_t *binary;
     uint8_t rp;
     uint64_t mp;
 } compile_context_t;
 
-compile_context_t *context_create(void)
+compile_context_t *context_create(const char *name, const char *listing)
 {
     compile_context_t *context = malloc(sizeof(compile_context_t));
 
+    context->name = name;
+    context->listing = listing;
     context->symbols = symbol_map_create();
     context->binary = binary_create();
     context->binary->data = memory_create();
@@ -240,8 +244,14 @@ uint8_t compile_internal(ast_t *ast, compile_context_t *context)
             // TODO: Handle variables in memory
             loc = symbol_map_get(context->symbols, ast->op.assign.name);
 
-            // TODO: Proper error handling please!
-            assert(loc.type != LOC_UNDEF);
+            if (loc.type == LOC_UNDEF)
+            {
+                char *error;
+                location_t loc = {ast->location.start, ast->location.end};
+                asprintf(&error, "Use of undeclared identifier \"%s\"", ast->op.assign.name);
+                printf("%s", format_error(context->name, context->listing, error, loc));
+                exit(1);
+            }
 
             instruction.opcode = OP_MOVE;
             instruction.fields.pair.arg1 = loc.address;
@@ -300,8 +310,14 @@ uint8_t compile_internal(ast_t *ast, compile_context_t *context)
             if (ast->op.literal.token.type == IDENTIFIER)
             {
                 loc = symbol_map_get(context->symbols, ast->op.literal.value);
-                // TODO: Proper error handling please!
-                assert(loc.type != LOC_UNDEF);
+                if (loc.type == LOC_UNDEF)
+                {
+                    char *error;
+                    location_t loc = {ast->location.start, ast->location.end};
+                    asprintf(&error, "Use of undeclared identifier \"%s\"", ast->op.literal.value);
+                    printf("%s", format_error(context->name, context->listing, error, loc));
+                    exit(1);
+                }
                 // TODO: Handle memory addresses
                 result = loc.address;
             }
@@ -334,9 +350,9 @@ uint8_t compile_internal(ast_t *ast, compile_context_t *context)
     return result;
 }
 
-binary_t *compile(ast_t *ast)
+binary_t *compile(const char *name, const char *listing, ast_t *ast)
 {
-    compile_context_t *context = context_create();
+    compile_context_t *context = context_create(name, listing);
     compile_internal(ast, context);
     binary_t *binary = context->binary;
     context_destroy(context);

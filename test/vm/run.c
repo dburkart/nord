@@ -40,11 +40,12 @@ int main(int argc, char *argv[])
         input[fsize] = 0;
 
         scan_context_t context;
+        context.name = argv[i];
         context.buffer = input;
         context.position = 0;
 
         ast_t *syntax_tree = parse(&context);
-        binary_t *binary = compile(syntax_tree);
+        binary_t *binary = compile(argv[i], input, syntax_tree);
 
         vm_t *vm = vm_create(binary);
         vm_execute(vm);

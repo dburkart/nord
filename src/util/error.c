@@ -33,12 +33,21 @@ char *format_error(const char *listing_name, const char *listing, const char *st
     memcpy(line, listing + position - 1, nl - position + 1);
     line[nl - position + 1] = 0;
 
-    char *spacing = malloc(loc.start - position + 1);
-    for (int i = 0; i <= loc.start - position; i++)
+    char *spacing;
+
+    if (loc.start > position)
     {
-        spacing[i] = ' ';
+        spacing = malloc(loc.start - position + 1);
+        for (int i = 0; i <= loc.start - position; i++)
+        {
+            spacing[i] = ' ';
+        }
+        spacing[loc.start - position + 1] = 0;
     }
-    spacing[loc.start - position + 1] = 0;
+    else
+    {
+        spacing = "";
+    }
 
     char *caret_pointer = malloc(loc.end - loc.start + 1);
     caret_pointer[0] = '^';
@@ -52,7 +61,7 @@ char *format_error(const char *listing_name, const char *listing, const char *st
              "%s:%d:%llu: %s\n\n%s\n%s%s Found here.\n",
              listing_name,
              lineno,
-             loc.start - position,
+             loc.start - (position - 1),
              str,
              line,
              spacing,

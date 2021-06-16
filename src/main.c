@@ -51,7 +51,7 @@ int main(int argc, char *argv[])
         print_ast(&context, syntax_tree);
         printf("\n");
 
-        binary_t *binary = compile(syntax_tree);
+        binary_t *binary = compile(argv[i], input, syntax_tree);
 
         printf("Instructions\n");
         printf("============\n\n");

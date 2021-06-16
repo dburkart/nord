@@ -236,8 +236,12 @@ ast_t *variable_decl(scan_context_t *context)
 
     if (peek(context).type != IDENTIFIER)
     {
-        backup(context);
-        return NULL;
+        char *error;
+        token_t invalid = accept(context);
+        location_t loc = {invalid.start, invalid.end};
+        asprintf(&error, "Expected identifier in declaration, but found \"%s\".", token_value(context, invalid));
+        printf("%s", format_error(context->name, context->buffer, error, loc));
+        exit(1);
     }
 
     token_t name = accept(context);
@@ -375,7 +379,7 @@ ast_t *unary(scan_context_t *context)
         {
             char *error;
             location_t loc = {peek(context).start, peek(context).end};
-            asprintf(&error, "Unexpected token. Expected keyword, number, string, or identifier, but found '%s'", token_value(context, peek(context)));
+            asprintf(&error, "Unexpected token. Expected keyword, number, string, or identifier, but found \"%s\"", token_value(context, peek(context)));
             printf("%s", format_error(context->name, context->buffer, error, loc));
             exit(1);
         }
@@ -409,7 +413,7 @@ ast_t *primary(scan_context_t *context)
         {
             char *error;
             location_t loc = {paren.start, paren.end};
-            asprintf(&error, "Mismatched parenthesis. Expected ')', but found '%s'.", token_value(context, paren));
+            asprintf(&error, "Mismatched parenthesis. Expected \")\", but found \"%s\".", token_value(context, paren));
             printf("%s", format_error(context->name, context->buffer, error, loc));
             exit(1);
         }
