@@ -1,9 +1,9 @@
 STMT LIST
-  ↳ FUNCTION(generate_incr)
+  ↳ FUNCTION_DECL(generate_incr)
   ⋅ ↳ STMT LIST
   ⋅ ⋅ ↳ DECLARE(IDENTIFIER) -> i
   ⋅ ⋅ ⋅ ↳ LITERAL(NUMBER) -> 0
-  ⋅ ⋅ ↳ FUNCTION(__anonymous)
+  ⋅ ⋅ ↳ FUNCTION_DECL(__anonymous)
   ⋅ ⋅ ⋅ ↳ STMT LIST
   ⋅ ⋅ ⋅ ⋅ ↳ ASSIGN(IDENTIFIER) -> i
   ⋅ ⋅ ⋅ ⋅ ⋅ ↳ BINARY(PLUS)

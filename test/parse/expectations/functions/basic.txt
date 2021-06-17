@@ -1,5 +1,5 @@
 STMT LIST
-  ↳ FUNCTION(add)
+  ↳ FUNCTION_DECL(add)
   ⋅ ↳ ARGUMENTS
   ⋅ ⋅ ↳ LITERAL(IDENTIFIER) -> first
   ⋅ ⋅ ↳ LITERAL(IDENTIFIER) -> second
