@@ -10,18 +10,30 @@ don't know where this is going yet, but it should be fun!
 
 Current State of the Project
 ===============================================================================
-Last Updated: 06/13/2021
+Last Updated: 06/17/2021
 
-The current overall state is non-working, although some of the subsystems work
-and have tests. The overall approach will be to bring each subsystem up and
-in line with the grammar, evolve the grammar, and repeat until we have a useful
-language. What follows is a bottom-up rundown of the overall status:
+Currently, a small subset of the planned language is implemented and working.
+There is support for basic expressions, including arithmetic and comparisons,
+as well as function call support. Beyond the fact that syntax is minimal, the
+following known limitations exist:
 
-Grammar   -- Minimal. For the current iteration, check docs/grammar.txt
-Lexer     -- Up to date with the grammar
-Parser    -- Up to date with the grammar
-Compiler  -- Nearly full grammar support
-VM        -- Nearly full grammar support
+ - Register allocation is not that sophisticated. In fact, full support for
+   spilling / unspilling variables to main memory doesn't exist (function calls
+   spill variables, but only using the stack). This means that sufficiently
+   large scripts with enough variables in the same scope will most likely
+   result in undefined behavior.
+
+ - Only partial error-handling exists. There are many edge cases which are
+   not handled correctly, resulting in asserts and seg faults for some classes
+   of syntax or semantic errors.
+   
+ - No builtins yet. This means that although we can run scripts we can't, for
+   example, print any output! That is why the nord binary still dumps the VM
+   after execution.
+   
+ - Function support is implemented, but it's still pretty basic. Scoping is
+   not fullly implemented, although we're almost there.
+
 
 Building
 ===============================================================================
