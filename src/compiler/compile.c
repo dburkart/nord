@@ -82,6 +82,8 @@ uint8_t compile_internal(ast_t *ast, compile_context_t *context)
     symbol_t sym;
     instruction_t instruction;
     value_t val;
+    int tmp, addr;
+    ast_t *args;
 
     switch (ast->type)
     {
@@ -341,8 +343,114 @@ uint8_t compile_internal(ast_t *ast, compile_context_t *context)
         case STATEMENT_LIST:
             for (int i = 0; i < ast->op.list.size; i++)
             {
-                compile_internal(ast->op.list.items[i], context);
+                result = compile_internal(ast->op.list.items[i], context);
             }
+            break;
+
+        case FUNCTION_DECL:
+            args = ast->op.fn.args;
+
+            // First, write out a dummy instruction which will be used to jump
+            // over the function.
+            instruction.opcode = OP_LOADV;
+            instruction.fields.pair.arg1 = context->rp;
+            instruction.fields.pair.arg2 = 0;
+            tmp = context->binary->code->size;
+            code_block_write(context->binary->code, instruction);
+            instruction.opcode = OP_JMP;
+            instruction.fields.pair.arg1 = context->rp;
+            code_block_write(context->binary->code, instruction);
+
+            addr = context->binary->code->size;
+
+            // Next, create a new symbol map for our new function, and capture
+            // our arguments
+            symbol_map_t *fn_map = symbol_map_create();
+            fn_map->parent = context->symbols;
+            context->symbols = fn_map;
+            for (int i = args->op.list.size - 1; i >= 0; i--)
+            {
+                sym.location.type = LOC_REGISTER;
+                sym.location.address = context->rp + i;
+                sym.name = args->op.list.items[i]->op.literal.value;
+                sym.type = SYM_VAR;
+                symbol_map_set(context->symbols, sym);
+                instruction.opcode = OP_POP;
+                instruction.fields.pair.arg1 = context->rp;
+                code_block_write(context->binary->code, instruction);
+            }
+            context->rp += args->op.list.size;
+
+            // Set symbol information for the function itself
+            sym.name = ast->op.fn.name;
+            sym.low_reg = context->rp;
+            sym.location.type = LOC_CODE;
+            sym.location.address = addr;
+
+            // Now, write out the block
+            result = compile_internal(ast->op.fn.body, context);
+
+            // Add an implicit return if needed
+            size_t address = context->binary->code->size - 1;
+            if (context->binary->code->code[address].opcode != OP_RETURN)
+            {
+                instruction.opcode = OP_RETURN;
+                instruction.fields.pair.arg1 = result;
+                code_block_write(context->binary->code, instruction);
+            }
+
+            // Finally, modify our first jump instruction to jump to the correct address
+            address = context->binary->code->size;
+            context->binary->code->code[tmp].fields.pair.arg2 = address;
+
+            // Now, reset our symbol map
+            symbol_map_t *map = context->symbols;
+            context->symbols = context->symbols->parent;
+            symbol_map_destroy(map);
+
+            // Another bit of housekeeping we have to do is make sure sym.low_reg is correct
+            if (context->rp == sym.low_reg)
+                sym.low_reg = 0;
+            else
+                context->rp = sym.low_reg;
+
+            // Store our function in the symbol map
+            symbol_map_set(context->symbols, sym);
+            break;
+
+        case FUNCTION_CALL:
+            sym = symbol_map_get(context->symbols, ast->op.call.name);
+            args = ast->op.call.args;
+
+            // First check low_reg and spill if needed
+            // uint8_t rp = context->rp;
+            // for (; context->rp > sym.low_reg; context->rp--)
+            // {
+            //     // TODO: Implement
+            // }
+
+            for (int i = 0; i < args->op.list.size; i++)
+            {
+                uint8_t val = compile_internal(args->op.list.items[i], context);
+                instruction.opcode = OP_PUSH;
+                instruction.fields.pair.arg1 = val;
+                code_block_write(context->binary->code, instruction);
+            }
+
+            // Call the function
+            instruction.opcode = OP_LOADV;
+            instruction.fields.pair.arg1 = context->rp;
+            instruction.fields.pair.arg2 = sym.location.address;
+            code_block_write(context->binary->code, instruction);
+
+            instruction.opcode = OP_CALL;
+            instruction.fields.pair.arg1 = context->rp;
+            code_block_write(context->binary->code, instruction);
+
+            instruction.opcode = OP_POP;
+            instruction.fields.pair.arg1 = context->rp;
+            result = context->rp;
+            code_block_write(context->binary->code, instruction);
             break;
 
         default:

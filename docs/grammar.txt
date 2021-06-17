@@ -9,8 +9,8 @@ statement_list  -> statement
 # Statements
 statement       -> variable_decl
                  | expression "\n"
-                 | function ;
-function        -> "fn" ( IDENTIFIER )? ( "(" expression_list ")" )* statement_block
+                 | function_decl ;
+function_decl   -> "fn" ( IDENTIFIER )? ( "(" expression_list ")" )* statement_block
 variable_decl   -> "var" IDENTIFIER ( "=" expression ) "\n" ;
 
 # Expressions
@@ -24,5 +24,7 @@ term            -> term_md ( ( "-" | "+" ) term_md )* ;
 term_md         -> unary ( ( "/" | "*" ) unary )*  ;
 unary           -> ( "!" | "-" ) unary
                  | primary ;
-primary         -> IDENTIFIER | NUMBER | FLOAT | STRING | "true" | "false" | "nil"
+primary         -> function_call
+                 | IDENTIFIER | NUMBER | FLOAT | STRING | "true" | "false" | "nil"
                  | "(" expression ")" ;
+function_call   -> IDENTIFIER "(" ( expression_list )* ")" ;

@@ -11,6 +11,7 @@
 #include "disassemble.h"
 #include "memory.h"
 
+#define FORMAT_SINGLE           "%-10s $%d\n"
 #define FORMAT_PAIR             "%-10s $%d $%d\n"
 #define FORMAT_PAIR_ADDR        "%-10s $%d @%d\n"
 #define FORMAT_PAIR_CONST_NUM   "%-10s $%d %d\n"
@@ -112,9 +113,28 @@ char *disassemble_instruction(memory_t *mem, instruction_t instruction)
                     );
             break;
 
+        // push <register>
+        case OP_PUSH:
+            asprintf(&assembly, FORMAT_SINGLE,
+                     "push",
+                     instruction.fields.pair.arg1
+                    );
+            break;
+
+        // pop <register>
+        case OP_POP:
+            asprintf(&assembly, FORMAT_SINGLE,
+                     "pop",
+                     instruction.fields.pair.arg1
+                    );
+            break;
+
         // jump <instruction #>
         case OP_JMP:
-
+            asprintf(&assembly, FORMAT_SINGLE,
+                     "jump",
+                     instruction.fields.pair.arg1
+                    );
             break;
 
         // add <register-out> <register-in> <register-in>
@@ -200,8 +220,18 @@ char *disassemble_instruction(memory_t *mem, instruction_t instruction)
             break;
 
         // -- Functions
-        case OP_RETURN:
+        case OP_CALL:
+            asprintf(&assembly, FORMAT_SINGLE,
+                     "call",
+                     instruction.fields.pair.arg1
+                    );
+            break;
 
+        case OP_RETURN:
+            asprintf(&assembly, FORMAT_SINGLE,
+                     "return",
+                     instruction.fields.pair.arg1
+                    );
             break;
     }
 

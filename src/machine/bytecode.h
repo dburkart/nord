@@ -24,9 +24,16 @@ typedef enum
     // move <register-out> <register-in>
     OP_MOVE,
 
+    // -- Stack manipulation
+
+    // push <register>
+    OP_PUSH,
+    // pop <register>
+    OP_POP,
+
     // -- Jumps
 
-    // jump <instruction #>
+    // jump <register>
     OP_JMP,
 
     // -- Arithmetic operations
@@ -55,6 +62,10 @@ typedef enum
 
     // -- Functions
 
+    // call <register-addr>
+    OP_CALL,
+
+    // return <register>
     OP_RETURN
 } opcode_t;
 

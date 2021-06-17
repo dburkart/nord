@@ -21,6 +21,9 @@ typedef struct
     // Stack pointer
     int sp;
 
+    memory_t *call_stack;
+    int csp;
+
     // Code-related data structures
     code_block_t *code;
     // Program counter

@@ -18,6 +18,7 @@ symbol_map_t *symbol_map_create(void)
     symbol_map->size = 0;
     // We want items to be zero'd out so that we can test for existence
     symbol_map->items = calloc(symbol_map->capacity, sizeof(symbol_t));
+    symbol_map->parent = NULL;
     return symbol_map;
 }
 

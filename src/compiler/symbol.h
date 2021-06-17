@@ -20,6 +20,7 @@ typedef struct
         LOC_UNDEF,
         LOC_REGISTER,
         LOC_MEMORY,
+        LOC_CODE,
         // Used to indicate a symbol has been declared but not assigned
         LOC_NONE
     } type;
@@ -33,15 +34,19 @@ typedef struct
     char *name;
     sym_type_e type;
     sym_pointer_t location;
+    // This field is used for symbols of type SYM_FN to find overlaps and
+    // spill registers when we're calling the function
+    uint8_t low_reg;
 } symbol_t;
 
 // Symbol hash map, containing an array of symbols
-typedef struct
+typedef struct sym_map_t
 {
     // We keep track of the number of elements in our map to know when to grow
     uint32_t size;
     uint32_t capacity;
     symbol_t *items;
+    struct sym_map_t *parent;
 } symbol_map_t;
 
 symbol_map_t *symbol_map_create(void);

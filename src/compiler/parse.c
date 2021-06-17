@@ -14,7 +14,7 @@
 ast_t *statement_block(scan_context_t *);
 ast_t *statement_list(scan_context_t *);
 ast_t *statement(scan_context_t *);
-ast_t *function(scan_context_t *);
+ast_t *function_decl(scan_context_t *);
 ast_t *variable_decl(scan_context_t *);
 ast_t *expression_list(scan_context_t *);
 ast_t *expression(scan_context_t *);
@@ -25,6 +25,7 @@ ast_t *term(scan_context_t *);
 ast_t *term_md(scan_context_t *);
 ast_t *unary(scan_context_t *);
 ast_t *primary(scan_context_t *);
+ast_t *function_call(scan_context_t *);
 
 ast_t *parse(scan_context_t *context)
 {
@@ -87,13 +88,20 @@ void print_ast_internal(scan_context_t *context, ast_t *ast, int indent)
                 print_ast_internal(context, ast->op.list.items[i], indent + 2);
             }
             break;
-        case FUNCTION:
-            printf("FUNCTION(%s)\n", ast->op.fn.name);
+        case FUNCTION_DECL:
+            printf("FUNCTION_DECL(%s)\n", ast->op.fn.name);
             if (ast->op.fn.args != NULL)
             {
                 print_ast_internal(context, ast->op.fn.args, indent + 2);
             }
             print_ast_internal(context, ast->op.fn.body, indent + 2);
+            break;
+        case FUNCTION_CALL:
+            printf("CALL_FN(%s)\n", ast->op.call.name);
+            if (ast->op.call.args != NULL)
+            {
+                print_ast_internal(context, ast->op.call.args, indent + 2);
+            }
             break;
         case EXPRESSION_LIST:
             printf("ARGUMENTS\n");
@@ -174,11 +182,20 @@ ast_t *make_group_expr(ast_t *expr)
 ast_t *make_fn_expr(char *name, ast_t *args, ast_t *body)
 {
     ast_t *fn_expr = (ast_t *)malloc(sizeof(ast_t));
-    fn_expr->type = FUNCTION;
+    fn_expr->type = FUNCTION_DECL;
     fn_expr->op.fn.name = name;
     fn_expr->op.fn.args = args;
     fn_expr->op.fn.body = body;
     return fn_expr;
+}
+
+ast_t *make_call_expr(char *name, ast_t *args)
+{
+    ast_t *call_expr = (ast_t *)malloc(sizeof(ast_t));
+    call_expr->type = FUNCTION_CALL;
+    call_expr->op.call.name = name;
+    call_expr->op.call.args = args;
+    return call_expr;
 }
 
 // List handling
@@ -261,7 +278,7 @@ ast_t *statement(scan_context_t *context)
         left = expression(context);
 
     if (left == NULL)
-        left = function(context);
+        left = function_decl(context);
 
     if (peek(context).type == EOL)
     {
@@ -275,7 +292,7 @@ ast_t *statement(scan_context_t *context)
     return left;
 }
 
-ast_t *function(scan_context_t *context)
+ast_t *function_decl(scan_context_t *context)
 {
     ast_t *left, *args = NULL, *body;
     char *name;
@@ -500,6 +517,10 @@ ast_t *unary(scan_context_t *context)
 
 ast_t *primary(scan_context_t *context)
 {
+    ast_t *left = function_call(context);
+    if (left != NULL)
+        return left;
+
     if (match(context, 6, IDENTIFIER, NUMBER, FLOAT, STRING, TRUE, FALSE, NIL))
     {
         token_t tok = accept(context);
@@ -533,4 +554,33 @@ ast_t *primary(scan_context_t *context)
     }
 
     return NULL;
+}
+
+ast_t *function_call(scan_context_t *context)
+{
+    ast_t *left;
+    ast_t *args;
+    char *fn_name;
+
+    if (peek(context).type != IDENTIFIER)
+        return NULL;
+
+    fn_name = token_value(context, accept(context));
+
+    if (peek(context).type != L_PAREN)
+    {
+        backup(context);
+        return NULL;
+    }
+
+    accept(context);
+
+    args = expression_list(context);
+
+    // TODO: Error handling
+    assert(accept(context).type == R_PAREN);
+
+    left = make_call_expr(fn_name, args);
+
+    return left;
 }

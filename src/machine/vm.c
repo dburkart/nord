@@ -58,6 +58,10 @@ vm_t *vm_create(binary_t *binary)
     vm->stack = memory_create();
     vm->sp = 0;
 
+    // Set up the call stack
+    vm->call_stack = memory_create();
+    vm->csp = 0;
+
     vm->code = binary->code;
     vm->pc = 0;
 
@@ -77,8 +81,26 @@ int vm_stack_push(vm_t *vm, value_t val)
 
 value_t vm_stack_pop(vm_t *vm)
 {
-    value_t val = memory_get(vm->stack, vm->sp);
     vm->sp--;
+    value_t val = memory_get(vm->stack, vm->sp);
+
+    return val;
+}
+
+int vm_cstack_push(vm_t *vm, value_t val)
+{
+    int reg = vm->csp;
+
+    memory_set(vm->call_stack, vm->csp, val);
+    vm->csp++;
+
+    return reg;
+}
+
+value_t vm_cstack_pop(vm_t *vm)
+{
+    vm->csp--;
+    value_t val = memory_get(vm->call_stack, vm->csp);
 
     return val;
 }
@@ -89,6 +111,7 @@ void vm_execute(vm_t *vm)
     {
         // Pull off the next instruction
         instruction_t instruction = vm->code->code[vm->pc++];
+        value_t ret;
         value_t result;
 
         switch (instruction.opcode)
@@ -112,9 +135,16 @@ void vm_execute(vm_t *vm)
                 vm->registers[instruction.fields.pair.arg1] = vm->registers[instruction.fields.pair.arg2];
                 break;
 
+            case OP_PUSH:
+                vm_stack_push(vm, vm->registers[instruction.fields.pair.arg1]);
+                break;
+
+            case OP_POP:
+                vm->registers[instruction.fields.pair.arg1] = vm_stack_pop(vm);
+                break;
+
             case OP_JMP:
-                // TODO: Use both arguments to piece together the address (we have an extra 8 bits we're not using)
-                vm->pc = instruction.fields.pair.arg2;
+                vm->pc = vm->registers[instruction.fields.pair.arg1].contents.number;
                 break;
 
             case OP_EQUAL:
@@ -249,6 +279,21 @@ void vm_execute(vm_t *vm)
                 }
                 vm->registers[instruction.fields.pair.arg1] = result;
                 break;
+
+            case OP_CALL:
+                // First, push the return address down
+                ret.type = VAL_INT;
+                ret.contents.number = vm->pc;
+                vm_cstack_push(vm, ret);
+                vm->pc = vm->registers[instruction.fields.pair.arg1].contents.number;
+                break;
+
+            case OP_RETURN:
+                ret = vm_cstack_pop(vm);
+                vm_stack_push(vm, vm->registers[instruction.fields.pair.arg1]);
+                vm->pc = ret.contents.number;
+                break;
+
         }
     }
 }
