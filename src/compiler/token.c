@@ -69,6 +69,10 @@ const char *token_name(token_t t)
         case EOL:
             return "EOL";
 
+        // BRANCHING
+        case IF:
+            return "IF";
+
         // COMPARATORS
         case BANG:
             return "BANG";

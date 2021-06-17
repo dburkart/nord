@@ -9,7 +9,9 @@ statement_list  -> statement
 # Statements
 statement       -> variable_decl
                  | expression "\n"
+                 | if_statement
                  | function_decl ;
+if_statement    -> "if" expression statement_block ;
 function_decl   -> "fn" ( IDENTIFIER )? ( "(" variable_list ")" )* statement_block
 variable_list   -> IDENTIFIER ( "," variable_list )* ;
 variable_decl   -> "var" IDENTIFIER ( "=" expression ) "\n" ;

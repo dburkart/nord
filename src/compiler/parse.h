@@ -22,7 +22,8 @@ typedef struct expr_t
         ASSIGN, BINARY, DECLARE, UNARY,
         LITERAL, GROUP, STATEMENT_LIST,
         FUNCTION_DECL, FUNCTION_CALL,
-        EXPRESSION_LIST, VARIABLE_LIST
+        EXPRESSION_LIST, VARIABLE_LIST,
+        IF_STATEMENT
     } type;
 
     union
@@ -78,6 +79,13 @@ typedef struct expr_t
             char *name;
             struct expr_t *args;
         } call;
+
+        struct
+        {
+            struct expr_t *condition;
+            struct expr_t *body;
+        } if_stmt;
+
 
 
         struct expr_t *group;

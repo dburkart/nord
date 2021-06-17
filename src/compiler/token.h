@@ -21,6 +21,9 @@ enum token_type_e {
     // Math
     PLUS, MINUS, ASTERISK, SLASH,
 
+    // Branching
+    IF,
+
     // Comparators
     GREATER, GREATER_EQUAL, LESS, LESS_EQUAL, EQUAL_EQUAL, BANG_EQUAL,
 

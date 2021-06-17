@@ -1,4 +1,4 @@
-[IDENTIFIER:0-2]
+[IF:0-2]
 [EQUAL:3-4]
 [L_PAREN:5-6]
 [R_PAREN:7-8]

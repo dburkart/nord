@@ -14,6 +14,7 @@
 ast_t *statement_block(scan_context_t *);
 ast_t *statement_list(scan_context_t *);
 ast_t *statement(scan_context_t *);
+ast_t *if_statement(scan_context_t *);
 ast_t *function_decl(scan_context_t *);
 ast_t *variable_list(scan_context_t *);
 ast_t *variable_decl(scan_context_t *);
@@ -111,6 +112,11 @@ void print_ast_internal(scan_context_t *context, ast_t *ast, int indent)
             {
                 print_ast_internal(context, ast->op.list.items[i], indent + 2);
             }
+            break;
+        case IF_STATEMENT:
+            printf("IF\n");
+            print_ast_internal(context, ast->op.if_stmt.condition, indent + 2);
+            print_ast_internal(context, ast->op.if_stmt.body, indent + 2);
             break;
 
     }
@@ -211,6 +217,15 @@ ast_t *make_list_expr(size_t capacity)
     return list_expr;
 }
 
+ast_t *make_if_expr(ast_t *condition, ast_t *body)
+{
+    ast_t *if_expr = (ast_t *)malloc(sizeof(ast_t));
+    if_expr->type = IF_STATEMENT;
+    if_expr->op.if_stmt.condition = condition;
+    if_expr->op.if_stmt.body = body;
+    return if_expr;
+}
+
 void list_expr_append(ast_t *list, ast_t *item)
 {
     if (list->op.list.size >= list->op.list.capacity - 1)
@@ -282,6 +297,9 @@ ast_t *statement(scan_context_t *context)
     if (left == NULL)
         left = function_decl(context);
 
+    if (left == NULL)
+        left = if_statement(context);
+
     if (peek(context).type == EOL)
     {
         accept(context);
@@ -292,6 +310,27 @@ ast_t *statement(scan_context_t *context)
         return left;
 
     return left;
+}
+
+ast_t *if_statement(scan_context_t *context)
+{
+    if (peek(context).type != IF)
+        return NULL;
+
+    // Pull off the "if" keyword
+    accept(context);
+
+    ast_t *condition = expression_list(context);
+
+    // TODO: Proper error handling!
+    assert(condition != NULL);
+
+    ast_t *body = statement_block(context);
+
+    // TODO: Proper error handling!
+    assert(body != NULL);
+
+    return make_if_expr(condition, body);
 }
 
 ast_t *function_decl(scan_context_t *context)
