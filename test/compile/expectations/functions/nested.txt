@@ -1,0 +1,14 @@
+loadv      $1 4
+jump       $1
+set        $1 "hi"
+return     $1
+loadv      $1 11
+jump       $1
+loadv      $1 0
+call       $1
+pop        $1
+set        $1 "mom"
+return     $1
+loadv      $1 6
+call       $1
+pop        $1

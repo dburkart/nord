@@ -1,0 +1,10 @@
+fn hi {
+    "hi"
+}
+
+fn mom {
+    hi()
+    "mom"
+}
+
+var m = mom()
