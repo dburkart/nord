@@ -368,6 +368,7 @@ uint8_t compile_internal(ast_t *ast, compile_context_t *context)
             symbol_map_t *fn_map = symbol_map_create();
             fn_map->parent = context->symbols;
             context->symbols = fn_map;
+            uint8_t rp = context->rp;
 
             if (args != NULL)
             {
@@ -388,7 +389,7 @@ uint8_t compile_internal(ast_t *ast, compile_context_t *context)
 
             // Set symbol information for the function itself
             sym.name = ast->op.fn.name;
-            sym.low_reg = context->rp;
+            sym.low_reg = rp;
             sym.location.type = LOC_CODE;
             sym.location.address = addr;
 

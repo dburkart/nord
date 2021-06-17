@@ -3,11 +3,10 @@
    0001 {BOOLEAN:true}
 
 [stack contents]
-   0000 {INT:5}
-   0001 {INT:16}
+   0000 {INT:16}
 
 [register contents]
    0001 {INT:16}
-   0002 {INT:5}
+   0002 {INT:16}
 
 stack pointer: 0
