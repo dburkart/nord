@@ -4,7 +4,7 @@ set        $1 "hi"
 return     $1
 loadv      $1 11
 jump       $1
-loadv      $1 0
+loadv      $1 2
 call       $1
 pop        $1
 set        $1 "mom"

@@ -299,8 +299,41 @@ token_t peek(scan_context_t *context)
                 if (advance)
                 {
                     t.type = STRING;
+                }
+                break;
+            case '0':
+            case '1':
+            case '2':
+            case '3':
+            case '4':
+            case '5':
+            case '6':
+            case '7':
+            case '8':
+            case '9':
+            case '.':
+                advance = match_number(c);
+                if (advance)
+                {
+                    t.type = NUMBER;
                     break;
                 }
+
+                advance = match_float(c);
+                if (advance)
+                {
+                    t.type = FLOAT;
+                    break;
+                }
+
+                // We didn't match anything, so consume until we hit whitespace
+                advance = 1;
+                while (!is_whitespace(*(c+advance)))
+                {
+                    advance = advance + 1;
+                }
+                t.type = INVALID;
+                break;
             case 'f':
                 if (*(c + 1) == 'n') {
                     advance = 2;
@@ -314,6 +347,14 @@ token_t peek(scan_context_t *context)
                     t.type = FALSE;
                     break;
                 }
+
+                advance = match_identifier(c);
+                if (advance)
+                {
+                    t.type = IDENTIFIER;
+                    break;
+                }
+                break;
             case 'n':
                 advance = match_keyword("nil", c, 3);
                 if (advance)
@@ -321,6 +362,14 @@ token_t peek(scan_context_t *context)
                     t.type = NIL;
                     break;
                 }
+
+                advance = match_identifier(c);
+                if (advance)
+                {
+                    t.type = IDENTIFIER;
+                    break;
+                }
+                break;
             case 't':
                 advance = match_keyword("true", c, 4);
                 if (advance)
@@ -328,6 +377,14 @@ token_t peek(scan_context_t *context)
                     t.type = TRUE;
                     break;
                 }
+
+                advance = match_identifier(c);
+                if (advance)
+                {
+                    t.type = IDENTIFIER;
+                    break;
+                }
+                break;
             case 'v':
                 advance = match_keyword("var", c, 3);
                 if (advance)
@@ -336,25 +393,18 @@ token_t peek(scan_context_t *context)
                     break;
                 }
 
-            default:
                 advance = match_identifier(c);
                 if (advance)
                 {
                     t.type = IDENTIFIER;
                     break;
                 }
-
-                advance = match_number(c);
+                break;
+            default:
+                advance = match_identifier(c);
                 if (advance)
                 {
-                    t.type = NUMBER;
-                    break;
-                }
-
-                advance = match_float(c);
-                if (advance)
-                {
-                    t.type = FLOAT;
+                    t.type = IDENTIFIER;
                     break;
                 }
 
