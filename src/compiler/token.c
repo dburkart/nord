@@ -124,6 +124,8 @@ const char *token_name(token_t t)
             return "VAR";
         case FN:
             return "FN";
+        case RETURN:
+            return "RETURN";
         case INVALID:
             return "INVALID";
 

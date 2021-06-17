@@ -18,7 +18,8 @@ variable_decl   -> "var" IDENTIFIER ( "=" expression ) "\n" ;
 
 # Expressions
 expression_list -> expression ( "," expression_list )* ;
-expression      -> assignment ;
+expression      -> "return" assignment
+                 | assignment ;
 assignment      -> IDENTIFIER "=" assignment
                  | equality ;
 equality        -> comparison ( ( "!=" | "==") comparison )* ;

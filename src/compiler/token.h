@@ -21,9 +21,6 @@ enum token_type_e {
     // Math
     PLUS, MINUS, ASTERISK, SLASH,
 
-    // Branching
-    IF,
-
     // Comparators
     GREATER, GREATER_EQUAL, LESS, LESS_EQUAL, EQUAL_EQUAL, BANG_EQUAL,
 
@@ -34,7 +31,10 @@ enum token_type_e {
     IDENTIFIER, STRING, NUMBER, FLOAT,
 
     // Keywords
-    VAR, FN, TRUE, FALSE, NIL,
+    VAR, FN, RETURN, TRUE, FALSE, NIL,
+
+    // Branching
+    IF,
 
     // Invalid token
     INVALID,

@@ -101,6 +101,11 @@ uint8_t compile_internal(ast_t *ast, compile_context_t *context)
                     instruction.opcode = OP_NOT;
                     instruction.fields.pair.arg1 = context->rp;
                     instruction.fields.pair.arg2 = right;
+                    break;
+                case RETURN:
+                    instruction.opcode = OP_RETURN;
+                    instruction.fields.pair.arg1 = right;
+                    break;
                 default:
                     ;
             }

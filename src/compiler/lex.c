@@ -385,6 +385,21 @@ token_t peek(scan_context_t *context)
                     break;
                 }
                 break;
+            case 'r':
+                advance = match_keyword("return", c, 6);
+                if (advance)
+                {
+                    t.type = RETURN;
+                    break;
+                }
+
+                advance = match_identifier(c);
+                if (advance)
+                {
+                    t.type = IDENTIFIER;
+                    break;
+                }
+                break;
             case 't':
                 advance = match_keyword("true", c, 4);
                 if (advance)

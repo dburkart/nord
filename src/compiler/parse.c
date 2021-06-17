@@ -461,6 +461,11 @@ ast_t *expression_list(scan_context_t *context)
 
 ast_t *expression(scan_context_t *context)
 {
+    if (peek(context).type == RETURN)
+    {
+        return make_unary_expr(accept(context), assignment(context));
+    }
+
     return assignment(context);
 }
 

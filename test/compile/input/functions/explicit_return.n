@@ -1,0 +1,5 @@
+fn squared(x) {
+    return x * x
+}
+
+var foo = squared(100)
