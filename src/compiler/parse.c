@@ -15,6 +15,7 @@ ast_t *statement_block(scan_context_t *);
 ast_t *statement_list(scan_context_t *);
 ast_t *statement(scan_context_t *);
 ast_t *function_decl(scan_context_t *);
+ast_t *variable_list(scan_context_t *);
 ast_t *variable_decl(scan_context_t *);
 ast_t *expression_list(scan_context_t *);
 ast_t *expression(scan_context_t *);
@@ -103,6 +104,7 @@ void print_ast_internal(scan_context_t *context, ast_t *ast, int indent)
                 print_ast_internal(context, ast->op.call.args, indent + 2);
             }
             break;
+        case VARIABLE_LIST:
         case EXPRESSION_LIST:
             printf("ARGUMENTS\n");
             for (int i = 0; i < ast->op.list.size; i++)
@@ -324,6 +326,35 @@ ast_t *function_decl(scan_context_t *context)
     assert(body != NULL);
 
     left = make_fn_expr(name, args, body);
+
+    return left;
+}
+
+ast_t *variable_list(scan_context_t *context)
+{
+    if (peek(context).type != IDENTIFIER)
+        return NULL;
+
+    ast_t *var = make_literal_expr(accept(context));
+    ast_t *left = make_list_expr(10);
+
+    list_expr_append(left, var);
+    left->type = VARIABLE_LIST;
+
+    while (peek(context).type == COMMA)
+    {
+        // Pull off the comma
+        accept(context);
+
+        if (peek(context).type != IDENTIFIER)
+        {
+            backup(context);
+            return left;
+        }
+
+        var = make_literal_expr(accept(context));
+        list_expr_append(left, var);
+    }
 
     return left;
 }
