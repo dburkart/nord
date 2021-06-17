@@ -368,18 +368,23 @@ uint8_t compile_internal(ast_t *ast, compile_context_t *context)
             symbol_map_t *fn_map = symbol_map_create();
             fn_map->parent = context->symbols;
             context->symbols = fn_map;
-            for (int i = args->op.list.size - 1; i >= 0; i--)
+
+            if (args != NULL)
             {
-                sym.location.type = LOC_REGISTER;
-                sym.location.address = context->rp + i;
-                sym.name = args->op.list.items[i]->op.literal.value;
-                sym.type = SYM_VAR;
-                symbol_map_set(context->symbols, sym);
-                instruction.opcode = OP_POP;
-                instruction.fields.pair.arg1 = context->rp;
-                code_block_write(context->binary->code, instruction);
+                for (int i = args->op.list.size - 1; i >= 0; i--)
+                {
+                    sym.location.type = LOC_REGISTER;
+                    sym.location.address = context->rp + i;
+                    sym.name = args->op.list.items[i]->op.literal.value;
+                    sym.type = SYM_VAR;
+                    symbol_map_set(context->symbols, sym);
+                    instruction.opcode = OP_POP;
+                    instruction.fields.pair.arg1 = context->rp;
+                    code_block_write(context->binary->code, instruction);
+                }
+                context->rp += args->op.list.size;
             }
-            context->rp += args->op.list.size;
+
 
             // Set symbol information for the function itself
             sym.name = ast->op.fn.name;
@@ -423,18 +428,26 @@ uint8_t compile_internal(ast_t *ast, compile_context_t *context)
             args = ast->op.call.args;
 
             // First check low_reg and spill if needed
-            // uint8_t rp = context->rp;
-            // for (; context->rp > sym.low_reg; context->rp--)
-            // {
-            //     // TODO: Implement
-            // }
-
-            for (int i = 0; i < args->op.list.size; i++)
+            uint8_t spilled = 0;
+            uint8_t first = 0;
+            for (int i = context->rp - 1; i > sym.low_reg; i--, context->rp--)
             {
-                uint8_t val = compile_internal(args->op.list.items[i], context);
                 instruction.opcode = OP_PUSH;
-                instruction.fields.pair.arg1 = val;
+                instruction.fields.pair.arg1 = i;
                 code_block_write(context->binary->code, instruction);
+                spilled += 1;
+                first = i;
+            }
+
+            if (args != NULL)
+            {
+                for (int i = 0; i < args->op.list.size; i++)
+                {
+                    uint8_t val = compile_internal(args->op.list.items[i], context);
+                    instruction.opcode = OP_PUSH;
+                    instruction.fields.pair.arg1 = val;
+                    code_block_write(context->binary->code, instruction);
+                }
             }
 
             // Call the function
@@ -447,10 +460,22 @@ uint8_t compile_internal(ast_t *ast, compile_context_t *context)
             instruction.fields.pair.arg1 = context->rp;
             code_block_write(context->binary->code, instruction);
 
+            // Unspill any registers
+            if (spilled)
+            {
+                for (int i = first, j = 0; j < spilled; i++, j++, context->rp++)
+                {
+                    instruction.opcode = OP_POP;
+                    instruction.fields.pair.arg1 = i;
+                    code_block_write(context->binary->code, instruction);
+                }
+            }
+
             instruction.opcode = OP_POP;
             instruction.fields.pair.arg1 = context->rp;
             result = context->rp;
             code_block_write(context->binary->code, instruction);
+
             break;
 
         default:

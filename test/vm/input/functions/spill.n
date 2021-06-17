@@ -1,0 +1,9 @@
+fn foo {
+    "Foo"
+}
+
+fn bar {
+    "Bar"
+}
+
+bar() + foo()

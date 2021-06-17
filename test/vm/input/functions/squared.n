@@ -1,0 +1,5 @@
+fn squared (a) {
+    a * a
+}
+
+squared(4)

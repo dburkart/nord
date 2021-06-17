@@ -365,11 +365,12 @@ ast_t *variable_decl(scan_context_t *context)
 
 ast_t *expression_list(scan_context_t *context)
 {
-    ast_t *left = make_list_expr(10);
     ast_t *expr = expression(context);
 
-    // TODO: Handle error
-    assert(expr != NULL);
+    if (expr == NULL)
+        return NULL;
+
+    ast_t *left = make_list_expr(10);
 
     list_expr_append(left, expr);
     left->type = EXPRESSION_LIST;
