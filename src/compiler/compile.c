@@ -352,6 +352,50 @@ uint8_t compile_internal(ast_t *ast, compile_context_t *context)
             }
             break;
 
+        case IF_STATEMENT:
+            // First, we compile our condition
+            result = compile_internal(ast->op.if_stmt.condition, context);
+
+            // Increment rp if necessary
+            if (result == context->rp)
+                context->rp += 1;
+
+            // Set our address to jump to if we evaluate to false. This is a dummy
+            // value for now, we'll come back later and modify it
+            tmp = context->binary->code->size;
+            instruction.opcode = OP_LOADV;
+            instruction.fields.pair.arg1 = context->rp++;
+            instruction.fields.pair.arg2 = 0;
+            code_block_write(context->binary->code, instruction);
+
+            // Load "true" into a register to compare against
+            instruction.opcode = OP_LOAD;
+            instruction.fields.pair.arg1 = context->rp;
+            instruction.fields.pair.arg2 = 1;
+            code_block_write(context->binary->code, instruction);
+
+            instruction.opcode = OP_EQUAL;
+            instruction.fields.triplet.arg1 = 0;
+            instruction.fields.triplet.arg2 = context->rp;
+            instruction.fields.triplet.arg3 = result;
+            code_block_write(context->binary->code, instruction);
+
+            // Condition evaluates to false
+            instruction.opcode = OP_JMP;
+            instruction.fields.pair.arg1 = context->rp - 1;
+            code_block_write(context->binary->code, instruction);
+
+            // Decrement rp since we no longer need our comparison or
+            // jump variables
+            context->rp -= 2;
+
+            // Now we write out our block
+            result = compile_internal(ast->op.if_stmt.body, context);
+
+            addr = context->binary->code->size;
+            context->binary->code->code[tmp].fields.pair.arg2 = addr;
+            break;
+
         case FUNCTION_DECL:
             args = ast->op.fn.args;
 
@@ -385,7 +429,7 @@ uint8_t compile_internal(ast_t *ast, compile_context_t *context)
                     sym.type = SYM_VAR;
                     symbol_map_set(context->symbols, sym);
                     instruction.opcode = OP_POP;
-                    instruction.fields.pair.arg1 = context->rp;
+                    instruction.fields.pair.arg1 = context->rp + i;
                     code_block_write(context->binary->code, instruction);
                 }
                 context->rp += args->op.list.size;
@@ -397,6 +441,10 @@ uint8_t compile_internal(ast_t *ast, compile_context_t *context)
             sym.low_reg = rp;
             sym.location.type = LOC_CODE;
             sym.location.address = addr;
+
+            // We need to write out the function symbol to our new symbol map
+            // to support recursive calls
+            symbol_map_set(context->symbols, sym);
 
             // Now, write out the block
             result = compile_internal(ast->op.fn.body, context);

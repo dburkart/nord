@@ -320,7 +320,7 @@ ast_t *if_statement(scan_context_t *context)
     // Pull off the "if" keyword
     accept(context);
 
-    ast_t *condition = expression_list(context);
+    ast_t *condition = expression(context);
 
     // TODO: Proper error handling!
     assert(condition != NULL);

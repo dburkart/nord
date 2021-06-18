@@ -62,7 +62,8 @@ void symbol_map_set(symbol_map_t *symbol_map, symbol_t symbol)
     uint32_t index = pjw_hash(symbol.name) & (symbol_map->capacity - 1);
 
     // Collision handling, simply look for the next free spot
-    while (symbol_map->items[index].name != NULL)
+    while (symbol.name != symbol_map->items[index].name &&
+           symbol_map->items[index].name != NULL)
     {
         index += 1;
     }
