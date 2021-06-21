@@ -26,6 +26,12 @@
 #define IS_NUMBERISH2(a) (vm->registers[instruction.fields.pair.a].type == VAL_INT || vm->registers[instruction.fields.pair.a].type == VAL_FLOAT || vm->registers[instruction.fields.pair.a].type == VAL_BOOLEAN)
 #define STRING3(a) vm->registers[instruction.fields.triplet.a].contents.string
 
+void vm_stack_create(vm_t *);
+void vm_stack_push(vm_t *, value_t val);
+value_t vm_stack_pop(vm_t *);
+
+void vm_cstack_create(vm_t *);
+
 void value_print(value_t v)
 {
     switch (v.type)
@@ -59,12 +65,10 @@ vm_t *vm_create(binary_t *binary)
     vm->memory = binary->data;
 
     // Set up the stack
-    vm->stack = memory_create();
-    vm->sp = 0;
+    vm_stack_create(vm);
 
     // Set up the call stack
-    vm->call_stack = memory_create();
-    vm->csp = 0;
+    vm_cstack_create(vm);
 
     vm->code = binary->code;
     vm->pc = 0;
@@ -74,41 +78,53 @@ vm_t *vm_create(binary_t *binary)
     return vm;
 }
 
-// Push a value onto the stack of a vm_t, returning the register it is stored in
-int vm_stack_push(vm_t *vm, value_t val)
+void vm_stack_create(vm_t *vm)
 {
-    int reg = vm->sp;
+    vm->stack_size = 256;
+    vm->stack = (value_t *)malloc(sizeof(value_t) * vm->stack_size);
+    vm->sp = 0;
+}
 
-    memory_set(vm->stack, vm->sp, val);
-    vm->sp++;
+// Push a value onto the stack of a vm_t, returning the register it is stored in
+void vm_stack_push(vm_t *vm, value_t val)
+{
+    if (vm->sp + 1 >= vm->stack_size)
+    {
+        vm->stack_size *= 2;
+        vm->stack = realloc(vm->stack, vm->stack_size);
+    }
 
-    return reg;
+    vm->stack[vm->sp++] = val;
 }
 
 value_t vm_stack_pop(vm_t *vm)
 {
     vm->sp--;
-    value_t val = memory_get(vm->stack, vm->sp);
-
-    return val;
+    return vm->stack[vm->sp];
 }
 
-int vm_cstack_push(vm_t *vm, value_t val)
+void vm_cstack_create(vm_t *vm)
 {
-    int reg = vm->csp;
+    vm->cstack_size = 256;
+    vm->call_stack = (value_t *)malloc(sizeof(value_t) * vm->cstack_size);
+    vm->csp = 0;
+}
 
-    memory_set(vm->call_stack, vm->csp, val);
-    vm->csp++;
+void vm_cstack_push(vm_t *vm, value_t val)
+{
+    if (vm->csp + 1 >= vm->cstack_size)
+    {
+        vm->cstack_size *= 2;
+        vm->call_stack = realloc(vm->call_stack, vm->cstack_size);
+    }
 
-    return reg;
+    vm->call_stack[vm->csp++] = val;
 }
 
 value_t vm_cstack_pop(vm_t *vm)
 {
     vm->csp--;
-    value_t val = memory_get(vm->call_stack, vm->csp);
-
-    return val;
+    return vm->call_stack[vm->csp];
 }
 
 void vm_execute(vm_t *vm)
@@ -150,27 +166,26 @@ void vm_execute(vm_t *vm)
                 break;
 
             case OP_SAVE:
+                // Key
                 ret.type = VAL_INT;
                 ret.contents.number = instruction.fields.pair.arg1;
-                result.type = VAL_TUPLE;
+                vm_stack_push(vm, ret);
 
-                result.contents.tuple.first = malloc(sizeof(value_t));
-                result.contents.tuple.second = malloc(sizeof(value_t));
+                // Value
+                vm_stack_push(vm, vm->registers[instruction.fields.pair.arg1]);
 
-                *(result.contents.tuple.first) = ret;
-                *(result.contents.tuple.second) = vm->registers[instruction.fields.pair.arg1];
-                vm_stack_push(vm, result);
                 break;
 
             case OP_RESTORE:
                 for (int i = 0; i < instruction.fields.pair.arg2; i++)
                 {
+                    // Value
                     result = vm_stack_pop(vm);
-                    assert(result.type == VAL_TUPLE);
-                    ret = *(result.contents.tuple.first);
-                    vm->registers[ret.contents.number] = *(result.contents.tuple.second);
-                    free(result.contents.tuple.first);
-                    free(result.contents.tuple.second);
+
+                    // Key
+                    ret = vm_stack_pop(vm);
+
+                    vm->registers[ret.contents.number] = result;
                 }
                 break;
 
@@ -344,10 +359,10 @@ void vm_dump(vm_t *vm)
     }
 
     printf("\n[stack contents]\n");
-    for (int i = 0; i < vm->stack->capacity; i++)
+    for (int i = 0; i < vm->sp; i++)
     {
         printf("   %04d ", i);
-        value_print(vm->stack->contents[i]);
+        value_print(vm->stack[i]);
     }
 
     printf("\n[register contents]\n");

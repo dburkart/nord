@@ -17,11 +17,13 @@ typedef struct
     memory_t *memory;
 
     // Stack-related data structures
-    memory_t *stack;
+    int stack_size;
+    value_t *stack;
     // Stack pointer
     int sp;
 
-    memory_t *call_stack;
+    int cstack_size;
+    value_t *call_stack;
     int csp;
 
     // Code-related data structures
@@ -34,8 +36,6 @@ typedef struct
 } vm_t;
 
 vm_t *vm_create(binary_t *);
-int vm_stack_push(vm_t *, value_t val);
-value_t vm_stack_pop(vm_t *);
 
 void vm_execute(vm_t *);
 void vm_dump(vm_t *);
