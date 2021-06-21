@@ -10,7 +10,7 @@ don't know where this is going yet, but it should be fun!
 
 Current State of the Project
 ===============================================================================
-Last Updated: 06/17/2021
+Last Updated: 06/21/2021
 
 Currently, a small subset of the planned language is implemented and working.
 There is support for basic expressions, including arithmetic and comparisons,
@@ -27,12 +27,10 @@ following known limitations exist:
    not handled correctly, resulting in asserts and seg faults for some classes
    of syntax or semantic errors.
    
- - No builtins yet. This means that although we can run scripts we can't, for
-   example, print any output! That is why the nord binary still dumps the VM
-   after execution.
-   
- - Function support is implemented, but it's still pretty basic. Scoping is
-   not fullly implemented, although we're almost there.
+ - No garbage collection or heap as such, only constant pool support.
+ 
+ - Only primitive types (int, float, string, bool) are supported, as we add
+   garbage collection, I'll look to expand to more complex types.
 
 
 Building
