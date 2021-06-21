@@ -94,24 +94,10 @@ uint8_t spill(compile_context_t *context, uint8_t low_reg)
 
         if (symbol.location.address >= low_reg)
         {
-            // We're in a nested context, so spill to the stack
-            if (context->symbols->parent)
-            {
-                instruction.opcode = OP_SAVE;
-                instruction.fields.pair.arg1 = symbol.location.address;
-                code_block_write(context->binary->code, instruction);
-                num_spilled += 1;
-            }
-            else
-            {
-                instruction.opcode = OP_STORE;
-                instruction.fields.pair.arg1 = symbol.location.address;
-                instruction.fields.pair.arg2 = context->mp;
-                code_block_write(context->binary->code, instruction);
-                symbol.location.address = context->mp++;
-                symbol.location.type = LOC_MEMORY;
-                symbol_map_set(context->symbols, symbol);
-            }
+            instruction.opcode = OP_SAVE;
+            instruction.fields.pair.arg1 = symbol.location.address;
+            code_block_write(context->binary->code, instruction);
+            num_spilled += 1;
         }
     }
 
