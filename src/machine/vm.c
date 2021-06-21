@@ -5,6 +5,7 @@
  */
 
 #include <assert.h>
+#include <dlfcn.h>
 #include <stdio.h>
 #include <string.h>
 
@@ -27,9 +28,6 @@
 #define STRING3(a) vm->registers[instruction.fields.triplet.a].contents.string
 
 void vm_stack_create(vm_t *);
-void vm_stack_push(vm_t *, value_t val);
-value_t vm_stack_pop(vm_t *);
-
 void vm_cstack_create(vm_t *);
 
 void value_print(value_t v)
@@ -334,6 +332,29 @@ void vm_execute(vm_t *vm)
                 ret.contents.number = vm->pc;
                 vm_cstack_push(vm, ret);
                 vm->pc = vm->registers[instruction.fields.pair.arg1].contents.number;
+                break;
+
+            case OP_CALL_DYNAMIC:
+                ret = memory_get(vm->memory, instruction.fields.pair.arg2);
+
+                // Function names must be string values. Not sure how they wouldn't
+                // be, so we assert here.
+                assert(ret.type == VAL_STRING);
+
+                char *builtin_name;
+                asprintf(&builtin_name, "builtin__%s", ret.contents.string);
+                void (*builtin)(vm_t *);
+                builtin = (void (*)(vm_t *))dlsym(RTLD_SELF, builtin_name);
+                free(builtin_name);
+
+                // TODO: Maintain a symbol map for future calls?
+
+                // TODO: Proper error handling-- we couldn't find the supplied
+                // runtime symbol
+                assert(builtin != NULL);
+
+                (*builtin)(vm);
+
                 break;
 
             case OP_RETURN:

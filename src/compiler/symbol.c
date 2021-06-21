@@ -85,7 +85,7 @@ symbol_t symbol_map_get(symbol_map_t *symbol_map, char *name)
         return symbol_map_get(symbol_map->parent, name);
 
     // If we have a collision, advance until we find the correct symbol
-    while (strcmp(symbol.name, name))
+    while (symbol.name != NULL && strcmp(symbol.name, name))
     {
         index += 1;
         // TODO: Should we really be assigning here?

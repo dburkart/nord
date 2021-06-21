@@ -69,6 +69,9 @@ typedef enum
     // call <register-addr>
     OP_CALL,
 
+    // calld @<memory-addr>
+    OP_CALL_DYNAMIC,
+
     // return <register>
     OP_RETURN
 } opcode_t;

@@ -13,6 +13,7 @@
 
 #define FORMAT_SINGLE           "%-10s $%d\n"
 #define FORMAT_SINGLE_CONST     "%-10s %d\n"
+#define FORMAT_SINGLE_ADDR      "%-10s @%d\n"
 #define FORMAT_PAIR             "%-10s $%d $%d\n"
 #define FORMAT_PAIR_ADDR        "%-10s $%d @%d\n"
 #define FORMAT_PAIR_CONST_NUM   "%-10s $%d %d\n"
@@ -248,6 +249,13 @@ char *disassemble_instruction(memory_t *mem, instruction_t instruction)
             asprintf(&assembly, FORMAT_SINGLE,
                      "call",
                      instruction.fields.pair.arg1
+                    );
+            break;
+
+        case OP_CALL_DYNAMIC:
+            asprintf(&assembly, FORMAT_SINGLE_ADDR,
+                     "calld",
+                     instruction.fields.pair.arg2
                     );
             break;
 

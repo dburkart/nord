@@ -12,6 +12,7 @@ SOURCES=$(BASE)/src/compiler/token.c \
         $(BASE)/src/machine/memory.c \
         $(BASE)/src/machine/vm.c \
         $(BASE)/src/machine/disassemble.c \
-        $(BASE)/src/machine/binary.c
+        $(BASE)/src/machine/binary.c \
+        $(BASE)/src/lang/builtins.c
 
 OBJECTS=$(SOURCES:.c=.o)

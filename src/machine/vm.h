@@ -40,4 +40,7 @@ vm_t *vm_create(binary_t *);
 void vm_execute(vm_t *);
 void vm_dump(vm_t *);
 
+void vm_stack_push(vm_t *, value_t val);
+value_t vm_stack_pop(vm_t *);
+
 #endif

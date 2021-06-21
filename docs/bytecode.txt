@@ -22,6 +22,13 @@ set $<dest> <value>
 # Move instruction from <src> to <dest>
 move $<dest> $<src>
 
+# Save the contents of the specified register to the stack. This is used
+# to spill registers before calling a function
+save $<register>
+
+# Restore N number of spilled registers from the stack
+restore <N>
+
 Arithmetic
 ==========
 
@@ -46,7 +53,7 @@ Logic
 The idea for these comparison functions take wholesale from Lua.
 
 # Compare the values in <reg-2> and <reg-3> and if the equality result matches
-# <reg-1>, execute the next instruction. Otherwise jump over the next 
+# <reg-1>, execute the next instruction. Otherwise jump over the next
 # instruction.
 eq $<reg-1> $<reg-2> $<reg-3>
 
@@ -60,3 +67,17 @@ or $<reg-1> $<reg-2> $<reg-3>
 
 # Logical not. Put the result of !<reg-1> in <dest>
 not $<dest> $<reg-1>
+
+Functions
+=========
+
+# Call the function at code address specified by reg, adding the current
+# frame to the call stack
+call $<reg>
+
+# Call Dynamic. Calls the named function at address <name>
+calld @<name>
+
+# Return from the current function, pushing the contents of <reg> onto the
+# stack.
+return $<reg>

@@ -540,6 +540,38 @@ uint8_t compile_internal(ast_t *ast, compile_context_t *context)
             sym = symbol_map_get(context->symbols, ast->op.call.name);
             args = ast->op.call.args;
 
+            if (sym.location.type == LOC_UNDEF)
+            {
+                // TODO: We don't handle imported symbols here, only builtins
+                val.type = VAL_STRING;
+                val.contents.string = ast->op.call.name;
+                memory_set(context->binary->data, context->mp, val);
+                tmp = context->mp;
+                context->mp += 1;
+
+                if (args != NULL)
+                {
+                    for (int i = 0; i < args->op.list.size; i++)
+                    {
+                        uint8_t val = compile_internal(args->op.list.items[i], context);
+                        instruction.opcode = OP_PUSH;
+                        instruction.fields.pair.arg1 = val;
+                        code_block_write(context->binary->code, instruction);
+                    }
+                }
+
+                instruction.opcode = OP_CALL_DYNAMIC;
+                instruction.fields.pair.arg2 = tmp;
+                code_block_write(context->binary->code, instruction);
+
+                instruction.opcode = OP_POP;
+                instruction.fields.pair.arg1 = context->rp;
+                result = context->rp;
+                code_block_write(context->binary->code, instruction);
+
+                break;
+            }
+
             // Spill symbols
             tmp = spill(context, sym.low_reg);
 

@@ -45,32 +45,9 @@ int main(int argc, char *argv[])
         context.position = 0;
 
         ast_t *syntax_tree = parse(&context);
-
-        printf("Abstract Syntax Tree\n");
-        printf("====================\n\n");
-        print_ast(&context, syntax_tree);
-        printf("\n");
-
         binary_t *binary = compile(argv[i], input, syntax_tree);
-
-        printf("Instructions\n");
-        printf("============\n\n");
-        char *listing = disassemble(binary);
-        printf("%s", listing);
-        free(listing);
-
-        printf("\n");
-
-        printf("Size of input text (in bytes): %lu\n", fsize);
-        printf("Size of compiled program (in bytes): %lu\n\n", sizeof(instruction_t) * binary->code->size);
-
         vm_t *vm = vm_create(binary);
         vm_execute(vm);
-
-        printf("Virtual Machine Dump\n");
-        printf("====================\n\n");
-        vm_dump(vm);
-
         free(input);
     }
 
