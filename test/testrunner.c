@@ -15,7 +15,7 @@
 #include <time.h>
 #include <unistd.h>
 
-#define SUBSYSTEM_COUNT 4
+#define SUBSYSTEM_COUNT 5
 #define USAGE "Usage %s:\n    --rebase  Rebaseline failing tests\n"
 #define HRULE "================================================================================\n"
 
@@ -26,7 +26,8 @@ const char *subsystems[SUBSYSTEM_COUNT] = {
     "lex",
     "parse",
     "compile",
-    "vm"
+    "vm",
+    "interpret"
 };
 
 typedef struct

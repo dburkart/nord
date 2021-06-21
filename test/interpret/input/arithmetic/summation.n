@@ -1,0 +1,10 @@
+fn summation(x) {
+    if x == 1 {
+        return 1
+    }
+
+    x + summation(x - 1)
+}
+
+var sum = summation(20)
+print(sum)

@@ -2,7 +2,7 @@ BASE = ..
 
 include $(BASE)/Makefile.shared
 
-all: runner lex/run parse/run compile/run vm/run
+all: runner lex/run parse/run compile/run vm/run interpret/run
 	@echo Running Test Suite...
 	@echo
 	@./testrunner
@@ -26,8 +26,13 @@ vm/run:
 	$(CC) -c $(CFLAGS) -I$(BASE)/src $@.c -o $@.o
 	$(CC) $(CFLAGS) -I$(BASE)/src -o $@ $(OBJECTS) $@.o
 
+interpret/run:
+	$(CC) -c $(CFLAGS) -I$(BASE)/src $@.c -o $@.o
+	$(CC) $(CFLAGS) -I$(BASE)/src -o $@ $(OBJECTS) $@.o
+
 clean:
 	rm -f lex/run{,.o}
 	rm -f parse/run{,.o}
 	rm -f compile/run{,.o}
 	rm -f vm/run{,.o}
+	rm -f interpret/run{,.o}

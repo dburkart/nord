@@ -1,0 +1,9 @@
+fn concat(str, num) {
+    if num == 1 {
+        return str
+    }
+    str + concat(str, num - 1)
+}
+
+var a = "Foo"
+print(concat(a, 10))
