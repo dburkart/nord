@@ -30,6 +30,10 @@ typedef enum
     OP_PUSH,
     // pop <register>
     OP_POP,
+    // save <register>
+    OP_SAVE,
+    // restore <num-registers>
+    OP_RESTORE,
 
     // -- Jumps
 

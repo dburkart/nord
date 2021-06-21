@@ -5,11 +5,11 @@
    0003 {STRING:Bar}
 
 [stack contents]
-   0000 {STRING:Bar}
+   0000 {TUPLE}
    0001 {STRING:Foo}
 
 [register contents]
-   0001 {STRING:FooBar}
-   0002 {STRING:Bar}
+   0001 {STRING:BarFoo}
+   0002 {STRING:Foo}
 
 stack pointer: 0

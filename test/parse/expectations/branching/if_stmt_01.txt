@@ -2,10 +2,9 @@ STMT LIST
   ↳ DECLARE(IDENTIFIER) -> a
   ⋅ ↳ LITERAL(NUMBER) -> 10
   ↳ IF
-  ⋅ ↳ ARGUMENTS
-  ⋅ ⋅ ↳ BINARY(GREATER)
-  ⋅ ⋅ ⋅ ↳ LITERAL(IDENTIFIER) -> a
-  ⋅ ⋅ ⋅ ↳ LITERAL(NUMBER) -> 1
+  ⋅ ↳ BINARY(GREATER)
+  ⋅ ⋅ ↳ LITERAL(IDENTIFIER) -> a
+  ⋅ ⋅ ↳ LITERAL(NUMBER) -> 1
   ⋅ ↳ STMT LIST
   ⋅ ⋅ ↳ ASSIGN(IDENTIFIER) -> a
   ⋅ ⋅ ⋅ ↳ BINARY(MINUS)

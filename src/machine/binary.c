@@ -158,6 +158,9 @@ void binary_write(binary_t *binary, const char *path)
                 break;
             case VAL_NONE:
                 ;
+            case VAL_TUPLE:
+                // TODO: Handle
+                ;
         }
     }
 

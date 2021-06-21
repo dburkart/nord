@@ -1,0 +1,9 @@
+fn summation(x) {
+    if x == 1 {
+        return 1
+    }
+
+    return x + summation(x - 1)
+}
+
+var a = summation(20)

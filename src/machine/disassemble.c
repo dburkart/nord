@@ -12,6 +12,7 @@
 #include "memory.h"
 
 #define FORMAT_SINGLE           "%-10s $%d\n"
+#define FORMAT_SINGLE_CONST     "%-10s %d\n"
 #define FORMAT_PAIR             "%-10s $%d $%d\n"
 #define FORMAT_PAIR_ADDR        "%-10s $%d @%d\n"
 #define FORMAT_PAIR_CONST_NUM   "%-10s $%d %d\n"
@@ -62,36 +63,45 @@ char *disassemble_instruction(memory_t *mem, instruction_t instruction)
     {
         // load <register> <address>
         case OP_LOAD:
-            // When disassembling a load instruction, we instead output a
-            // pseudo-instruction, "set", which sets values directly to
-            // registers.
             value = memory_get(mem, instruction.fields.pair.arg2);
 
+            if (value.type == VAL_NONE)
+            {
+                asprintf(&assembly, FORMAT_PAIR_ADDR,
+                        "load",
+                        instruction.fields.pair.arg1,
+                        instruction.fields.pair.arg2
+                    );
+            }
+            // When disassembling a load instruction, we instead output a
+            // pseudo-instruction, "set", which sets values directly to
+            // registers. We do this only for "constant" values though.
+            else
+            {
+                if (value.type == VAL_INT)
+                    asprintf(&str, "%d", value.contents.number);
+                else if (value.type == VAL_STRING)
+                    asprintf(&str, "\"%s\"", value.contents.string);
+                else if (value.type == VAL_FLOAT)
+                    asprintf(&str, "%f", value.contents.real);
+                else if (value.type == VAL_BOOLEAN)
+                    asprintf(&str, "%s", (value.contents.boolean == true) ? "true" : "false");
+                asprintf(&assembly, FORMAT_PAIR_CONST_STR,
+                        "set",
+                        instruction.fields.pair.arg1,
+                        str
+                        );
+                free(str);
+            }
 
-            if (value.type == VAL_INT)
-                asprintf(&str, "%d", value.contents.number);
-            else if (value.type == VAL_STRING)
-                asprintf(&str, "\"%s\"", value.contents.string);
-            else if (value.type == VAL_FLOAT)
-                asprintf(&str, "%f", value.contents.real);
-            else if (value.type == VAL_BOOLEAN)
-                asprintf(&str, "%s", (value.contents.boolean == true) ? "true" : "false");
-
-            asprintf(&assembly, FORMAT_PAIR_CONST_STR,
-                     "set",
-                     instruction.fields.pair.arg1,
-                     str
-                     );
-
-            free(str);
             break;
 
         // load <register> <value>
         case OP_LOADV:
             asprintf(&assembly, FORMAT_PAIR_CONST_NUM,
                      "loadv",
-                     instruction.fields.triplet.arg1,
-                     instruction.fields.triplet.arg3
+                     instruction.fields.pair.arg1,
+                     instruction.fields.pair.arg2
                     );
             break;
 
@@ -99,8 +109,8 @@ char *disassemble_instruction(memory_t *mem, instruction_t instruction)
         case OP_STORE:
             asprintf(&assembly, FORMAT_PAIR_ADDR,
                      "store",
-                     instruction.fields.triplet.arg1,
-                     instruction.fields.triplet.arg3
+                     instruction.fields.pair.arg1,
+                     instruction.fields.pair.arg2
                     );
             break;
 
@@ -126,6 +136,20 @@ char *disassemble_instruction(memory_t *mem, instruction_t instruction)
             asprintf(&assembly, FORMAT_SINGLE,
                      "pop",
                      instruction.fields.pair.arg1
+                    );
+            break;
+
+        case OP_SAVE:
+            asprintf(&assembly, FORMAT_SINGLE,
+                     "save",
+                     instruction.fields.pair.arg1
+                    );
+            break;
+
+        case OP_RESTORE:
+            asprintf(&assembly, FORMAT_SINGLE_CONST,
+                     "restore",
+                     instruction.fields.pair.arg2
                     );
             break;
 

@@ -42,6 +42,10 @@ void memory_set(memory_t *mem, int address, value_t val)
 
 value_t memory_get(memory_t *mem, int address)
 {
+    value_t none = {VAL_NONE};
+    if (address > mem->capacity)
+        return none;
+
     // TODO: Error checking
     return mem->contents[address];
 }

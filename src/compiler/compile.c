@@ -76,6 +76,56 @@ void compile_comparison(compile_context_t *context, uint8_t reg, uint8_t opcode,
     code_block_write(context->binary->code, instruction);
 }
 
+uint8_t spill(compile_context_t *context, uint8_t low_reg)
+{
+    instruction_t instruction;
+    uint8_t num_spilled = 0;
+
+    for (int i = 0; i < context->symbols->capacity; i++)
+    {
+        symbol_t symbol = context->symbols->items[i];
+
+        // Don't need to spill anything but register contents
+        if (symbol.type != SYM_VAR || symbol.location.type != LOC_REGISTER)
+        {
+            continue;
+        }
+
+
+        if (symbol.location.address >= low_reg)
+        {
+            // We're in a nested context, so spill to the stack
+            if (context->symbols->parent)
+            {
+                instruction.opcode = OP_SAVE;
+                instruction.fields.pair.arg1 = symbol.location.address;
+                code_block_write(context->binary->code, instruction);
+                num_spilled += 1;
+            }
+            else
+            {
+                instruction.opcode = OP_STORE;
+                instruction.fields.pair.arg1 = symbol.location.address;
+                instruction.fields.pair.arg2 = context->mp;
+                code_block_write(context->binary->code, instruction);
+                symbol.location.address = context->mp++;
+                symbol.location.type = LOC_MEMORY;
+                symbol_map_set(context->symbols, symbol);
+            }
+        }
+    }
+
+    for (int i = context->rp - 1; i > low_reg; i--)
+    {
+        instruction.opcode = OP_SAVE;
+        instruction.fields.pair.arg1 = i;
+        code_block_write(context->binary->code, instruction);
+        num_spilled += 1;
+    }
+
+    return num_spilled;
+}
+
 uint8_t compile_internal(ast_t *ast, compile_context_t *context)
 {
     uint8_t result = 0, left, right;
@@ -114,11 +164,23 @@ uint8_t compile_internal(ast_t *ast, compile_context_t *context)
             result = context->rp;
             break;
         case BINARY:
-            // First get our left and right values
-            left = compile_internal(ast->op.binary.left, context);
-            context->rp += 1;
-            right = compile_internal(ast->op.binary.right, context);
-            context->rp -= 1;
+            // // If either side of the operation is a function call, compile that
+            // // side first. This will ensure that needed spill will happen
+            // // before we compile the other side.
+            // if (ast->op.binary.right->type == FUNCTION_CALL)
+            // {
+            //     right = compile_internal(ast->op.binary.right, context);
+            //     context->rp -= 1;
+            //     left = compile_internal(ast->op.binary.left, context);
+            //     context->rp += 1;
+            // }
+            // else
+            // {
+                left = compile_internal(ast->op.binary.left, context);
+                context->rp += 1;
+                right = compile_internal(ast->op.binary.right, context);
+                context->rp -= 1;
+            // }
 
             switch (ast->op.binary.operator.type)
             {
@@ -327,7 +389,18 @@ uint8_t compile_internal(ast_t *ast, compile_context_t *context)
                     printf("%s", format_error(context->name, context->listing, error, loc));
                     exit(1);
                 }
-                // TODO: Handle memory addresses
+
+                if (sym.location.type == LOC_MEMORY)
+                {
+                    instruction.opcode = OP_LOAD;
+                    instruction.fields.pair.arg1 = context->rp;
+                    instruction.fields.pair.arg2 = sym.location.address;
+                    code_block_write(context->binary->code, instruction);
+                    sym.location.type = LOC_REGISTER;
+                    sym.location.address = context->rp++;
+                    symbol_map_set(context->symbols, sym);
+                }
+
                 result = sym.location.address;
             }
 
@@ -481,17 +554,8 @@ uint8_t compile_internal(ast_t *ast, compile_context_t *context)
             sym = symbol_map_get(context->symbols, ast->op.call.name);
             args = ast->op.call.args;
 
-            // First check low_reg and spill if needed
-            uint8_t spilled = 0;
-            uint8_t first = 0;
-            for (int i = context->rp - 1; i > sym.low_reg; i--, context->rp--)
-            {
-                instruction.opcode = OP_PUSH;
-                instruction.fields.pair.arg1 = i;
-                code_block_write(context->binary->code, instruction);
-                spilled += 1;
-                first = i;
-            }
+            // Spill symbols
+            tmp = spill(context, sym.low_reg);
 
             if (args != NULL)
             {
@@ -514,21 +578,17 @@ uint8_t compile_internal(ast_t *ast, compile_context_t *context)
             instruction.fields.pair.arg1 = context->rp;
             code_block_write(context->binary->code, instruction);
 
-            // Unspill any registers
-            if (spilled)
-            {
-                for (int i = first, j = 0; j < spilled; i++, j++, context->rp++)
-                {
-                    instruction.opcode = OP_POP;
-                    instruction.fields.pair.arg1 = i;
-                    code_block_write(context->binary->code, instruction);
-                }
-            }
-
             instruction.opcode = OP_POP;
             instruction.fields.pair.arg1 = context->rp;
             result = context->rp;
             code_block_write(context->binary->code, instruction);
+
+            if (tmp)
+            {
+                instruction.opcode = OP_RESTORE;
+                instruction.fields.pair.arg2 = tmp;
+                code_block_write(context->binary->code, instruction);
+            }
 
             break;
 

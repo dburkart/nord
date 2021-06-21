@@ -4,6 +4,7 @@
  * SPDX-License-Identifier: BSD-2-Clause
  */
 
+#include <assert.h>
 #include <stdio.h>
 #include <string.h>
 
@@ -44,6 +45,9 @@ void value_print(value_t v)
         case VAL_NONE:
             printf("{NONE}\n");
             break;
+        case VAL_TUPLE:
+            printf("{TUPLE}\n");
+            break;
     }
 }
 
@@ -64,6 +68,8 @@ vm_t *vm_create(binary_t *binary)
 
     vm->code = binary->code;
     vm->pc = 0;
+
+    memset(&vm->registers, 0, 128 * sizeof(value_t));
 
     return vm;
 }
@@ -141,6 +147,31 @@ void vm_execute(vm_t *vm)
 
             case OP_POP:
                 vm->registers[instruction.fields.pair.arg1] = vm_stack_pop(vm);
+                break;
+
+            case OP_SAVE:
+                ret.type = VAL_INT;
+                ret.contents.number = instruction.fields.pair.arg1;
+                result.type = VAL_TUPLE;
+
+                result.contents.tuple.first = malloc(sizeof(value_t));
+                result.contents.tuple.second = malloc(sizeof(value_t));
+
+                *(result.contents.tuple.first) = ret;
+                *(result.contents.tuple.second) = vm->registers[instruction.fields.pair.arg1];
+                vm_stack_push(vm, result);
+                break;
+
+            case OP_RESTORE:
+                for (int i = 0; i < instruction.fields.pair.arg2; i++)
+                {
+                    result = vm_stack_pop(vm);
+                    assert(result.type == VAL_TUPLE);
+                    ret = *(result.contents.tuple.first);
+                    vm->registers[ret.contents.number] = *(result.contents.tuple.second);
+                    free(result.contents.tuple.first);
+                    free(result.contents.tuple.second);
+                }
                 break;
 
             case OP_JMP:
@@ -276,6 +307,8 @@ void vm_execute(vm_t *vm)
                     case VAL_STRING:
                         result.contents.boolean = (bool)!strlen(STR2(arg2));
                         break;
+                    default:
+                        ;
                 }
                 vm->registers[instruction.fields.pair.arg1] = result;
                 break;

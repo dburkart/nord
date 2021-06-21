@@ -29,6 +29,8 @@ void symbol_map_destroy(symbol_map_t *symbol_map)
     free(symbol_map);
 }
 
+#include <stdio.h>
+
 void symbol_map_set(symbol_map_t *symbol_map, symbol_t symbol)
 {
     // When we are 50% full or more, we grow the map. Why 50%? We never want
@@ -62,8 +64,8 @@ void symbol_map_set(symbol_map_t *symbol_map, symbol_t symbol)
     uint32_t index = pjw_hash(symbol.name) & (symbol_map->capacity - 1);
 
     // Collision handling, simply look for the next free spot
-    while (symbol.name != symbol_map->items[index].name &&
-           symbol_map->items[index].name != NULL)
+    while (symbol_map->items[index].name != NULL &&
+           symbol.name != symbol_map->items[index].name)
     {
         index += 1;
     }
