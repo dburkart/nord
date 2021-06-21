@@ -3,7 +3,6 @@
    0001 {BOOLEAN:true}
 
 [stack contents]
-   0000 {INT:16}
 
 [register contents]
    0001 {INT:16}
