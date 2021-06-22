@@ -1,0 +1,7 @@
+if "Foo" == "Bar" {
+    print("Not Possible.")
+}
+
+if "Foo" != "Bar" {
+    print("Foo != Bar")
+}

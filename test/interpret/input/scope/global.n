@@ -1,0 +1,7 @@
+var scope = "global"
+
+fn test() {
+    print(scope)
+}
+
+test()
