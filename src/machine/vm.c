@@ -81,7 +81,7 @@ vm_t *vm_create(binary_t *binary)
 
 void vm_stack_create(vm_t *vm)
 {
-    vm->stack = memory_create(256);
+    vm->stack = memory_create(VM_STACK_SIZE);
     vm->sp = 0;
 }
 
@@ -99,7 +99,7 @@ value_t vm_stack_pop(vm_t *vm)
 
 void vm_cstack_create(vm_t *vm)
 {
-    vm->call_stack = memory_create(256);
+    vm->call_stack = memory_create(VM_STACK_SIZE);
     vm->csp = 0;
 }
 
@@ -124,12 +124,22 @@ void vm_execute(vm_t *vm)
         value_t result;
         string_t *s1, *s2;
         char *stmp;
+        memory_t *mem;
 
         switch (instruction.opcode)
         {
             // Load a value into the specified register
             case OP_LOAD:
-                vm->registers[instruction.fields.pair.arg1] = memory_get(vm->memory, instruction.fields.pair.arg2);
+                if (instruction.fields.pair.arg1 & 0x70)
+                {
+                    mem = vm->stack;
+                }
+                else
+                {
+                    mem = vm->memory;
+                }
+
+                vm->registers[instruction.fields.pair.arg1] = memory_get(mem, instruction.fields.pair.arg2);
                 break;
 
             case OP_LOADV:

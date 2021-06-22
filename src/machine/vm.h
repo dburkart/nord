@@ -11,7 +11,8 @@
 #include "value.h"
 #include "binary.h"
 
-#define VM_NUM_REGISTERS 128
+#define VM_NUM_REGISTERS 256
+#define VM_STACK_SIZE 256
 
 typedef struct
 {
