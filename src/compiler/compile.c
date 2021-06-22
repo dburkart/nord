@@ -115,7 +115,7 @@ uint8_t spill(compile_context_t *context, uint8_t low_reg)
 
 uint8_t compile_internal(ast_t *ast, compile_context_t *context)
 {
-    uint8_t result = 0, left, right;
+    uint8_t result = 0, left, right, *regs;
     symbol_t sym;
     instruction_t instruction;
     value_t val;
@@ -406,21 +406,28 @@ uint8_t compile_internal(ast_t *ast, compile_context_t *context)
             break;
 
         case TUPLE:
+            regs = (uint8_t *)malloc(sizeof(uint8_t) * ast->op.list.size);
+            tmp = context->rp;
+
             // First, calculate the values of the tuple
             for (int i = 0; i < ast->op.list.size; i++)
             {
-                result = compile_internal(ast->op.list.items[i], context);
-                context->rp++;
+                regs[i] = compile_internal(ast->op.list.items[i], context);
+
+                if (regs[i] == context->rp)
+                    context->rp++;
             }
 
             // Now, push them on the stack in reverse order
-            for (int i = context->rp - 1, j = 0; j < ast->op.list.size; j++, i--)
+            for (int i = ast->op.list.size - 1; i >= 0; i--)
             {
                 instruction.opcode = OP_PUSH;
-                instruction.fields.pair.arg1 = i;
+                instruction.fields.pair.arg1 = regs[i];
                 code_block_write(context->binary->code, instruction);
-                context->rp--;
             }
+
+            context->rp = tmp;
+            free(regs);
 
             // Now, set register 0 to the number of args
             instruction.opcode = OP_LOADV;
@@ -587,22 +594,42 @@ uint8_t compile_internal(ast_t *ast, compile_context_t *context)
                 // TODO: We don't handle imported symbols here, only builtins
                 val = string_create(ast->op.call.name);
                 memory_set(context->binary->data, context->mp, val);
-                tmp = context->mp;
+                addr = context->mp;
                 context->mp += 1;
 
                 if (args != NULL)
                 {
+                    regs = (uint8_t *)malloc(sizeof(uint8_t) * args->op.list.size);
+                    tmp = context->rp;
+
+                    // First, calculate the values of our arguments
                     for (int i = 0; i < args->op.list.size; i++)
                     {
-                        uint8_t val = compile_internal(args->op.list.items[i], context);
+                        regs[i] = compile_internal(args->op.list.items[i], context);
+
+                        if (regs[i] == context->rp)
+                            context->rp++;
+                    }
+
+                    // Now, push them on the stack in reverse order
+                    for (int i = args->op.list.size - 1; i >= 0; i--)
+                    {
                         instruction.opcode = OP_PUSH;
-                        instruction.fields.pair.arg1 = val;
+                        instruction.fields.pair.arg1 = regs[i];
                         code_block_write(context->binary->code, instruction);
                     }
+
+                    context->rp = tmp;
+                    free(regs);
                 }
 
+                instruction.opcode = OP_LOADV;
+                instruction.fields.pair.arg1 = 0;
+                instruction.fields.pair.arg2 = args->op.list.size;
+                code_block_write(context->binary->code, instruction);
+
                 instruction.opcode = OP_CALL_DYNAMIC;
-                instruction.fields.pair.arg2 = tmp;
+                instruction.fields.pair.arg2 = addr;
                 code_block_write(context->binary->code, instruction);
 
                 instruction.opcode = OP_POP;
