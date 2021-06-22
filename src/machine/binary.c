@@ -12,6 +12,7 @@
 
 #include "binary.h"
 #include "memory.h"
+#include "value.h"
 
 typedef struct __attribute__((__packed__))
 {
@@ -71,7 +72,7 @@ binary_t *binary_load(const char *path)
             case VAL_STRING:
                 str = (char *)malloc(packed.v_size);
                 read(fd, str, packed.v_size);
-                val = make_string(str);
+                val = string_create(str);
                 break;
             default:
                 ;

@@ -30,5 +30,6 @@ unary           -> ( "!" | "-" ) unary
                  | primary ;
 primary         -> function_call
                  | IDENTIFIER | NUMBER | FLOAT | STRING | "true" | "false" | "nil"
-                 | "(" expression ")" ;
+                 | tuple ;
+tuple           -> "(" expression_list ")";
 function_call   -> IDENTIFIER "(" ( expression_list )* ")" ;

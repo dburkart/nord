@@ -11,6 +11,7 @@
 
 #include "bytecode.h"
 #include "vm.h"
+#include "value.h"
 
 // Defines to make handling type information less verbose
 #define REG_TYPE3(a, t) vm->registers[instruction.fields.triplet.a].type == t
@@ -256,7 +257,7 @@ void vm_execute(vm_t *vm)
                 else if (REG_TYPE3(arg2, VAL_STRING) || REG_TYPE3(arg3, VAL_STRING))
                 {
                     asprintf(&stmp, "%s%s", STRING3(arg2), STRING3(arg3));
-                    result = make_string(stmp);
+                    result = string_create(stmp);
                 }
                 else
                 {

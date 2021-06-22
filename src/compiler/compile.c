@@ -352,7 +352,7 @@ uint8_t compile_internal(ast_t *ast, compile_context_t *context)
                 result = context->rp;
 
                 // First, set the constant in the text section of our binary
-                val = make_string(ast->op.literal.value);
+                val = string_create(ast->op.literal.value);
                 memory_set(context->binary->data, context->mp, val);
 
                 // Now, write out an instruction to load it into a register
@@ -398,10 +398,52 @@ uint8_t compile_internal(ast_t *ast, compile_context_t *context)
                 instruction.fields.pair.arg2 = (ast->op.literal.token.type == TRUE) ? 1 : 0;
                 code_block_write(context->binary->code, instruction);
             }
+
             break;
 
         case GROUP:
             result = compile_internal(ast->op.group, context);
+            break;
+
+        case TUPLE:
+            // First, calculate the values of the tuple
+            for (int i = 0; i < ast->op.list.size; i++)
+            {
+                result = compile_internal(ast->op.list.items[i], context);
+                context->rp++;
+            }
+
+            // Now, push them on the stack in reverse order
+            for (int i = context->rp - 1, j = 0; j < ast->op.list.size; j++, i--)
+            {
+                instruction.opcode = OP_PUSH;
+                instruction.fields.pair.arg1 = i;
+                code_block_write(context->binary->code, instruction);
+                context->rp--;
+            }
+
+            // Now, set register 0 to the number of args
+            instruction.opcode = OP_LOADV;
+            instruction.fields.pair.arg1 = 0;
+            instruction.fields.pair.arg2 = ast->op.list.size;
+            code_block_write(context->binary->code, instruction);
+
+            // Call tuple
+            val = string_create("tuple");
+            memory_set(context->binary->data, context->mp, val);
+            tmp = context->mp;
+            context->mp += 1;
+
+            instruction.opcode = OP_CALL_DYNAMIC;
+            instruction.fields.pair.arg2 = tmp;
+            code_block_write(context->binary->code, instruction);
+
+            instruction.opcode = OP_POP;
+            instruction.fields.pair.arg1 = context->rp;
+            code_block_write(context->binary->code, instruction);
+
+            result = context->rp;
+
             break;
 
         case STATEMENT_LIST:
@@ -543,7 +585,7 @@ uint8_t compile_internal(ast_t *ast, compile_context_t *context)
             if (sym.location.type == LOC_UNDEF)
             {
                 // TODO: We don't handle imported symbols here, only builtins
-                val = make_string(ast->op.call.name);
+                val = string_create(ast->op.call.name);
                 memory_set(context->binary->data, context->mp, val);
                 tmp = context->mp;
                 context->mp += 1;

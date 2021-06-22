@@ -27,6 +27,7 @@ ast_t *term(scan_context_t *);
 ast_t *term_md(scan_context_t *);
 ast_t *unary(scan_context_t *);
 ast_t *primary(scan_context_t *);
+ast_t *tuple(scan_context_t *);
 ast_t *function_call(scan_context_t *);
 
 ast_t *parse(scan_context_t *context)
@@ -113,6 +114,15 @@ void print_ast_internal(scan_context_t *context, ast_t *ast, int indent)
                 print_ast_internal(context, ast->op.list.items[i], indent + 2);
             }
             break;
+
+        case TUPLE:
+            printf("TUPLE\n");
+            for (int i = 0; i < ast->op.list.size; i++)
+            {
+                print_ast_internal(context, ast->op.list.items[i], indent + 2);
+            }
+            break;
+
         case IF_STATEMENT:
             printf("IF\n");
             print_ast_internal(context, ast->op.if_stmt.condition, indent + 2);
@@ -607,15 +617,32 @@ ast_t *primary(scan_context_t *context)
         return literal;
     }
 
+    return tuple(context);
+}
+
+ast_t *tuple(scan_context_t *context)
+{
     if (peek(context).type == L_PAREN)
     {
         // Consume the parenthesis
         token_t paren = accept(context);
 
-        ast_t *expr = expression(context);
+        ast_t *expr = expression_list(context);
         expr->location.start = paren.start;
         paren = accept(context);
         expr->location.end = paren.end;
+
+        if (expr->op.list.size == 1)
+        {
+            ast_t *tmp = make_group_expr(expr->op.list.items[0]);
+            free(expr->op.list.items);
+            free(expr);
+            expr = tmp;
+        }
+        else
+        {
+            expr->type = TUPLE;
+        }
 
         if (paren.type != R_PAREN)
         {
@@ -626,7 +653,7 @@ ast_t *primary(scan_context_t *context)
             exit(1);
         }
 
-        return make_group_expr(expr);
+        return expr;
     }
 
     return NULL;

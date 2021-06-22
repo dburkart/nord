@@ -23,7 +23,7 @@ typedef struct expr_t
         LITERAL, GROUP, STATEMENT_LIST,
         FUNCTION_DECL, FUNCTION_CALL,
         EXPRESSION_LIST, VARIABLE_LIST,
-        IF_STATEMENT
+        IF_STATEMENT, TUPLE
     } type;
 
     union
@@ -85,8 +85,6 @@ typedef struct expr_t
             struct expr_t *condition;
             struct expr_t *body;
         } if_stmt;
-
-
 
         struct expr_t *group;
     } op;

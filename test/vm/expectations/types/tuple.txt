@@ -1,0 +1,13 @@
+[memory contents]
+   0000 {BOOLEAN:false}
+   0001 {BOOLEAN:true}
+   0002 {STRING:tuple}
+
+[stack contents]
+
+[register contents]
+   0001 {TUPLE}
+   0002 {INT:2}
+   0003 {INT:3}
+
+stack pointer: 0

@@ -44,14 +44,23 @@ typedef struct obj_t
     value_type_e type;
 } object_t;
 
-//
+// String object
 typedef struct
 {
     object_t object;
+    int length;
     char *string;
 } string_t;
 
-value_t make_string(char *string);
+value_t string_create(char *string);
 
+typedef struct
+{
+    object_t object;
+    int length;
+    value_t *values;
+} tuple_t;
+
+value_t tuple_create(int length);
 
 #endif

@@ -1,0 +1,9 @@
+loadv      $1 1
+loadv      $2 2
+loadv      $3 3
+push       $3
+push       $2
+push       $1
+loadv      $0 3
+calld      @2
+pop        $1
