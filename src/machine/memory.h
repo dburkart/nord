@@ -10,26 +10,7 @@
 #include <stdbool.h>
 #include <stdlib.h>
 
-typedef struct v_t
-{
-    enum
-    {
-        VAL_NONE, VAL_INT, VAL_STRING,
-        VAL_FLOAT, VAL_BOOLEAN, VAL_TUPLE
-    } type;
-
-    union
-    {
-        int number;
-        float real;
-        char *string;
-        bool boolean;
-        struct {
-            struct v_t *first;
-            struct v_t *second;
-        } tuple;
-    } contents;
-} value_t;
+#include "value.h"
 
 typedef struct
 {

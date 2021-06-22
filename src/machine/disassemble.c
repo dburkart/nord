@@ -59,6 +59,7 @@ char *disassemble_instruction(memory_t *mem, instruction_t instruction)
     char *assembly;
     char *str;
     value_t value;
+    string_t *s1;
 
     switch (instruction.opcode)
     {
@@ -82,7 +83,10 @@ char *disassemble_instruction(memory_t *mem, instruction_t instruction)
                 if (value.type == VAL_INT)
                     asprintf(&str, "%d", value.contents.number);
                 else if (value.type == VAL_STRING)
-                    asprintf(&str, "\"%s\"", value.contents.string);
+                {
+                    s1 = (string_t *)value.contents.object;
+                    asprintf(&str, "\"%s\"", s1->string);
+                }
                 else if (value.type == VAL_FLOAT)
                     asprintf(&str, "%f", value.contents.real);
                 else if (value.type == VAL_BOOLEAN)

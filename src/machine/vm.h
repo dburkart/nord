@@ -8,6 +8,7 @@
 #define VM_H
 
 #include "memory.h"
+#include "value.h"
 #include "binary.h"
 
 #define VM_NUM_REGISTERS 128

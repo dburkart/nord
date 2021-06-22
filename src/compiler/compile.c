@@ -11,6 +11,7 @@
 #include "parse.h"
 #include "symbol.h"
 #include "machine/memory.h"
+#include "machine/value.h"
 #include "util/error.h"
 
 typedef struct
@@ -351,8 +352,7 @@ uint8_t compile_internal(ast_t *ast, compile_context_t *context)
                 result = context->rp;
 
                 // First, set the constant in the text section of our binary
-                val.type = VAL_STRING;
-                val.contents.string = ast->op.literal.value;
+                val = make_string(ast->op.literal.value);
                 memory_set(context->binary->data, context->mp, val);
 
                 // Now, write out an instruction to load it into a register
@@ -543,8 +543,7 @@ uint8_t compile_internal(ast_t *ast, compile_context_t *context)
             if (sym.location.type == LOC_UNDEF)
             {
                 // TODO: We don't handle imported symbols here, only builtins
-                val.type = VAL_STRING;
-                val.contents.string = ast->op.call.name;
+                val = make_string(ast->op.call.name);
                 memory_set(context->binary->data, context->mp, val);
                 tmp = context->mp;
                 context->mp += 1;

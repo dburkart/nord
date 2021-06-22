@@ -52,6 +52,7 @@ binary_t *binary_load(const char *path)
     {
         // First, read off our packed memory value descriptor and create a value_t
         value_t val;
+        char *str;
         packed_memory_value_t packed;
         read(fd, &packed, sizeof(packed_memory_value_t));
         bytes_read += sizeof(packed_memory_value_t);
@@ -68,8 +69,9 @@ binary_t *binary_load(const char *path)
                 read(fd, &val.contents.boolean, packed.v_size);
                 break;
             case VAL_STRING:
-                val.contents.string = (char *)malloc(packed.v_size);
-                read(fd, val.contents.string, packed.v_size);
+                str = (char *)malloc(packed.v_size);
+                read(fd, str, packed.v_size);
+                val = make_string(str);
                 break;
             default:
                 ;
@@ -104,6 +106,7 @@ void binary_write(binary_t *binary, const char *path)
     // Measure our data section
     uint8_t *data_section;
     size_t total_size = 0;
+    string_t *s1;
     packed_memory_value_t *packed_values = (packed_memory_value_t *)malloc(sizeof(packed_memory_value_t) * binary->data->capacity);
     for (int i = 0; i < binary->data->capacity; i++)
     {
@@ -121,7 +124,8 @@ void binary_write(binary_t *binary, const char *path)
                 size = sizeof(bool);
                 break;
             case VAL_STRING:
-                size = strlen(binary->data->contents[i].contents.string) + 1;
+                s1 = (string_t *)binary->data->contents[i].contents.object;
+                size = strlen(s1->string) + 1;
                 break;
             default:
                 ;
@@ -154,7 +158,8 @@ void binary_write(binary_t *binary, const char *path)
                 write(fd, &binary->data->contents[i].contents.boolean, packed_values[i].v_size);
                 break;
             case VAL_STRING:
-                write(fd, binary->data->contents[i].contents.string, packed_values[i].v_size);
+                s1 = (string_t *)binary->data->contents[i].contents.object;
+                write(fd, s1->string, packed_values[i].v_size);
                 break;
             case VAL_NONE:
                 ;

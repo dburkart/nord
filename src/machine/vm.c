@@ -17,7 +17,7 @@
 #define BOOL2(a) vm->registers[instruction.fields.pair.a].contents.boolean
 #define FLOAT2(a) vm->registers[instruction.fields.pair.a].contents.real
 #define NUM2(a) vm->registers[instruction.fields.pair.a].contents.number
-#define STR2(a) vm->registers[instruction.fields.pair.a].contents.string
+#define STR2(a) ((string_t *)vm->registers[instruction.fields.pair.a].contents.object)->string
 #define NUM3(a) vm->registers[instruction.fields.triplet.a].contents.number
 #define NUM_OR_FLOAT3(a) ((vm->registers[instruction.fields.triplet.a].type == VAL_FLOAT) ? vm->registers[instruction.fields.triplet.a].contents.real : vm->registers[instruction.fields.triplet.a].contents.number)
 #define NUM_OR_FLOAT_OR_BOOL3(a) ((vm->registers[instruction.fields.triplet.a].type == VAL_FLOAT) ? vm->registers[instruction.fields.triplet.a].contents.real : \
@@ -25,20 +25,22 @@
                                    vm->registers[instruction.fields.triplet.a].contents.boolean))
 #define IS_NUMBERISH3(a) (vm->registers[instruction.fields.triplet.a].type == VAL_INT || vm->registers[instruction.fields.triplet.a].type == VAL_FLOAT || vm->registers[instruction.fields.triplet.a].type == VAL_BOOLEAN)
 #define IS_NUMBERISH2(a) (vm->registers[instruction.fields.pair.a].type == VAL_INT || vm->registers[instruction.fields.pair.a].type == VAL_FLOAT || vm->registers[instruction.fields.pair.a].type == VAL_BOOLEAN)
-#define STRING3(a) vm->registers[instruction.fields.triplet.a].contents.string
+#define STRING3(a) ((string_t *)vm->registers[instruction.fields.triplet.a].contents.object)->string
 
 void vm_stack_create(vm_t *);
 void vm_cstack_create(vm_t *);
 
 void value_print(value_t v)
 {
+    string_t *s;
     switch (v.type)
     {
         case VAL_INT:
             printf("{INT:%d}\n", v.contents.number);
             break;
         case VAL_STRING:
-            printf("{STRING:%s}\n", v.contents.string);
+            s = (string_t *)v.contents.object;
+            printf("{STRING:%s}\n", s->string);
             break;
         case VAL_FLOAT:
             printf("{FLOAT:%f}\n", v.contents.real);
@@ -133,6 +135,8 @@ void vm_execute(vm_t *vm)
         instruction_t instruction = vm->code->code[vm->pc++];
         value_t ret;
         value_t result;
+        string_t *s1, *s2;
+        char *stmp;
 
         switch (instruction.opcode)
         {
@@ -203,8 +207,9 @@ void vm_execute(vm_t *vm)
                 }
                 else if (REG_TYPE3(arg2, VAL_STRING) && REG_TYPE3(arg3, VAL_STRING))
                 {
-                    result.contents.boolean = !strcmp(vm->registers[instruction.fields.triplet.arg2].contents.string,
-                                                      vm->registers[instruction.fields.triplet.arg3].contents.string);
+                    s1 = (string_t *)vm->registers[instruction.fields.triplet.arg2].contents.object;
+                    s2 = (string_t *)vm->registers[instruction.fields.triplet.arg3].contents.object;
+                    result.contents.boolean = !strcmp(s1->string, s2->string);
                 }
 
                 if (result.contents.boolean != instruction.fields.triplet.arg1)
@@ -250,8 +255,8 @@ void vm_execute(vm_t *vm)
                 }
                 else if (REG_TYPE3(arg2, VAL_STRING) || REG_TYPE3(arg3, VAL_STRING))
                 {
-                    result.type = VAL_STRING;
-                    asprintf(&result.contents.string, "%s%s", STRING3(arg2), STRING3(arg3));
+                    asprintf(&stmp, "%s%s", STRING3(arg2), STRING3(arg3));
+                    result = make_string(stmp);
                 }
                 else
                 {
@@ -341,8 +346,10 @@ void vm_execute(vm_t *vm)
                 // be, so we assert here.
                 assert(ret.type == VAL_STRING);
 
+                s1 = (string_t *)ret.contents.object;
+
                 char *builtin_name;
-                asprintf(&builtin_name, "builtin__%s", ret.contents.string);
+                asprintf(&builtin_name, "builtin__%s", s1->string);
                 void (*builtin)(vm_t *);
                 builtin = (void (*)(vm_t *))dlsym(RTLD_SELF, builtin_name);
                 free(builtin_name);

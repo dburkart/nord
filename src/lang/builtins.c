@@ -17,11 +17,13 @@ void builtin__print(vm_t *vm)
 {
     value_t result;
     value_t val = vm_stack_pop(vm);
+    string_t *s1;
 
     switch(val.type)
     {
         case VAL_STRING:
-            printf("%s\n", val.contents.string);
+            s1 = (string_t *)val.contents.object;
+            printf("%s\n", s1->string);
             break;
 
         case VAL_INT:
