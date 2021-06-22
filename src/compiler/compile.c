@@ -32,7 +32,7 @@ compile_context_t *context_create(const char *name, const char *listing)
     context->listing = listing;
     context->symbols = symbol_map_create();
     context->binary = binary_create();
-    context->binary->data = memory_create();
+    context->binary->data = memory_create(1);
     context->binary->code = code_block_create();
     context->rp = 1;
 
@@ -625,7 +625,7 @@ uint8_t compile_internal(ast_t *ast, compile_context_t *context)
 
                 instruction.opcode = OP_LOADV;
                 instruction.fields.pair.arg1 = 0;
-                instruction.fields.pair.arg2 = args->op.list.size;
+                instruction.fields.pair.arg2 = (args) ? args->op.list.size : 0;
                 code_block_write(context->binary->code, instruction);
 
                 instruction.opcode = OP_CALL_DYNAMIC;

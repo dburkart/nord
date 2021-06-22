@@ -81,51 +81,37 @@ vm_t *vm_create(binary_t *binary)
 
 void vm_stack_create(vm_t *vm)
 {
-    vm->stack_size = 256;
-    vm->stack = (value_t *)malloc(sizeof(value_t) * vm->stack_size);
+    vm->stack = memory_create(256);
     vm->sp = 0;
 }
 
 // Push a value onto the stack of a vm_t, returning the register it is stored in
 void vm_stack_push(vm_t *vm, value_t val)
 {
-    if (vm->sp + 1 >= vm->stack_size)
-    {
-        vm->stack_size *= 2;
-        vm->stack = realloc(vm->stack, vm->stack_size);
-    }
-
-    vm->stack[vm->sp++] = val;
+    memory_set(vm->stack, vm->sp++, val);
 }
 
 value_t vm_stack_pop(vm_t *vm)
 {
     vm->sp--;
-    return vm->stack[vm->sp];
+    return memory_get(vm->stack, vm->sp);
 }
 
 void vm_cstack_create(vm_t *vm)
 {
-    vm->cstack_size = 256;
-    vm->call_stack = (value_t *)malloc(sizeof(value_t) * vm->cstack_size);
+    vm->call_stack = memory_create(256);
     vm->csp = 0;
 }
 
 void vm_cstack_push(vm_t *vm, value_t val)
 {
-    if (vm->csp + 1 >= vm->cstack_size)
-    {
-        vm->cstack_size *= 2;
-        vm->call_stack = realloc(vm->call_stack, vm->cstack_size);
-    }
-
-    vm->call_stack[vm->csp++] = val;
+    memory_set(vm->call_stack, vm->csp++, val);
 }
 
 value_t vm_cstack_pop(vm_t *vm)
 {
     vm->csp--;
-    return vm->call_stack[vm->csp];
+    return memory_get(vm->call_stack, vm->csp);
 }
 
 void vm_execute(vm_t *vm)
@@ -391,7 +377,7 @@ void vm_dump(vm_t *vm)
     for (int i = 0; i < vm->sp; i++)
     {
         printf("   %04d ", i);
-        value_print(vm->stack[i]);
+        value_print(vm->stack->contents[i]);
     }
 
     printf("\n[register contents]\n");

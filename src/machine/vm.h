@@ -18,13 +18,11 @@ typedef struct
     memory_t *memory;
 
     // Stack-related data structures
-    int stack_size;
-    value_t *stack;
+    memory_t *stack;
     // Stack pointer
     int sp;
 
-    int cstack_size;
-    value_t *call_stack;
+    memory_t *call_stack;
     int csp;
 
     // Code-related data structures

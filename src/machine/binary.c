@@ -46,7 +46,7 @@ binary_t *binary_load(const char *path)
 
     // Load data section
     lseek(fd, binary->sections.data_offset, SEEK_SET);
-    memory_t *mem = memory_create();
+    memory_t *mem = memory_create(1);
     size_t bytes_read = 0;
     int i = 0;
     while (bytes_read < binary->sections.code_offset - binary->sections.data_offset)

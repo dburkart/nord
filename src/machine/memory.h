@@ -18,7 +18,7 @@ typedef struct
     value_t *contents;
 } memory_t;
 
-memory_t *memory_create(void);
+memory_t *memory_create(size_t size);
 void memory_free(memory_t *);
 void memory_set(memory_t *, int address, value_t val);
 value_t memory_get(memory_t *, int address);

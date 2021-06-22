@@ -1,8 +1,8 @@
 #include "memory.h"
 
-memory_t *memory_create(void)
+memory_t *memory_create(size_t size)
 {
-    memory_t *mem = calloc(1, sizeof(memory_t));
+    memory_t *mem = calloc(size, sizeof(memory_t));
 
     return mem;
 }
