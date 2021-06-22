@@ -33,7 +33,7 @@ void memory_set(memory_t *mem, int address, value_t val)
         // Ensure that we zero out our new memory
         for (int i = old; i < mem->capacity; i++)
         {
-            mem->contents[i].type = VAL_NONE;
+            mem->contents[i].type = VAL_ABSENT;
         }
     }
 
@@ -42,7 +42,7 @@ void memory_set(memory_t *mem, int address, value_t val)
 
 value_t memory_get(memory_t *mem, int address)
 {
-    value_t none = {VAL_NONE};
+    value_t none = {VAL_ABSENT};
     if (address > mem->capacity)
         return none;
 

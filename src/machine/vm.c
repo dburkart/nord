@@ -48,7 +48,7 @@ void value_print(value_t v)
         case VAL_BOOLEAN:
             printf("{BOOLEAN:%s}\n", (v.contents.boolean) ? "true" : "false");
             break;
-        case VAL_NONE:
+        case VAL_ABSENT:
             printf("{NONE}\n");
             break;
         case VAL_TUPLE:
@@ -319,7 +319,7 @@ void vm_execute(vm_t *vm)
                     case VAL_BOOLEAN:
                         result.contents.boolean = !BOOL2(arg2);
                         break;
-                    case VAL_NONE:
+                    case VAL_ABSENT:
                         result.contents.boolean = true;
                         break;
                     case VAL_STRING:
@@ -379,7 +379,7 @@ void vm_dump(vm_t *vm)
     printf("[memory contents]\n");
     for (int i = 0; i < vm->memory->capacity; i++)
     {
-        if (vm->memory->contents[i].type == VAL_NONE)
+        if (vm->memory->contents[i].type == VAL_ABSENT)
             break;
 
         printf("   %04d ", i);
@@ -396,7 +396,7 @@ void vm_dump(vm_t *vm)
     printf("\n[register contents]\n");
     for (int i = 1; i < VM_NUM_REGISTERS; i++)
     {
-        if (vm->registers[i].type == VAL_NONE)
+        if (vm->registers[i].type == VAL_ABSENT)
             break;
 
         printf("   %04d ", i);

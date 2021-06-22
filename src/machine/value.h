@@ -14,7 +14,7 @@ struct obj_t;
 // Enumeration of value types supported by nord
 typedef enum
 {
-    VAL_NONE,
+    VAL_ABSENT,
     VAL_INT,
     VAL_STRING,
     VAL_FLOAT,

@@ -67,7 +67,7 @@ char *disassemble_instruction(memory_t *mem, instruction_t instruction)
         case OP_LOAD:
             value = memory_get(mem, instruction.fields.pair.arg2);
 
-            if (value.type == VAL_NONE)
+            if (value.type == VAL_ABSENT)
             {
                 asprintf(&assembly, FORMAT_PAIR_ADDR,
                         "load",

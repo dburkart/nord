@@ -38,7 +38,7 @@ void builtin__print(vm_t *vm)
             printf("%s\n", val.contents.boolean ? "true" : "false");
             break;
 
-        case VAL_NONE:
+        case VAL_ABSENT:
             printf("nothing\n");
             break;
 

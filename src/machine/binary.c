@@ -161,7 +161,7 @@ void binary_write(binary_t *binary, const char *path)
                 s1 = (string_t *)binary->data->contents[i].contents.object;
                 write(fd, s1->string, packed_values[i].v_size);
                 break;
-            case VAL_NONE:
+            case VAL_ABSENT:
                 ;
             case VAL_TUPLE:
                 // TODO: Handle
