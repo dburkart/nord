@@ -55,7 +55,7 @@ char *format_error(const char *listing_name, const char *listing, const char *st
     {
         caret_pointer[i] = '~';
     }
-    caret_pointer[loc.end - loc.start + 1] = 0;
+    caret_pointer[loc.end - loc.start] = 0;
 
     asprintf(&error,
              "%s:%d:%llu: %s\n\n%s\n%s%s Found here.\n",
