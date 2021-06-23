@@ -541,7 +541,7 @@ uint8_t compile_internal(ast_t *ast, compile_context_t *context)
             symbol_map_t *map = context->symbols;
             context->symbols = context->symbols->parent;
             symbol_map_destroy(map);
-]
+
             context->rp = sym.low_reg;
 
             // Store our function in the symbol map
