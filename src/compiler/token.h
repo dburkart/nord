@@ -31,7 +31,7 @@ enum token_type_e {
     IDENTIFIER, STRING, NUMBER, FLOAT,
 
     // Keywords
-    VAR, FN, RETURN, TRUE, FALSE, NIL,
+    VAR, FN, RETURN, TRUE, FALSE, NIL, FOR, IN,
 
     // Branching
     IF,
