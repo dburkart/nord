@@ -54,6 +54,8 @@ void symbol_map_destroy(symbol_map_t *);
 
 // Adding / getting items
 void symbol_map_set(symbol_map_t *, symbol_t);
+symbol_t symbol_map_get_local(symbol_map_t *symbol_map, char *name);
 symbol_t symbol_map_get(symbol_map_t *, char *);
+symbol_map_t *symbol_map_context(symbol_map_t *symbol_map, char *name);
 
 #endif

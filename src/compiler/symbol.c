@@ -29,8 +29,6 @@ void symbol_map_destroy(symbol_map_t *symbol_map)
     free(symbol_map);
 }
 
-#include <stdio.h>
-
 void symbol_map_set(symbol_map_t *symbol_map, symbol_t symbol)
 {
     // When we are 50% full or more, we grow the map. Why 50%? We never want
@@ -74,15 +72,13 @@ void symbol_map_set(symbol_map_t *symbol_map, symbol_t symbol)
     symbol_map->size += 1;
 }
 
-symbol_t symbol_map_get(symbol_map_t *symbol_map, char *name)
+symbol_t symbol_map_get_local(symbol_map_t *symbol_map, char *name)
 {
     uint32_t index = pjw_hash(name) & (symbol_map->capacity - 1);
     symbol_t symbol = symbol_map->items[index];
 
-    if (symbol.location.type == LOC_UNDEF && symbol_map->parent == NULL)
+    if (symbol.location.type == LOC_UNDEF)
         return symbol;
-    else if (symbol.location.type == LOC_UNDEF)
-        return symbol_map_get(symbol_map->parent, name);
 
     // If we have a collision, advance until we find the correct symbol
     while (symbol.name != NULL && strcmp(symbol.name, name))
@@ -93,4 +89,40 @@ symbol_t symbol_map_get(symbol_map_t *symbol_map, char *name)
     }
 
     return symbol;
+}
+
+symbol_t symbol_map_get(symbol_map_t *symbol_map, char *name)
+{
+    symbol_map_t *context = symbol_map;
+    symbol_t symbol = symbol_map_get_local(context, name);
+
+    while (symbol.location.type == LOC_UNDEF)
+    {
+        context = context->parent;
+
+        if (context == NULL)
+            return symbol;
+
+        symbol = symbol_map_get_local(context, name);
+    }
+
+    return symbol;
+}
+
+symbol_map_t *symbol_map_context(symbol_map_t *symbol_map, char *name)
+{
+    symbol_map_t *context = symbol_map;
+    symbol_t symbol = symbol_map_get_local(symbol_map, name);
+
+    while (symbol.location.type == LOC_UNDEF)
+    {
+        context = context->parent;
+
+        if (context == NULL)
+            return context;
+
+        symbol = symbol_map_get(context, name);
+    }
+
+    return context;
 }

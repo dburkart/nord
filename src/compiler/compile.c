@@ -82,27 +82,7 @@ uint8_t spill(compile_context_t *context, uint8_t low_reg)
     instruction_t instruction;
     uint8_t num_spilled = 0;
 
-    for (int i = 0; i < context->symbols->capacity; i++)
-    {
-        symbol_t symbol = context->symbols->items[i];
-
-        // Don't need to spill anything but register contents
-        if (symbol.type != SYM_VAR || symbol.location.type != LOC_REGISTER)
-        {
-            continue;
-        }
-
-
-        if (symbol.location.address >= low_reg)
-        {
-            instruction.opcode = OP_SAVE;
-            instruction.fields.pair.arg1 = symbol.location.address;
-            code_block_write(context->binary->code, instruction);
-            num_spilled += 1;
-        }
-    }
-
-    for (int i = context->rp - 1; i > low_reg; i--)
+    for (int i = context->rp - 1; i >= low_reg; i--)
     {
         instruction.opcode = OP_SAVE;
         instruction.fields.pair.arg1 = i;
@@ -151,23 +131,10 @@ uint8_t compile_internal(ast_t *ast, compile_context_t *context)
             result = context->rp;
             break;
         case BINARY:
-            // // If either side of the operation is a function call, compile that
-            // // side first. This will ensure that needed spill will happen
-            // // before we compile the other side.
-            // if (ast->op.binary.right->type == FUNCTION_CALL)
-            // {
-            //     right = compile_internal(ast->op.binary.right, context);
-            //     context->rp -= 1;
-            //     left = compile_internal(ast->op.binary.left, context);
-            //     context->rp += 1;
-            // }
-            // else
-            // {
-                left = compile_internal(ast->op.binary.left, context);
-                context->rp += 1;
-                right = compile_internal(ast->op.binary.right, context);
-                context->rp -= 1;
-            // }
+            left = compile_internal(ast->op.binary.left, context);
+            context->rp += 1;
+            right = compile_internal(ast->op.binary.right, context);
+            context->rp -= 1;
 
             switch (ast->op.binary.operator.type)
             {
@@ -574,12 +541,8 @@ uint8_t compile_internal(ast_t *ast, compile_context_t *context)
             symbol_map_t *map = context->symbols;
             context->symbols = context->symbols->parent;
             symbol_map_destroy(map);
-
-            // Another bit of housekeeping we have to do is make sure sym.low_reg is correct
-            if (context->rp == sym.low_reg)
-                sym.low_reg = 0;
-            else
-                context->rp = sym.low_reg;
+]
+            context->rp = sym.low_reg;
 
             // Store our function in the symbol map
             symbol_map_set(context->symbols, sym);
