@@ -301,6 +301,9 @@ ast_t *statement(scan_context_t *context)
 {
     ast_t *left = variable_decl(context);
 
+    if (peek(context).type == RETURN)
+        return make_unary_expr(accept(context), statement(context));
+
     if (left == NULL)
         left = expression(context);
 
@@ -471,11 +474,6 @@ ast_t *expression_list(scan_context_t *context)
 
 ast_t *expression(scan_context_t *context)
 {
-    if (peek(context).type == RETURN)
-    {
-        return make_unary_expr(accept(context), assignment(context));
-    }
-
     return assignment(context);
 }
 
@@ -628,6 +626,8 @@ ast_t *tuple(scan_context_t *context)
         token_t paren = accept(context);
 
         ast_t *expr = expression_list(context);
+        // TODO: Error checking!
+        assert(expr != NULL);
         expr->location.start = paren.start;
         paren = accept(context);
         expr->location.end = paren.end;
