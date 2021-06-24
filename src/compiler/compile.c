@@ -24,6 +24,28 @@ typedef struct
     uint64_t mp;
 } compile_context_t;
 
+
+static inline instruction_t make_single_instr(uint8_t opcode, uint8_t arg1)
+{
+    return (instruction_t){ opcode, .fields={ .pair={ arg1, 0 } } };
+}
+
+static inline instruction_t make_singlew_instr(uint8_t opcode, uint16_t arg1)
+{
+    return (instruction_t){ opcode, .fields={ .pair={ 0, arg1 } } };
+}
+
+static inline instruction_t make_pair_instr(uint8_t opcode, uint8_t arg1, uint16_t arg2)
+{
+    return (instruction_t){ opcode, .fields={ .pair={ arg1, arg2 } } };
+}
+
+static inline instruction_t make_triplet_instr(uint8_t opcode, uint8_t arg1, uint8_t arg2, uint8_t arg3)
+{
+    return (instruction_t){ opcode, .fields={ .triplet={ arg1, arg2, arg3 } } };
+}
+
+
 compile_context_t *context_create(const char *name, const char *listing)
 {
     compile_context_t *context = malloc(sizeof(compile_context_t));
@@ -58,35 +80,25 @@ void compile_comparison(compile_context_t *context, uint8_t reg, uint8_t opcode,
     instruction_t instruction;
 
     // First, write the false case
-    instruction.opcode = OP_LOAD;
-    instruction.fields.pair.arg1 = reg;
-    instruction.fields.pair.arg2 = 0;
+    instruction = make_pair_instr(OP_LOAD, reg, 0);
     code_block_write(context->binary->code, instruction);
 
     // Now, write out the comparison instruction
-    instruction.opcode = opcode;
-    instruction.fields.triplet.arg1 = condition;
-    instruction.fields.triplet.arg2 = left;
-    instruction.fields.triplet.arg3 = right;
+    instruction = make_triplet_instr(opcode, condition, left, right);
     code_block_write(context->binary->code, instruction);
 
     // Finally, write out the true case
-    instruction.opcode = OP_LOAD;
-    instruction.fields.pair.arg1 = reg;
-    instruction.fields.pair.arg2 = 1;
+    instruction = make_pair_instr(OP_LOAD, reg, 1);
     code_block_write(context->binary->code, instruction);
 }
 
 uint8_t spill(compile_context_t *context, uint8_t low_reg)
 {
-    instruction_t instruction;
     uint8_t num_spilled = 0;
 
     for (int i = context->rp - 1; i >= low_reg; i--)
     {
-        instruction.opcode = OP_SAVE;
-        instruction.fields.pair.arg1 = i;
-        code_block_write(context->binary->code, instruction);
+        code_block_write(context->binary->code, make_single_instr(OP_SAVE, i));
         num_spilled += 1;
     }
 
@@ -110,18 +122,13 @@ uint8_t compile_internal(ast_t *ast, compile_context_t *context)
             switch (ast->op.unary.operator.type)
             {
                 case MINUS:
-                    instruction.opcode = OP_NEGATE;
-                    instruction.fields.pair.arg1 = context->rp;
-                    instruction.fields.pair.arg2 = right;
+                    instruction = make_pair_instr(OP_NEGATE, context->rp, right);
                     break;
                 case BANG:
-                    instruction.opcode = OP_NOT;
-                    instruction.fields.pair.arg1 = context->rp;
-                    instruction.fields.pair.arg2 = right;
+                    instruction = make_pair_instr(OP_NOT, context->rp, right);
                     break;
                 case RETURN:
-                    instruction.opcode = OP_RETURN;
-                    instruction.fields.pair.arg1 = right;
+                    instruction = make_single_instr(OP_RETURN, right);
                     break;
                 default:
                     ;
@@ -140,28 +147,16 @@ uint8_t compile_internal(ast_t *ast, compile_context_t *context)
             {
                 // -- Arithmetic
                 case PLUS:
-                    instruction.opcode = OP_ADD;
-                    instruction.fields.triplet.arg1 = context->rp;
-                    instruction.fields.triplet.arg2 = left;
-                    instruction.fields.triplet.arg3 = right;
+                    instruction = make_triplet_instr(OP_ADD, context->rp, left, right);
                     break;
                 case MINUS:
-                    instruction.opcode = OP_SUBTRACT;
-                    instruction.fields.triplet.arg1 = context->rp;
-                    instruction.fields.triplet.arg2 = left;
-                    instruction.fields.triplet.arg3 = right;
+                    instruction = make_triplet_instr(OP_SUBTRACT, context->rp, left, right);
                     break;
                 case ASTERISK:
-                    instruction.opcode = OP_MULTIPLY;
-                    instruction.fields.triplet.arg1 = context->rp;
-                    instruction.fields.triplet.arg2 = left;
-                    instruction.fields.triplet.arg3 = right;
+                    instruction = make_triplet_instr(OP_MULTIPLY, context->rp, left, right);
                     break;
                 case SLASH:
-                    instruction.opcode = OP_DIVIDE;
-                    instruction.fields.triplet.arg1 = context->rp;
-                    instruction.fields.triplet.arg2 = left;
-                    instruction.fields.triplet.arg3 = right;
+                    instruction = make_triplet_instr(OP_DIVIDE, context->rp, left, right);
                     break;
 
                 // -- Logic
@@ -169,53 +164,39 @@ uint8_t compile_internal(ast_t *ast, compile_context_t *context)
                     compile_comparison(context, context->rp + 2, OP_EQUAL, 1, left, right);
                     // Because we don't have proper register allocation, we need an extra instruction
                     // to move the result to a compact register
-                    instruction.opcode = OP_MOVE;
-                    instruction.fields.pair.arg1 = context->rp;
-                    instruction.fields.pair.arg2 = context->rp + 2;
+                    instruction = make_pair_instr(OP_MOVE, context->rp, context->rp + 2);
                     break;
                 case BANG_EQUAL:
                     compile_comparison(context, context->rp + 2, OP_EQUAL, 0, left, right);
                     // Because we don't have proper register allocation, we need an extra instruction
                     // to move the result to a compact register
-                    instruction.opcode = OP_MOVE;
-                    instruction.fields.pair.arg1 = context->rp;
-                    instruction.fields.pair.arg2 = context->rp + 2;
+                    instruction = make_pair_instr(OP_MOVE, context->rp, context->rp + 2);
                     break;
                 case LESS:
                     compile_comparison(context, context->rp + 2, OP_LESSTHAN, 1, left, right);
                     // Because we don't have proper register allocation, we need an extra instruction
                     // to move the result to a compact register
-                    instruction.opcode = OP_MOVE;
-                    instruction.fields.pair.arg1 = context->rp;
-                    instruction.fields.pair.arg2 = context->rp + 2;
+                    instruction = make_pair_instr(OP_MOVE, context->rp, context->rp + 2);
                     break;
                 case LESS_EQUAL:
                     compile_comparison(context, context->rp + 2, OP_LESSTHAN, 1, left, right);
                     compile_comparison(context, context->rp + 3, OP_EQUAL, 1, left, right);
                     // Because we don't have proper register allocation, we need an extra instruction
                     // to move the result to a compact register
-                    instruction.opcode = OP_OR;
-                    instruction.fields.triplet.arg1 = context->rp;
-                    instruction.fields.triplet.arg2 = context->rp + 2;
-                    instruction.fields.triplet.arg3 = context->rp + 3;
+                    instruction = make_triplet_instr(OP_OR, context->rp, context->rp + 2, context->rp + 3);
                     break;
                 case GREATER:
                     compile_comparison(context, context->rp + 2, OP_LESSTHAN, 0, left, right);
                     // Because we don't have proper register allocation, we need an extra instruction
                     // to move the result to a compact register
-                    instruction.opcode = OP_MOVE;
-                    instruction.fields.pair.arg1 = context->rp;
-                    instruction.fields.pair.arg2 = context->rp + 2;
+                    instruction = make_pair_instr(OP_MOVE, context->rp, context->rp + 2);
                     break;
                 case GREATER_EQUAL:
                     compile_comparison(context, context->rp + 2, OP_LESSTHAN, 0, left, right);
                     compile_comparison(context, context->rp + 3, OP_EQUAL, 1, left, right);
                     // Because we don't have proper register allocation, we need an extra instruction
                     // to move the result to a compact register
-                    instruction.opcode = OP_OR;
-                    instruction.fields.triplet.arg1 = context->rp;
-                    instruction.fields.triplet.arg2 = context->rp + 2;
-                    instruction.fields.triplet.arg3 = context->rp + 3;
+                    instruction = make_triplet_instr(OP_OR, context->rp, context->rp + 2, context->rp + 3);
                     break;
                 default:
                     ;
@@ -238,9 +219,7 @@ uint8_t compile_internal(ast_t *ast, compile_context_t *context)
 
                 if (result < context->rp)
                 {
-                    instruction.opcode = OP_MOVE;
-                    instruction.fields.pair.arg1 = context->rp;
-                    instruction.fields.pair.arg2 = result;
+                    instruction = make_pair_instr(OP_MOVE, context->rp, result);
                     code_block_write(context->binary->code, instruction);
                     sym.location.address = context->rp;
                 }
@@ -278,10 +257,7 @@ uint8_t compile_internal(ast_t *ast, compile_context_t *context)
                 exit(1);
             }
 
-            instruction.opcode = OP_MOVE;
-            instruction.fields.pair.arg1 = sym.location.address;
-            instruction.fields.pair.arg2 = result;
-
+            instruction = make_pair_instr(OP_MOVE, sym.location.address, result);
             code_block_write(context->binary->code, instruction);
             break;
 
@@ -290,10 +266,7 @@ uint8_t compile_internal(ast_t *ast, compile_context_t *context)
             if (ast->op.literal.token.type == NUMBER)
             {
                 result = context->rp;
-                instruction.opcode = OP_LOADV;
-                instruction.fields.pair.arg1 = result;
-                instruction.fields.pair.arg2 = atoi(ast->op.literal.value);
-
+                instruction = make_pair_instr(OP_LOADV, result, atoi(ast->op.literal.value));
                 code_block_write(context->binary->code, instruction);
             }
 
@@ -306,10 +279,7 @@ uint8_t compile_internal(ast_t *ast, compile_context_t *context)
                 val.contents.real = atof(ast->op.literal.value);
                 memory_set(context->binary->data, context->mp, val);
 
-                instruction.opcode = OP_LOAD;
-                instruction.fields.pair.arg1 = result;
-                instruction.fields.pair.arg2 = context->mp;
-
+                instruction = make_pair_instr(OP_LOAD, result, context->mp);
                 code_block_write(context->binary->code, instruction);
                 context->mp += 1;
             }
@@ -323,10 +293,7 @@ uint8_t compile_internal(ast_t *ast, compile_context_t *context)
                 memory_set(context->binary->data, context->mp, val);
 
                 // Now, write out an instruction to load it into a register
-                instruction.opcode = OP_LOAD;
-                instruction.fields.pair.arg1 = result;
-                instruction.fields.pair.arg2 = context->mp;
-
+                instruction = make_pair_instr(OP_LOAD, result, context->mp);
                 code_block_write(context->binary->code, instruction);
                 context->mp += 1;
             }
@@ -345,9 +312,7 @@ uint8_t compile_internal(ast_t *ast, compile_context_t *context)
 
                 if (sym.location.type == LOC_MEMORY)
                 {
-                    instruction.opcode = OP_LOAD;
-                    instruction.fields.pair.arg1 = context->rp;
-                    instruction.fields.pair.arg2 = sym.location.address;
+                    instruction = make_pair_instr(OP_LOAD, context->rp, sym.location.address);
                     code_block_write(context->binary->code, instruction);
                     sym.location.type = LOC_REGISTER;
                     sym.location.address = context->rp++;
@@ -360,9 +325,7 @@ uint8_t compile_internal(ast_t *ast, compile_context_t *context)
             if (ast->op.literal.token.type == TRUE || ast->op.literal.token.type == FALSE)
             {
                 result = context->rp;
-                instruction.opcode = OP_LOAD;
-                instruction.fields.pair.arg1 = result;
-                instruction.fields.pair.arg2 = (ast->op.literal.token.type == TRUE) ? 1 : 0;
+                instruction = make_pair_instr(OP_LOAD, result, (ast->op.literal.token.type == TRUE) ? 1 : 0);
                 code_block_write(context->binary->code, instruction);
             }
 
@@ -388,8 +351,7 @@ uint8_t compile_internal(ast_t *ast, compile_context_t *context)
             // Now, push them on the stack in reverse order
             for (int i = ast->op.list.size - 1; i >= 0; i--)
             {
-                instruction.opcode = OP_PUSH;
-                instruction.fields.pair.arg1 = regs[i];
+                instruction = make_single_instr(OP_PUSH, regs[i]);
                 code_block_write(context->binary->code, instruction);
             }
 
@@ -397,9 +359,7 @@ uint8_t compile_internal(ast_t *ast, compile_context_t *context)
             free(regs);
 
             // Now, set register 0 to the number of args
-            instruction.opcode = OP_LOADV;
-            instruction.fields.pair.arg1 = 0;
-            instruction.fields.pair.arg2 = ast->op.list.size;
+            instruction = make_pair_instr(OP_LOADV, 0, ast->op.list.size);
             code_block_write(context->binary->code, instruction);
 
             // Call tuple
@@ -408,12 +368,10 @@ uint8_t compile_internal(ast_t *ast, compile_context_t *context)
             tmp = context->mp;
             context->mp += 1;
 
-            instruction.opcode = OP_CALL_DYNAMIC;
-            instruction.fields.pair.arg2 = tmp;
+            instruction = make_singlew_instr(OP_CALL_DYNAMIC, tmp);
             code_block_write(context->binary->code, instruction);
 
-            instruction.opcode = OP_POP;
-            instruction.fields.pair.arg1 = context->rp;
+            instruction = make_single_instr(OP_POP, context->rp);
             code_block_write(context->binary->code, instruction);
 
             result = context->rp;
@@ -438,26 +396,18 @@ uint8_t compile_internal(ast_t *ast, compile_context_t *context)
             // Set our address to jump to if we evaluate to false. This is a dummy
             // value for now, we'll come back later and modify it
             tmp = context->binary->code->size;
-            instruction.opcode = OP_LOADV;
-            instruction.fields.pair.arg1 = context->rp++;
-            instruction.fields.pair.arg2 = 0;
+            instruction = make_pair_instr(OP_LOADV, context->rp++, 0);
             code_block_write(context->binary->code, instruction);
 
             // Load "true" into a register to compare against
-            instruction.opcode = OP_LOAD;
-            instruction.fields.pair.arg1 = context->rp;
-            instruction.fields.pair.arg2 = 1;
+            instruction = make_pair_instr(OP_LOAD, context->rp, 1);
             code_block_write(context->binary->code, instruction);
 
-            instruction.opcode = OP_EQUAL;
-            instruction.fields.triplet.arg1 = 0;
-            instruction.fields.triplet.arg2 = context->rp;
-            instruction.fields.triplet.arg3 = result;
+            instruction = make_triplet_instr(OP_EQUAL, 0, context->rp, result);
             code_block_write(context->binary->code, instruction);
 
             // Condition evaluates to false
-            instruction.opcode = OP_JMP;
-            instruction.fields.pair.arg1 = context->rp - 1;
+            instruction = make_single_instr(OP_JMP, context->rp - 1);
             code_block_write(context->binary->code, instruction);
 
             // Decrement rp since we no longer need our comparison or
@@ -476,13 +426,10 @@ uint8_t compile_internal(ast_t *ast, compile_context_t *context)
 
             // First, write out a dummy instruction which will be used to jump
             // over the function.
-            instruction.opcode = OP_LOADV;
-            instruction.fields.pair.arg1 = context->rp;
-            instruction.fields.pair.arg2 = 0;
+            instruction = make_pair_instr(OP_LOADV, context->rp, 0);
             tmp = context->binary->code->size;
             code_block_write(context->binary->code, instruction);
-            instruction.opcode = OP_JMP;
-            instruction.fields.pair.arg1 = context->rp;
+            instruction = make_single_instr(OP_JMP, context->rp);
             code_block_write(context->binary->code, instruction);
 
             addr = context->binary->code->size;
@@ -503,8 +450,7 @@ uint8_t compile_internal(ast_t *ast, compile_context_t *context)
                     sym.name = args->op.list.items[i]->op.literal.value;
                     sym.type = SYM_VAR;
                     symbol_map_set(context->symbols, sym);
-                    instruction.opcode = OP_POP;
-                    instruction.fields.pair.arg1 = context->rp + i;
+                    instruction = make_single_instr(OP_POP, context->rp + i);
                     code_block_write(context->binary->code, instruction);
                 }
                 context->rp += args->op.list.size;
@@ -528,8 +474,7 @@ uint8_t compile_internal(ast_t *ast, compile_context_t *context)
             size_t address = context->binary->code->size - 1;
             if (context->binary->code->code[address].opcode != OP_RETURN)
             {
-                instruction.opcode = OP_RETURN;
-                instruction.fields.pair.arg1 = result;
+                instruction = make_single_instr(OP_RETURN, result);
                 code_block_write(context->binary->code, instruction);
             }
 
@@ -600,8 +545,7 @@ uint8_t compile_internal(ast_t *ast, compile_context_t *context)
                     // Now, push them on the stack in reverse order
                     for (int i = args->op.list.size - 1; i >= 0; i--)
                     {
-                        instruction.opcode = OP_PUSH;
-                        instruction.fields.pair.arg1 = regs[i];
+                        instruction = make_single_instr(OP_PUSH, regs[i]);
                         code_block_write(context->binary->code, instruction);
                     }
 
@@ -611,17 +555,13 @@ uint8_t compile_internal(ast_t *ast, compile_context_t *context)
 
                 // Builtins don't require spilling since they are currently all
                 // implemented in C.
-                instruction.opcode = OP_LOADV;
-                instruction.fields.pair.arg1 = 0;
-                instruction.fields.pair.arg2 = (args) ? args->op.list.size : 0;
+                instruction = make_pair_instr(OP_LOADV, 0, (args) ? args->op.list.size : 0);
                 code_block_write(context->binary->code, instruction);
 
-                instruction.opcode = OP_CALL_DYNAMIC;
-                instruction.fields.pair.arg2 = addr;
+                instruction = make_singlew_instr(OP_CALL_DYNAMIC, addr);
                 code_block_write(context->binary->code, instruction);
 
-                instruction.opcode = OP_POP;
-                instruction.fields.pair.arg1 = context->rp;
+                instruction = make_single_instr(OP_POP, context->rp);
                 result = context->rp;
                 code_block_write(context->binary->code, instruction);
 
@@ -636,24 +576,19 @@ uint8_t compile_internal(ast_t *ast, compile_context_t *context)
                 for (int i = 0; i < args->op.list.size; i++)
                 {
                     uint8_t val = compile_internal(args->op.list.items[i], context);
-                    instruction.opcode = OP_PUSH;
-                    instruction.fields.pair.arg1 = val;
+                    instruction = make_single_instr(OP_PUSH, val);
                     code_block_write(context->binary->code, instruction);
                 }
             }
 
             // Call the function
-            instruction.opcode = OP_LOADV;
-            instruction.fields.pair.arg1 = context->rp;
-            instruction.fields.pair.arg2 = sym.location.address;
+            instruction = make_pair_instr(OP_LOADV, context->rp, sym.location.address);
             code_block_write(context->binary->code, instruction);
 
-            instruction.opcode = OP_CALL;
-            instruction.fields.pair.arg1 = context->rp;
+            instruction = make_single_instr(OP_CALL, context->rp);
             code_block_write(context->binary->code, instruction);
 
-            instruction.opcode = OP_POP;
-            instruction.fields.pair.arg1 = context->rp;
+            instruction = make_single_instr(OP_POP, context->rp);
             result = context->rp;
             code_block_write(context->binary->code, instruction);
 
