@@ -552,13 +552,36 @@ uint8_t compile_internal(ast_t *ast, compile_context_t *context)
             sym = symbol_map_get(context->symbols, ast->op.call.name);
             args = ast->op.call.args;
 
+            // If the symbol is undefined, we assume that it is a builtin.
+            // In the future, it could also be an imported symbol. On first
+            // reference of a builtin, we put the symbol in our constant
+            // pool and create an entry in the root symbol map.
             if (sym.location.type == LOC_UNDEF)
             {
-                // TODO: We don't handle imported symbols here, only builtins
                 val = string_create(ast->op.call.name);
                 memory_set(context->binary->data, context->mp, val);
-                addr = context->mp;
-                context->mp += 1;
+                sym.location.type = LOC_MEMORY;
+                sym.location.address = context->mp++;
+                sym.name = ast->op.call.name;
+                sym.type = SYM_FN;
+
+                // Set the symbol in our root context, since builtins are
+                // global symbols.
+                symbol_map_t *map = context->symbols;
+                while (map->parent != NULL)
+                {
+                    map = map->parent;
+                }
+                symbol_map_set(map, sym);
+            }
+
+            // Currently, functions with symbols that reside in memory are
+            // functions which are builtin to the language. Eventually symbols
+            // of this nature might also represent symbols imported from a
+            // package.
+            if (sym.location.type == LOC_MEMORY)
+            {
+                addr = sym.location.address;
 
                 if (args != NULL)
                 {
@@ -586,6 +609,8 @@ uint8_t compile_internal(ast_t *ast, compile_context_t *context)
                     free(regs);
                 }
 
+                // Builtins don't require spilling since they are currently all
+                // implemented in C.
                 instruction.opcode = OP_LOADV;
                 instruction.fields.pair.arg1 = 0;
                 instruction.fields.pair.arg2 = (args) ? args->op.list.size : 0;
