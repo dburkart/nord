@@ -16,14 +16,13 @@
 // Data structure representing a node in our abstract syntax tree.
 typedef struct expr_t
 {
-    // TODO: Namespace this enum
     enum
     {
-        ASSIGN, BINARY, DECLARE, UNARY,
-        LITERAL, GROUP, STATEMENT_LIST,
-        FUNCTION_DECL, FUNCTION_CALL,
-        EXPRESSION_LIST, VARIABLE_LIST,
-        IF_STATEMENT, TUPLE
+        AST_ASSIGN, AST_BINARY, AST_DECLARE, AST_UNARY,
+        AST_LITERAL, AST_GROUP, AST_STMT_LIST,
+        AST_FUNCTION_DECL, AST_FUNCTION_CALL,
+        AST_EXPR_LIST, AST_VAR_LIST,
+        AST_IF_STMT, AST_TUPLE
     } type;
 
     union

@@ -116,7 +116,7 @@ uint8_t compile_internal(ast_t *ast, compile_context_t *context)
 
     switch (ast->type)
     {
-        case UNARY:
+        case AST_UNARY:
             right = compile_internal(ast->op.unary.operand, context);
 
             switch (ast->op.unary.operator.type)
@@ -137,7 +137,7 @@ uint8_t compile_internal(ast_t *ast, compile_context_t *context)
             code_block_write(context->binary->code, instruction);
             result = context->rp;
             break;
-        case BINARY:
+        case AST_BINARY:
             left = compile_internal(ast->op.binary.left, context);
             context->rp += 1;
             right = compile_internal(ast->op.binary.right, context);
@@ -207,7 +207,7 @@ uint8_t compile_internal(ast_t *ast, compile_context_t *context)
             result = context->rp;
             break;
 
-        case DECLARE:
+        case AST_DECLARE:
             // Handle declaration with no assignment
             if (ast->op.declare.initial_value == NULL)
             {
@@ -237,7 +237,7 @@ uint8_t compile_internal(ast_t *ast, compile_context_t *context)
             symbol_map_set(context->symbols, sym);
             break;
 
-        case ASSIGN:
+        case AST_ASSIGN:
             result = compile_internal(ast->op.assign.value, context);
             // Right now, since we assign registers in a stack-like manner, we
             // use a move instruction for assignment so that register usage
@@ -261,7 +261,7 @@ uint8_t compile_internal(ast_t *ast, compile_context_t *context)
             code_block_write(context->binary->code, instruction);
             break;
 
-        case LITERAL:
+        case AST_LITERAL:
             // TODO: Support ints which are larger than 16-bit
             if (ast->op.literal.token.type == TOK_NUMBER)
             {
@@ -331,11 +331,11 @@ uint8_t compile_internal(ast_t *ast, compile_context_t *context)
 
             break;
 
-        case GROUP:
+        case AST_GROUP:
             result = compile_internal(ast->op.group, context);
             break;
 
-        case TUPLE:
+        case AST_TUPLE:
             regs = (uint8_t *)malloc(sizeof(uint8_t) * ast->op.list.size);
             tmp = context->rp;
 
@@ -378,14 +378,14 @@ uint8_t compile_internal(ast_t *ast, compile_context_t *context)
 
             break;
 
-        case STATEMENT_LIST:
+        case AST_STMT_LIST:
             for (int i = 0; i < ast->op.list.size; i++)
             {
                 result = compile_internal(ast->op.list.items[i], context);
             }
             break;
 
-        case IF_STATEMENT:
+        case AST_IF_STMT:
             // First, we compile our condition
             result = compile_internal(ast->op.if_stmt.condition, context);
 
@@ -421,7 +421,7 @@ uint8_t compile_internal(ast_t *ast, compile_context_t *context)
             context->binary->code->code[tmp].fields.pair.arg2 = addr;
             break;
 
-        case FUNCTION_DECL:
+        case AST_FUNCTION_DECL:
             args = ast->op.fn.args;
 
             // First, write out a dummy instruction which will be used to jump
@@ -493,7 +493,7 @@ uint8_t compile_internal(ast_t *ast, compile_context_t *context)
             symbol_map_set(context->symbols, sym);
             break;
 
-        case FUNCTION_CALL:
+        case AST_FUNCTION_CALL:
             sym = symbol_map_get(context->symbols, ast->op.call.name);
             args = ast->op.call.args;
 
