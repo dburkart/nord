@@ -196,109 +196,109 @@ token_t peek(scan_context_t *context)
                 token_found = false;
                 break;
             case '\0':
-                t.type = EOF_CHAR;
+                t.type = TOK_EOF;
                 advance = 1;
                 break;
             case '\n':
-                t.type = EOL;
+                t.type = TOK_EOL;
                 advance = 1;
                 break;
             case '=':
                 if (*(c+1) == '=')
                 {
-                    t.type = EQUAL_EQUAL;
+                    t.type = TOK_EQUAL_EQUAL;
                     advance = 2;
                     break;
                 }
 
-                t.type = EQUAL;
+                t.type = TOK_EQUAL;
                 advance = 1;
                 break;
             case '!':
                 if (*(c+1) == '=')
                 {
-                    t.type = BANG_EQUAL;
+                    t.type = TOK_BANG_EQUAL;
                     advance = 2;
                     break;
                 }
 
-                t.type = BANG;
+                t.type = TOK_BANG;
                 advance = 1;
                 break;
             case '>':
                 if (*(c+1) == '=')
                 {
-                    t.type = GREATER_EQUAL;
+                    t.type = TOK_GREATER_EQUAL;
                     advance = 2;
                     break;
                 }
 
-                t.type = GREATER;
+                t.type = TOK_GREATER;
                 advance = 1;
                 break;
             case '<':
                 if (*(c+1) == '=')
                 {
-                    t.type = LESS_EQUAL;
+                    t.type = TOK_LESS_EQUAL;
                     advance = 2;
                     break;
                 }
 
-                t.type = LESS;
+                t.type = TOK_LESS;
                 advance = 1;
                 break;
             case '(':
-                t.type = L_PAREN;
+                t.type = TOK_L_PAREN;
                 advance = 1;
                 break;
             case ')':
-                t.type = R_PAREN;
+                t.type = TOK_R_PAREN;
                 advance = 1;
                 break;
             case '{':
-                t.type = L_BRACE;
+                t.type = TOK_L_BRACE;
                 advance = 1;
                 break;
             case '}':
-                t.type = R_BRACE;
+                t.type = TOK_R_BRACE;
                 advance = 1;
                 break;
             case ':':
-                t.type = COLON;
+                t.type = TOK_COLON;
                 advance = 1;
                 break;
             case ',':
-                t.type = COMMA;
+                t.type = TOK_COMMA;
                 advance = 1;
                 break;
             case '-':
                 advance = match_right_arrow(c);
                 if (advance)
                 {
-                    t.type = R_ARROW;
+                    t.type = TOK_R_ARROW;
                     break;
                 }
 
-                t.type = MINUS;
+                t.type = TOK_MINUS;
                 advance = 1;
                 break;
             case '+':
-                t.type = PLUS;
+                t.type = TOK_PLUS;
                 advance = 1;
                 break;
             case '*':
-                t.type = ASTERISK;
+                t.type = TOK_ASTERISK;
                 advance = 1;
                 break;
             case '/':
-                t.type = SLASH;
+                t.type = TOK_SLASH;
                 advance = 1;
                 break;
             case '"':
                 advance = match_string(c);
                 if (advance)
                 {
-                    t.type = STRING;
+                    t.type = TOK_STRING;
                 }
                 break;
             case '0':
@@ -315,14 +315,14 @@ token_t peek(scan_context_t *context)
                 advance = match_number(c);
                 if (advance)
                 {
-                    t.type = NUMBER;
+                    t.type = TOK_NUMBER;
                     break;
                 }
 
                 advance = match_float(c);
                 if (advance)
                 {
-                    t.type = FLOAT;
+                    t.type = TOK_FLOAT;
                     break;
                 }
 
@@ -332,26 +332,26 @@ token_t peek(scan_context_t *context)
                 {
                     advance = advance + 1;
                 }
-                t.type = INVALID;
+                t.type = TOK_INVALID;
                 break;
             case 'f':
                 if (*(c + 1) == 'n') {
                     advance = 2;
-                    t.type = FN;
+                    t.type = TOK_FN;
                     break;
                 }
 
                 advance = match_keyword("false", c, 5);
                 if (advance)
                 {
-                    t.type = FALSE;
+                    t.type = TOK_FALSE;
                     break;
                 }
 
                 advance = match_identifier(c);
                 if (advance)
                 {
-                    t.type = IDENTIFIER;
+                    t.type = TOK_IDENTIFIER;
                     break;
                 }
                 break;
@@ -359,14 +359,14 @@ token_t peek(scan_context_t *context)
                 advance = match_keyword("if", c, 2);
                 if (advance)
                 {
-                    t.type = IF;
+                    t.type = TOK_IF;
                     break;
                 }
 
                 advance = match_identifier(c);
                 if (advance)
                 {
-                    t.type = IDENTIFIER;
+                    t.type = TOK_IDENTIFIER;
                     break;
                 }
                 break;
@@ -374,14 +374,14 @@ token_t peek(scan_context_t *context)
                 advance = match_keyword("nil", c, 3);
                 if (advance)
                 {
-                    t.type = NIL;
+                    t.type = TOK_NIL;
                     break;
                 }
 
                 advance = match_identifier(c);
                 if (advance)
                 {
-                    t.type = IDENTIFIER;
+                    t.type = TOK_IDENTIFIER;
                     break;
                 }
                 break;
@@ -389,14 +389,14 @@ token_t peek(scan_context_t *context)
                 advance = match_keyword("return", c, 6);
                 if (advance)
                 {
-                    t.type = RETURN;
+                    t.type = TOK_RETURN;
                     break;
                 }
 
                 advance = match_identifier(c);
                 if (advance)
                 {
-                    t.type = IDENTIFIER;
+                    t.type = TOK_IDENTIFIER;
                     break;
                 }
                 break;
@@ -404,14 +404,14 @@ token_t peek(scan_context_t *context)
                 advance = match_keyword("true", c, 4);
                 if (advance)
                 {
-                    t.type = TRUE;
+                    t.type = TOK_TRUE;
                     break;
                 }
 
                 advance = match_identifier(c);
                 if (advance)
                 {
-                    t.type = IDENTIFIER;
+                    t.type = TOK_IDENTIFIER;
                     break;
                 }
                 break;
@@ -419,14 +419,14 @@ token_t peek(scan_context_t *context)
                 advance = match_keyword("var", c, 3);
                 if (advance)
                 {
-                    t.type = VAR;
+                    t.type = TOK_VAR;
                     break;
                 }
 
                 advance = match_identifier(c);
                 if (advance)
                 {
-                    t.type = IDENTIFIER;
+                    t.type = TOK_IDENTIFIER;
                     break;
                 }
                 break;
@@ -434,7 +434,7 @@ token_t peek(scan_context_t *context)
                 advance = match_identifier(c);
                 if (advance)
                 {
-                    t.type = IDENTIFIER;
+                    t.type = TOK_IDENTIFIER;
                     break;
                 }
 
@@ -444,7 +444,7 @@ token_t peek(scan_context_t *context)
                 {
                     advance = advance + 1;
                 }
-                t.type = INVALID;
+                t.type = TOK_INVALID;
         }
 
         // Advance our position
@@ -509,7 +509,7 @@ char *token_value(scan_context_t *context, token_t t)
     char *value = calloc(len + 1, sizeof(char));
 
     // If the token is a string, omit the quotes
-    if (t.type == STRING)
+    if (t.type == TOK_STRING)
     {
         memcpy(value, context->buffer + t.start + 1, len - 2);
         value[len-2] = 0;
@@ -536,7 +536,7 @@ token_list_t scan_input(char *path, char *input)
     do {
         t = accept(&context);
         token_list_add(&tokens, t);
-    } while (t.type != EOF_CHAR);
+    } while (t.type != TOK_EOF);
 
     return tokens;
 }

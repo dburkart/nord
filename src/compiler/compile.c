@@ -121,13 +121,13 @@ uint8_t compile_internal(ast_t *ast, compile_context_t *context)
 
             switch (ast->op.unary.operator.type)
             {
-                case MINUS:
+                case TOK_MINUS:
                     instruction = make_pair_instr(OP_NEGATE, context->rp, right);
                     break;
-                case BANG:
+                case TOK_BANG:
                     instruction = make_pair_instr(OP_NOT, context->rp, right);
                     break;
-                case RETURN:
+                case TOK_RETURN:
                     instruction = make_single_instr(OP_RETURN, right);
                     break;
                 default:
@@ -146,52 +146,52 @@ uint8_t compile_internal(ast_t *ast, compile_context_t *context)
             switch (ast->op.binary.operator.type)
             {
                 // -- Arithmetic
-                case PLUS:
+                case TOK_PLUS:
                     instruction = make_triplet_instr(OP_ADD, context->rp, left, right);
                     break;
-                case MINUS:
+                case TOK_MINUS:
                     instruction = make_triplet_instr(OP_SUBTRACT, context->rp, left, right);
                     break;
-                case ASTERISK:
+                case TOK_ASTERISK:
                     instruction = make_triplet_instr(OP_MULTIPLY, context->rp, left, right);
                     break;
-                case SLASH:
+                case TOK_SLASH:
                     instruction = make_triplet_instr(OP_DIVIDE, context->rp, left, right);
                     break;
 
                 // -- Logic
-                case EQUAL_EQUAL:
+                case TOK_EQUAL_EQUAL:
                     compile_comparison(context, context->rp + 2, OP_EQUAL, 1, left, right);
                     // Because we don't have proper register allocation, we need an extra instruction
                     // to move the result to a compact register
                     instruction = make_pair_instr(OP_MOVE, context->rp, context->rp + 2);
                     break;
-                case BANG_EQUAL:
+                case TOK_BANG_EQUAL:
                     compile_comparison(context, context->rp + 2, OP_EQUAL, 0, left, right);
                     // Because we don't have proper register allocation, we need an extra instruction
                     // to move the result to a compact register
                     instruction = make_pair_instr(OP_MOVE, context->rp, context->rp + 2);
                     break;
-                case LESS:
+                case TOK_LESS:
                     compile_comparison(context, context->rp + 2, OP_LESSTHAN, 1, left, right);
                     // Because we don't have proper register allocation, we need an extra instruction
                     // to move the result to a compact register
                     instruction = make_pair_instr(OP_MOVE, context->rp, context->rp + 2);
                     break;
-                case LESS_EQUAL:
+                case TOK_LESS_EQUAL:
                     compile_comparison(context, context->rp + 2, OP_LESSTHAN, 1, left, right);
                     compile_comparison(context, context->rp + 3, OP_EQUAL, 1, left, right);
                     // Because we don't have proper register allocation, we need an extra instruction
                     // to move the result to a compact register
                     instruction = make_triplet_instr(OP_OR, context->rp, context->rp + 2, context->rp + 3);
                     break;
-                case GREATER:
+                case TOK_GREATER:
                     compile_comparison(context, context->rp + 2, OP_LESSTHAN, 0, left, right);
                     // Because we don't have proper register allocation, we need an extra instruction
                     // to move the result to a compact register
                     instruction = make_pair_instr(OP_MOVE, context->rp, context->rp + 2);
                     break;
-                case GREATER_EQUAL:
+                case TOK_GREATER_EQUAL:
                     compile_comparison(context, context->rp + 2, OP_LESSTHAN, 0, left, right);
                     compile_comparison(context, context->rp + 3, OP_EQUAL, 1, left, right);
                     // Because we don't have proper register allocation, we need an extra instruction
@@ -263,14 +263,14 @@ uint8_t compile_internal(ast_t *ast, compile_context_t *context)
 
         case LITERAL:
             // TODO: Support ints which are larger than 16-bit
-            if (ast->op.literal.token.type == NUMBER)
+            if (ast->op.literal.token.type == TOK_NUMBER)
             {
                 result = context->rp;
                 instruction = make_pair_instr(OP_LOADV, result, atoi(ast->op.literal.value));
                 code_block_write(context->binary->code, instruction);
             }
 
-            if (ast->op.literal.token.type == FLOAT)
+            if (ast->op.literal.token.type == TOK_FLOAT)
             {
                 result = context->rp;
 
@@ -284,7 +284,7 @@ uint8_t compile_internal(ast_t *ast, compile_context_t *context)
                 context->mp += 1;
             }
 
-            if (ast->op.literal.token.type == STRING)
+            if (ast->op.literal.token.type == TOK_STRING)
             {
                 result = context->rp;
 
@@ -298,7 +298,7 @@ uint8_t compile_internal(ast_t *ast, compile_context_t *context)
                 context->mp += 1;
             }
 
-            if (ast->op.literal.token.type == IDENTIFIER)
+            if (ast->op.literal.token.type == TOK_IDENTIFIER)
             {
                 sym = symbol_map_get(context->symbols, ast->op.literal.value);
                 if (sym.location.type == LOC_UNDEF)
@@ -322,10 +322,10 @@ uint8_t compile_internal(ast_t *ast, compile_context_t *context)
                 result = sym.location.address;
             }
 
-            if (ast->op.literal.token.type == TRUE || ast->op.literal.token.type == FALSE)
+            if (ast->op.literal.token.type == TOK_TRUE || ast->op.literal.token.type == TOK_FALSE)
             {
                 result = context->rp;
-                instruction = make_pair_instr(OP_LOAD, result, (ast->op.literal.token.type == TRUE) ? 1 : 0);
+                instruction = make_pair_instr(OP_LOAD, result, (ast->op.literal.token.type == TOK_TRUE) ? 1 : 0);
                 code_block_write(context->binary->code, instruction);
             }
 

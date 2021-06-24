@@ -252,16 +252,16 @@ ast_t *statement_block(scan_context_t* context)
     ast_t *left;
 
     // TODO: Proper error handling
-    assert(accept(context).type == L_BRACE);
+    assert(accept(context).type == TOK_L_BRACE);
 
-    while (peek(context).type == EOL)
+    while (peek(context).type == TOK_EOL)
         accept(context);
 
     left = statement_list(context);
 
     // TODO: Proper error handling
     assert(left != NULL);
-    assert(accept(context).type == R_BRACE);
+    assert(accept(context).type == TOK_R_BRACE);
 
     return left;
 }
@@ -279,10 +279,10 @@ ast_t *statement_list(scan_context_t* context)
 
     list_expr_append(statements, current);
 
-    while (peek(context).type != EOF_CHAR && peek(context).type != EOF_CHAR)
+    while (peek(context).type != TOK_EOF && peek(context).type != TOK_EOF)
     {
         // If the next token is and EOL, consume it
-        if (peek(context).type == EOL)
+        if (peek(context).type == TOK_EOL)
             accept(context);
 
         // Now pull off the next statement
@@ -301,7 +301,7 @@ ast_t *statement(scan_context_t *context)
 {
     ast_t *left = variable_decl(context);
 
-    if (peek(context).type == RETURN)
+    if (peek(context).type == TOK_RETURN)
         return make_unary_expr(accept(context), statement(context));
 
     if (left == NULL)
@@ -313,13 +313,13 @@ ast_t *statement(scan_context_t *context)
     if (left == NULL)
         left = if_statement(context);
 
-    if (peek(context).type == EOL)
+    if (peek(context).type == TOK_EOL)
     {
         accept(context);
         return left;
     }
 
-    if (peek(context).type == EOF_CHAR)
+    if (peek(context).type == TOK_EOF)
         return left;
 
     return left;
@@ -327,7 +327,7 @@ ast_t *statement(scan_context_t *context)
 
 ast_t *if_statement(scan_context_t *context)
 {
-    if (peek(context).type != IF)
+    if (peek(context).type != TOK_IF)
         return NULL;
 
     // Pull off the "if" keyword
@@ -351,12 +351,12 @@ ast_t *function_decl(scan_context_t *context)
     ast_t *left, *args = NULL, *body;
     char *name;
 
-    if (peek(context).type != FN)
+    if (peek(context).type != TOK_FN)
         return NULL;
 
     accept(context);
 
-    if (peek(context).type == IDENTIFIER)
+    if (peek(context).type == TOK_IDENTIFIER)
     {
         name = token_value(context, accept(context));
     }
@@ -365,12 +365,12 @@ ast_t *function_decl(scan_context_t *context)
         name = "__anonymous";
     }
 
-    if (peek(context).type == L_PAREN)
+    if (peek(context).type == TOK_L_PAREN)
     {
         accept(context);
         args = expression_list(context);
         // TODO: Handle error
-        assert(accept(context).type == R_PAREN);
+        assert(accept(context).type == TOK_R_PAREN);
     }
 
     body = statement_block(context);
@@ -384,7 +384,7 @@ ast_t *function_decl(scan_context_t *context)
 
 ast_t *variable_list(scan_context_t *context)
 {
-    if (peek(context).type != IDENTIFIER)
+    if (peek(context).type != TOK_IDENTIFIER)
         return NULL;
 
     ast_t *var = make_literal_expr(accept(context));
@@ -393,12 +393,12 @@ ast_t *variable_list(scan_context_t *context)
     list_expr_append(left, var);
     left->type = VARIABLE_LIST;
 
-    while (peek(context).type == COMMA)
+    while (peek(context).type == TOK_COMMA)
     {
         // Pull off the comma
         accept(context);
 
-        if (peek(context).type != IDENTIFIER)
+        if (peek(context).type != TOK_IDENTIFIER)
         {
             backup(context);
             return left;
@@ -415,12 +415,12 @@ ast_t *variable_decl(scan_context_t *context)
 {
     ast_t *left;
 
-    if (peek(context).type != VAR)
+    if (peek(context).type != TOK_VAR)
         return NULL;
 
     token_t var_type = accept(context);
 
-    if (peek(context).type != IDENTIFIER)
+    if (peek(context).type != TOK_IDENTIFIER)
     {
         char *error;
         token_t invalid = accept(context);
@@ -433,7 +433,7 @@ ast_t *variable_decl(scan_context_t *context)
     token_t name = accept(context);
     ast_t *right = NULL;
 
-    if (peek(context).type == EQUAL)
+    if (peek(context).type == TOK_EQUAL)
     {
         accept(context);
         right = expression(context);
@@ -458,7 +458,7 @@ ast_t *expression_list(scan_context_t *context)
     list_expr_append(left, expr);
     left->type = EXPRESSION_LIST;
 
-    while (peek(context).type == COMMA)
+    while (peek(context).type == TOK_COMMA)
     {
         // Pull off the comma
         accept(context);
@@ -482,12 +482,12 @@ ast_t *assignment(scan_context_t *context)
     ast_t *left = NULL;
     token_t name;
 
-    if (peek(context).type != IDENTIFIER)
+    if (peek(context).type != TOK_IDENTIFIER)
         return equality(context);
 
     name = accept(context);
 
-    if (peek(context).type != EQUAL)
+    if (peek(context).type != TOK_EQUAL)
     {
         free(left);
         backup(context);
@@ -509,7 +509,7 @@ ast_t *equality(scan_context_t *context)
 {
     ast_t *left = comparison(context);
 
-    while (match(context, 2, BANG_EQUAL, EQUAL_EQUAL))
+    while (match(context, 2, TOK_BANG_EQUAL, TOK_EQUAL_EQUAL))
     {
         token_t operator = accept(context);
         ast_t *right = comparison(context);
@@ -526,7 +526,7 @@ ast_t *comparison(scan_context_t *context)
 {
     ast_t *left = term(context);
 
-    while (match(context, 4, GREATER, GREATER_EQUAL, LESS, LESS_EQUAL))
+    while (match(context, 4, TOK_GREATER, TOK_GREATER_EQUAL, TOK_LESS, TOK_LESS_EQUAL))
     {
         token_t operator = accept(context);
         ast_t *right = term(context);
@@ -543,7 +543,7 @@ ast_t *term(scan_context_t *context)
 {
     ast_t *left = term_md(context);
 
-    while (match(context, 2, MINUS, PLUS))
+    while (match(context, 2, TOK_MINUS, TOK_PLUS))
     {
         token_t operator = accept(context);
         ast_t *right = term_md(context);
@@ -560,7 +560,7 @@ ast_t *term_md(scan_context_t *context)
 {
     ast_t *left = unary(context);
 
-    while (match(context, 2, SLASH, ASTERISK))
+    while (match(context, 2, TOK_SLASH, TOK_ASTERISK))
     {
         token_t operator = accept(context);
         ast_t *right = unary(context);
@@ -575,7 +575,7 @@ ast_t *term_md(scan_context_t *context)
 
 ast_t *unary(scan_context_t *context)
 {
-    if (match(context, 2, BANG, MINUS))
+    if (match(context, 2, TOK_BANG, TOK_MINUS))
     {
         token_t operator = accept(context);
         ast_t *operand = unary(context);
@@ -587,7 +587,7 @@ ast_t *unary(scan_context_t *context)
     else
     {
         ast_t *p = primary(context);
-        if (p == NULL && peek(context).type == INVALID)
+        if (p == NULL && peek(context).type == TOK_INVALID)
         {
             char *error;
             location_t loc = {peek(context).start, peek(context).end};
@@ -605,7 +605,7 @@ ast_t *primary(scan_context_t *context)
     if (left != NULL)
         return left;
 
-    if (match(context, 6, IDENTIFIER, NUMBER, FLOAT, STRING, TRUE, FALSE, NIL))
+    if (match(context, 6, TOK_IDENTIFIER, TOK_NUMBER, TOK_FLOAT, TOK_STRING, TOK_TRUE, TOK_FALSE, TOK_NIL))
     {
         token_t tok = accept(context);
         ast_t *literal = make_literal_expr(tok);
@@ -620,7 +620,7 @@ ast_t *primary(scan_context_t *context)
 
 ast_t *tuple(scan_context_t *context)
 {
-    if (peek(context).type == L_PAREN)
+    if (peek(context).type == TOK_L_PAREN)
     {
         // Consume the parenthesis
         token_t paren = accept(context);
@@ -644,7 +644,7 @@ ast_t *tuple(scan_context_t *context)
             expr->type = TUPLE;
         }
 
-        if (paren.type != R_PAREN)
+        if (paren.type != TOK_R_PAREN)
         {
             char *error;
             location_t loc = {paren.start, paren.end};
@@ -665,12 +665,12 @@ ast_t *function_call(scan_context_t *context)
     ast_t *args;
     char *fn_name;
 
-    if (peek(context).type != IDENTIFIER)
+    if (peek(context).type != TOK_IDENTIFIER)
         return NULL;
 
     fn_name = token_value(context, accept(context));
 
-    if (peek(context).type != L_PAREN)
+    if (peek(context).type != TOK_L_PAREN)
     {
         backup(context);
         return NULL;
@@ -681,7 +681,7 @@ ast_t *function_call(scan_context_t *context)
     args = expression_list(context);
 
     // TODO: Error handling
-    assert(accept(context).type == R_PAREN);
+    assert(accept(context).type == TOK_R_PAREN);
 
     left = make_call_expr(fn_name, args);
 
