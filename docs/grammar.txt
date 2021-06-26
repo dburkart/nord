@@ -9,6 +9,7 @@ statement_list  -> statement
 # Statements
 statement       -> variable_decl
                  | expression "\n"
+                 | "return" statement
                  | if_statement
                  | function_decl ;
 if_statement    -> "if" expression statement_block ;
@@ -19,8 +20,7 @@ variable_decl   -> "var" IDENTIFIER ( "=" expression ) "\n" ;
 
 # Expressions
 expression_list -> expression ( "," expression_list )* ;
-expression      -> "return" assignment
-                 | assignment ;
+expression      -> assignment ;
 assignment      -> IDENTIFIER "=" assignment
                  | equality ;
 equality        -> comparison ( ( "!=" | "==") comparison )* ;

@@ -1,0 +1,6 @@
+fn foo() {
+    print("foo")
+}
+
+foo()
+print("bar")

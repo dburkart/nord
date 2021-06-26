@@ -52,89 +52,89 @@ const char *token_name(token_t t)
     switch(t.type)
     {
         // Single character tokens
-        case EQUAL:
+        case TOK_EQUAL:
             return "EQUAL";
-        case L_PAREN:
+        case TOK_L_PAREN:
             return "L_PAREN";
-        case R_PAREN:
+        case TOK_R_PAREN:
             return "R_PAREN";
-        case L_BRACE:
+        case TOK_L_BRACE:
             return "L_BRACE";
-        case R_BRACE:
+        case TOK_R_BRACE:
             return "R_BRACE";
-        case COLON:
+        case TOK_COLON:
             return "COLON";
-        case COMMA:
+        case TOK_COMMA:
             return "COMMA";
-        case EOL:
+        case TOK_EOL:
             return "EOL";
 
         // BRANCHING
-        case IF:
+        case TOK_IF:
             return "IF";
 
         // COMPARATORS
-        case BANG:
+        case TOK_BANG:
             return "BANG";
-        case BANG_EQUAL:
+        case TOK_BANG_EQUAL:
             return "BANG_EQUAL";
-        case EQUAL_EQUAL:
+        case TOK_EQUAL_EQUAL:
             return "EQUAL_EQUAL";
-        case LESS:
+        case TOK_LESS:
             return "LESS";
-        case LESS_EQUAL:
+        case TOK_LESS_EQUAL:
             return "LESS_EQUAL";
-        case GREATER:
+        case TOK_GREATER:
             return "GREATER";
-        case GREATER_EQUAL:
+        case TOK_GREATER_EQUAL:
             return "GREATER_EQUAL";
 
         // MATH
-        case MINUS:
+        case TOK_MINUS:
             return "MINUS";
-        case PLUS:
+        case TOK_PLUS:
             return "PLUS";
-        case ASTERISK:
+        case TOK_ASTERISK:
             return "ASTERISK";
-        case SLASH:
+        case TOK_SLASH:
             return "SLASH";
 
         // Arrows
-        case R_ARROW:
+        case TOK_R_ARROW:
             return "R_ARROW";
 
         // Literals
-        case IDENTIFIER:
+        case TOK_IDENTIFIER:
             return "IDENTIFIER";
-        case STRING:
+        case TOK_STRING:
             return "STRING";
-        case NUMBER:
+        case TOK_NUMBER:
             return "NUMBER";
-        case FLOAT:
+        case TOK_FLOAT:
             return "FLOAT";
 
         // Keywords
-        case TRUE:
+        case TOK_TRUE:
             return "TRUE";
-        case FALSE:
+        case TOK_FALSE:
             return "FALSE";
-        case NIL:
+        case TOK_NIL:
             return "NIL";
-        case VAR:
+        case TOK_VAR:
             return "VAR";
-        case FN:
+        case TOK_FN:
             return "FN";
         case FOR:
             return "FOR";
         case IN:
             return "IN";
-        case RETURN:
+        case TOK_RETURN:
             return "RETURN";
-        case INVALID:
+        case TOK_INVALID:
             return "INVALID";
 
         // EOF
-        case EOF_CHAR:
+        case TOK_EOF:
             return "EOF";
         default:
             break;

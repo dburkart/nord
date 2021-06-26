@@ -10,36 +10,37 @@
 #include <stdlib.h>
 #include <stdint.h>
 
-// TODO: Namespace this enum
 // Lexeme Enumeration
 enum token_type_e {
     // Delimiters
-    L_PAREN, R_PAREN, L_BRACE, R_BRACE, COLON, COMMA, EOL,
+    TOK_L_PAREN, TOK_R_PAREN, TOK_L_BRACE, TOK_R_BRACE, TOK_COLON, TOK_COMMA,
+    TOK_EOL,
 
-    EQUAL, BANG,
+    TOK_EQUAL, TOK_BANG,
 
     // Math
-    PLUS, MINUS, ASTERISK, SLASH,
+    TOK_PLUS, TOK_MINUS, TOK_ASTERISK, TOK_SLASH,
 
     // Comparators
-    GREATER, GREATER_EQUAL, LESS, LESS_EQUAL, EQUAL_EQUAL, BANG_EQUAL,
+    TOK_GREATER, TOK_GREATER_EQUAL, TOK_LESS, TOK_LESS_EQUAL, TOK_EQUAL_EQUAL,
+    TOK_BANG_EQUAL,
 
     // Arrows
-    R_ARROW,
+    TOK_R_ARROW,
 
     // Literals
-    IDENTIFIER, STRING, NUMBER, FLOAT,
+    TOK_IDENTIFIER, TOK_STRING, TOK_NUMBER, TOK_FLOAT,
 
     // Keywords
-    VAR, FN, RETURN, TRUE, FALSE, NIL, FOR, IN,
+    TOK_VAR, TOK_FN, TOK_RETURN, TOK_TRUE, TOK_FALSE, TOK_NIL, FOR, IN
 
     // Branching
-    IF,
+    TOK_IF,
 
     // Invalid token
-    INVALID,
+    TOK_INVALID,
 
-    EOF_CHAR // 'EOF' is reserved on some platforms
+    TOK_EOF // 'EOF' is reserved on some platforms
 };
 
 // Token specific information

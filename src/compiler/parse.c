@@ -55,17 +55,17 @@ void print_ast_internal(scan_context_t *context, ast_t *ast, int indent)
 
     switch(ast->type)
     {
-        case ASSIGN:
+        case AST_ASSIGN:
             token_val = ast->op.assign.name;
             printf("ASSIGN(IDENTIFIER) -> %s\n", token_val);
             print_ast_internal(context, ast->op.assign.value, indent + 2);
             break;
-        case BINARY:
+        case AST_BINARY:
             printf("BINARY(%s)\n", token_name(ast->op.binary.operator));
             print_ast_internal(context, ast->op.binary.left, indent + 2);
             print_ast_internal(context, ast->op.binary.right, indent + 2);
             break;
-        case DECLARE:
+        case AST_DECLARE:
             token_val = ast->op.declare.name;
             printf("DECLARE(IDENTIFIER) -> %s\n", token_val);
             if (ast->op.declare.initial_value)
@@ -73,25 +73,25 @@ void print_ast_internal(scan_context_t *context, ast_t *ast, int indent)
                 print_ast_internal(context, ast->op.declare.initial_value, indent + 2);
             }
             break;
-        case UNARY:
+        case AST_UNARY:
             printf("UNARY(%s)\n", token_name(ast->op.unary.operator));
             print_ast_internal(context, ast->op.unary.operand, indent + 2);
             break;
-        case LITERAL:
+        case AST_LITERAL:
             printf("LITERAL(%s) -> %s\n", token_name(ast->op.literal.token), ast->op.literal.value);
             break;
-        case GROUP:
+        case AST_GROUP:
             printf("GROUP\n");
             print_ast_internal(context, ast->op.group, indent + 2);
             break;
-        case STATEMENT_LIST:
+        case AST_STMT_LIST:
             printf("STMT LIST\n");
             for (int i = 0; i < ast->op.list.size; i++)
             {
                 print_ast_internal(context, ast->op.list.items[i], indent + 2);
             }
             break;
-        case FUNCTION_DECL:
+        case AST_FUNCTION_DECL:
             printf("FUNCTION_DECL(%s)\n", ast->op.fn.name);
             if (ast->op.fn.args != NULL)
             {
@@ -99,15 +99,15 @@ void print_ast_internal(scan_context_t *context, ast_t *ast, int indent)
             }
             print_ast_internal(context, ast->op.fn.body, indent + 2);
             break;
-        case FUNCTION_CALL:
+        case AST_FUNCTION_CALL:
             printf("CALL_FN(%s)\n", ast->op.call.name);
             if (ast->op.call.args != NULL)
             {
                 print_ast_internal(context, ast->op.call.args, indent + 2);
             }
             break;
-        case VARIABLE_LIST:
-        case EXPRESSION_LIST:
+        case AST_VAR_LIST:
+        case AST_EXPR_LIST:
             printf("ARGUMENTS\n");
             for (int i = 0; i < ast->op.list.size; i++)
             {
@@ -115,7 +115,7 @@ void print_ast_internal(scan_context_t *context, ast_t *ast, int indent)
             }
             break;
 
-        case TUPLE:
+        case AST_TUPLE:
             printf("TUPLE\n");
             for (int i = 0; i < ast->op.list.size; i++)
             {
@@ -123,7 +123,7 @@ void print_ast_internal(scan_context_t *context, ast_t *ast, int indent)
             }
             break;
 
-        case IF_STATEMENT:
+        case AST_IF_STMT:
             printf("IF\n");
             print_ast_internal(context, ast->op.if_stmt.condition, indent + 2);
             print_ast_internal(context, ast->op.if_stmt.body, indent + 2);
@@ -140,7 +140,7 @@ void print_ast(scan_context_t *context, ast_t *ast)
 ast_t* make_assign_expr(char *name, ast_t *value)
 {
     ast_t *assign_expr = (ast_t *)malloc(sizeof(ast_t));
-    assign_expr->type = ASSIGN;
+    assign_expr->type = AST_ASSIGN;
     assign_expr->op.assign.name = name;
     assign_expr->op.assign.value = value;
 
@@ -150,7 +150,7 @@ ast_t* make_assign_expr(char *name, ast_t *value)
 ast_t *make_binary_expr(ast_t *left, token_t operator, ast_t *right)
 {
     ast_t *binary_expr = (ast_t *)malloc(sizeof(ast_t));
-    binary_expr->type = BINARY;
+    binary_expr->type = AST_BINARY;
     binary_expr->op.binary.operator = operator;
     binary_expr->op.binary.left = left;
     binary_expr->op.binary.right = right;
@@ -161,7 +161,7 @@ ast_t *make_binary_expr(ast_t *left, token_t operator, ast_t *right)
 ast_t *make_declare_expr(token_t var_type, char *name, ast_t *initial_value)
 {
     ast_t *declare_expr = (ast_t *)malloc(sizeof(ast_t));
-    declare_expr->type = DECLARE;
+    declare_expr->type = AST_DECLARE;
     declare_expr->op.declare.var_type = var_type;
     declare_expr->op.declare.name = name;
     declare_expr->op.declare.initial_value = initial_value;
@@ -172,7 +172,7 @@ ast_t *make_declare_expr(token_t var_type, char *name, ast_t *initial_value)
 ast_t *make_unary_expr(token_t operator, ast_t *operand)
 {
     ast_t *unary_expr = (ast_t *)malloc(sizeof(ast_t));
-    unary_expr->type = UNARY;
+    unary_expr->type = AST_UNARY;
     unary_expr->op.unary.operator = operator;
     unary_expr->op.unary.operand = operand;
 
@@ -182,7 +182,7 @@ ast_t *make_unary_expr(token_t operator, ast_t *operand)
 ast_t *make_literal_expr(token_t literal)
 {
     ast_t *literal_expr = (ast_t *)malloc(sizeof(ast_t));
-    literal_expr->type = LITERAL;
+    literal_expr->type = AST_LITERAL;
     literal_expr->op.literal.token = literal;
 
     return literal_expr;
@@ -191,7 +191,7 @@ ast_t *make_literal_expr(token_t literal)
 ast_t *make_group_expr(ast_t *expr)
 {
     ast_t *group_expr = (ast_t *)malloc(sizeof(ast_t));
-    group_expr->type = GROUP;
+    group_expr->type = AST_GROUP;
     group_expr->op.group = expr;
 
     return group_expr;
@@ -200,7 +200,7 @@ ast_t *make_group_expr(ast_t *expr)
 ast_t *make_fn_expr(char *name, ast_t *args, ast_t *body)
 {
     ast_t *fn_expr = (ast_t *)malloc(sizeof(ast_t));
-    fn_expr->type = FUNCTION_DECL;
+    fn_expr->type = AST_FUNCTION_DECL;
     fn_expr->op.fn.name = name;
     fn_expr->op.fn.args = args;
     fn_expr->op.fn.body = body;
@@ -210,7 +210,7 @@ ast_t *make_fn_expr(char *name, ast_t *args, ast_t *body)
 ast_t *make_call_expr(char *name, ast_t *args)
 {
     ast_t *call_expr = (ast_t *)malloc(sizeof(ast_t));
-    call_expr->type = FUNCTION_CALL;
+    call_expr->type = AST_FUNCTION_CALL;
     call_expr->op.call.name = name;
     call_expr->op.call.args = args;
     return call_expr;
@@ -220,7 +220,7 @@ ast_t *make_call_expr(char *name, ast_t *args)
 ast_t *make_list_expr(size_t capacity)
 {
     ast_t *list_expr = (ast_t *)malloc(sizeof(ast_t));
-    list_expr->type = STATEMENT_LIST;
+    list_expr->type = AST_STMT_LIST;
     list_expr->op.list.size = 0;
     list_expr->op.list.capacity = capacity;
     list_expr->op.list.items = (ast_t **)malloc(sizeof(ast_t) * capacity);
@@ -230,7 +230,7 @@ ast_t *make_list_expr(size_t capacity)
 ast_t *make_if_expr(ast_t *condition, ast_t *body)
 {
     ast_t *if_expr = (ast_t *)malloc(sizeof(ast_t));
-    if_expr->type = IF_STATEMENT;
+    if_expr->type = AST_IF_STMT;
     if_expr->op.if_stmt.condition = condition;
     if_expr->op.if_stmt.body = body;
     return if_expr;
@@ -252,16 +252,16 @@ ast_t *statement_block(scan_context_t* context)
     ast_t *left;
 
     // TODO: Proper error handling
-    assert(accept(context).type == L_BRACE);
+    assert(accept(context).type == TOK_L_BRACE);
 
-    while (peek(context).type == EOL)
+    while (peek(context).type == TOK_EOL)
         accept(context);
 
     left = statement_list(context);
 
     // TODO: Proper error handling
     assert(left != NULL);
-    assert(accept(context).type == R_BRACE);
+    assert(accept(context).type == TOK_R_BRACE);
 
     return left;
 }
@@ -279,10 +279,10 @@ ast_t *statement_list(scan_context_t* context)
 
     list_expr_append(statements, current);
 
-    while (peek(context).type != EOF_CHAR && peek(context).type != EOF_CHAR)
+    while (peek(context).type != TOK_EOF && peek(context).type != TOK_EOF)
     {
         // If the next token is and EOL, consume it
-        if (peek(context).type == EOL)
+        if (peek(context).type == TOK_EOL)
             accept(context);
 
         // Now pull off the next statement
@@ -301,6 +301,9 @@ ast_t *statement(scan_context_t *context)
 {
     ast_t *left = variable_decl(context);
 
+    if (peek(context).type == TOK_RETURN)
+        return make_unary_expr(accept(context), statement(context));
+
     if (left == NULL)
         left = expression(context);
 
@@ -310,13 +313,13 @@ ast_t *statement(scan_context_t *context)
     if (left == NULL)
         left = if_statement(context);
 
-    if (peek(context).type == EOL)
+    if (peek(context).type == TOK_EOL)
     {
         accept(context);
         return left;
     }
 
-    if (peek(context).type == EOF_CHAR)
+    if (peek(context).type == TOK_EOF)
         return left;
 
     return left;
@@ -324,7 +327,7 @@ ast_t *statement(scan_context_t *context)
 
 ast_t *if_statement(scan_context_t *context)
 {
-    if (peek(context).type != IF)
+    if (peek(context).type != TOK_IF)
         return NULL;
 
     // Pull off the "if" keyword
@@ -348,12 +351,12 @@ ast_t *function_decl(scan_context_t *context)
     ast_t *left, *args = NULL, *body;
     char *name;
 
-    if (peek(context).type != FN)
+    if (peek(context).type != TOK_FN)
         return NULL;
 
     accept(context);
 
-    if (peek(context).type == IDENTIFIER)
+    if (peek(context).type == TOK_IDENTIFIER)
     {
         name = token_value(context, accept(context));
     }
@@ -362,12 +365,12 @@ ast_t *function_decl(scan_context_t *context)
         name = "__anonymous";
     }
 
-    if (peek(context).type == L_PAREN)
+    if (peek(context).type == TOK_L_PAREN)
     {
         accept(context);
         args = expression_list(context);
         // TODO: Handle error
-        assert(accept(context).type == R_PAREN);
+        assert(accept(context).type == TOK_R_PAREN);
     }
 
     body = statement_block(context);
@@ -381,21 +384,21 @@ ast_t *function_decl(scan_context_t *context)
 
 ast_t *variable_list(scan_context_t *context)
 {
-    if (peek(context).type != IDENTIFIER)
+    if (peek(context).type != TOK_IDENTIFIER)
         return NULL;
 
     ast_t *var = make_literal_expr(accept(context));
     ast_t *left = make_list_expr(10);
 
     list_expr_append(left, var);
-    left->type = VARIABLE_LIST;
+    left->type = AST_VAR_LIST;
 
-    while (peek(context).type == COMMA)
+    while (peek(context).type == TOK_COMMA)
     {
         // Pull off the comma
         accept(context);
 
-        if (peek(context).type != IDENTIFIER)
+        if (peek(context).type != TOK_IDENTIFIER)
         {
             backup(context);
             return left;
@@ -412,12 +415,12 @@ ast_t *variable_decl(scan_context_t *context)
 {
     ast_t *left;
 
-    if (peek(context).type != VAR)
+    if (peek(context).type != TOK_VAR)
         return NULL;
 
     token_t var_type = accept(context);
 
-    if (peek(context).type != IDENTIFIER)
+    if (peek(context).type != TOK_IDENTIFIER)
     {
         char *error;
         token_t invalid = accept(context);
@@ -430,7 +433,7 @@ ast_t *variable_decl(scan_context_t *context)
     token_t name = accept(context);
     ast_t *right = NULL;
 
-    if (peek(context).type == EQUAL)
+    if (peek(context).type == TOK_EQUAL)
     {
         accept(context);
         right = expression(context);
@@ -453,9 +456,9 @@ ast_t *expression_list(scan_context_t *context)
     ast_t *left = make_list_expr(10);
 
     list_expr_append(left, expr);
-    left->type = EXPRESSION_LIST;
+    left->type = AST_EXPR_LIST;
 
-    while (peek(context).type == COMMA)
+    while (peek(context).type == TOK_COMMA)
     {
         // Pull off the comma
         accept(context);
@@ -471,11 +474,6 @@ ast_t *expression_list(scan_context_t *context)
 
 ast_t *expression(scan_context_t *context)
 {
-    if (peek(context).type == RETURN)
-    {
-        return make_unary_expr(accept(context), assignment(context));
-    }
-
     return assignment(context);
 }
 
@@ -484,12 +482,12 @@ ast_t *assignment(scan_context_t *context)
     ast_t *left = NULL;
     token_t name;
 
-    if (peek(context).type != IDENTIFIER)
+    if (peek(context).type != TOK_IDENTIFIER)
         return equality(context);
 
     name = accept(context);
 
-    if (peek(context).type != EQUAL)
+    if (peek(context).type != TOK_EQUAL)
     {
         free(left);
         backup(context);
@@ -511,7 +509,7 @@ ast_t *equality(scan_context_t *context)
 {
     ast_t *left = comparison(context);
 
-    while (match(context, 2, BANG_EQUAL, EQUAL_EQUAL))
+    while (match(context, 2, TOK_BANG_EQUAL, TOK_EQUAL_EQUAL))
     {
         token_t operator = accept(context);
         ast_t *right = comparison(context);
@@ -528,7 +526,7 @@ ast_t *comparison(scan_context_t *context)
 {
     ast_t *left = term(context);
 
-    while (match(context, 4, GREATER, GREATER_EQUAL, LESS, LESS_EQUAL))
+    while (match(context, 4, TOK_GREATER, TOK_GREATER_EQUAL, TOK_LESS, TOK_LESS_EQUAL))
     {
         token_t operator = accept(context);
         ast_t *right = term(context);
@@ -545,7 +543,7 @@ ast_t *term(scan_context_t *context)
 {
     ast_t *left = term_md(context);
 
-    while (match(context, 2, MINUS, PLUS))
+    while (match(context, 2, TOK_MINUS, TOK_PLUS))
     {
         token_t operator = accept(context);
         ast_t *right = term_md(context);
@@ -562,7 +560,7 @@ ast_t *term_md(scan_context_t *context)
 {
     ast_t *left = unary(context);
 
-    while (match(context, 2, SLASH, ASTERISK))
+    while (match(context, 2, TOK_SLASH, TOK_ASTERISK))
     {
         token_t operator = accept(context);
         ast_t *right = unary(context);
@@ -577,7 +575,7 @@ ast_t *term_md(scan_context_t *context)
 
 ast_t *unary(scan_context_t *context)
 {
-    if (match(context, 2, BANG, MINUS))
+    if (match(context, 2, TOK_BANG, TOK_MINUS))
     {
         token_t operator = accept(context);
         ast_t *operand = unary(context);
@@ -589,7 +587,7 @@ ast_t *unary(scan_context_t *context)
     else
     {
         ast_t *p = primary(context);
-        if (p == NULL && peek(context).type == INVALID)
+        if (p == NULL && peek(context).type == TOK_INVALID)
         {
             char *error;
             location_t loc = {peek(context).start, peek(context).end};
@@ -607,7 +605,7 @@ ast_t *primary(scan_context_t *context)
     if (left != NULL)
         return left;
 
-    if (match(context, 6, IDENTIFIER, NUMBER, FLOAT, STRING, TRUE, FALSE, NIL))
+    if (match(context, 6, TOK_IDENTIFIER, TOK_NUMBER, TOK_FLOAT, TOK_STRING, TOK_TRUE, TOK_FALSE, TOK_NIL))
     {
         token_t tok = accept(context);
         ast_t *literal = make_literal_expr(tok);
@@ -622,12 +620,14 @@ ast_t *primary(scan_context_t *context)
 
 ast_t *tuple(scan_context_t *context)
 {
-    if (peek(context).type == L_PAREN)
+    if (peek(context).type == TOK_L_PAREN)
     {
         // Consume the parenthesis
         token_t paren = accept(context);
 
         ast_t *expr = expression_list(context);
+        // TODO: Error checking!
+        assert(expr != NULL);
         expr->location.start = paren.start;
         paren = accept(context);
         expr->location.end = paren.end;
@@ -641,10 +641,10 @@ ast_t *tuple(scan_context_t *context)
         }
         else
         {
-            expr->type = TUPLE;
+            expr->type = AST_TUPLE;
         }
 
-        if (paren.type != R_PAREN)
+        if (paren.type != TOK_R_PAREN)
         {
             char *error;
             location_t loc = {paren.start, paren.end};
@@ -665,12 +665,12 @@ ast_t *function_call(scan_context_t *context)
     ast_t *args;
     char *fn_name;
 
-    if (peek(context).type != IDENTIFIER)
+    if (peek(context).type != TOK_IDENTIFIER)
         return NULL;
 
     fn_name = token_value(context, accept(context));
 
-    if (peek(context).type != L_PAREN)
+    if (peek(context).type != TOK_L_PAREN)
     {
         backup(context);
         return NULL;
@@ -681,7 +681,7 @@ ast_t *function_call(scan_context_t *context)
     args = expression_list(context);
 
     // TODO: Error handling
-    assert(accept(context).type == R_PAREN);
+    assert(accept(context).type == TOK_R_PAREN);
 
     left = make_call_expr(fn_name, args);
 
