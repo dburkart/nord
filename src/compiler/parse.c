@@ -15,6 +15,7 @@ ast_t *statement_block(scan_context_t *);
 ast_t *statement_list(scan_context_t *);
 ast_t *statement(scan_context_t *);
 ast_t *if_statement(scan_context_t *);
+ast_t *for_statement(scan_context_t *);
 ast_t *function_decl(scan_context_t *);
 ast_t *variable_list(scan_context_t *);
 ast_t *variable_decl(scan_context_t *);
@@ -129,6 +130,19 @@ void print_ast_internal(scan_context_t *context, ast_t *ast, int indent)
             print_ast_internal(context, ast->op.if_stmt.body, indent + 2);
             break;
 
+        case FOR_STATEMENT:
+            if (ast->op.for_stmt.var != NULL)
+            {
+                printf("FOR(%s)\n", ast->op.for_stmt.var);
+            }
+            else
+            {
+                printf("FOR\n");
+            }
+            print_ast_internal(context, ast->op.for_stmt.iterable, indent + 2);
+            print_ast_internal(context, ast->op.for_stmt.body, indent + 2);
+            break;
+
     }
 }
 
@@ -236,6 +250,16 @@ ast_t *make_if_expr(ast_t *condition, ast_t *body)
     return if_expr;
 }
 
+ast_t *make_for_expr(char *var, ast_t *iterable, ast_t *body)
+{
+    ast_t *for_expr = (ast_t *)malloc(sizeof(ast_t));
+    for_expr->type = FOR_STATEMENT;
+    for_expr->op.for_stmt.var = var;
+    for_expr->op.for_stmt.iterable = iterable;
+    for_expr->op.for_stmt.body = body;
+    return for_expr;
+}
+
 void list_expr_append(ast_t *list, ast_t *item)
 {
     if (list->op.list.size >= list->op.list.capacity - 1)
@@ -313,6 +337,9 @@ ast_t *statement(scan_context_t *context)
     if (left == NULL)
         left = if_statement(context);
 
+    if (left == NULL)
+        left = for_statement(context);
+
     if (peek(context).type == TOK_EOL)
     {
         accept(context);
@@ -344,6 +371,51 @@ ast_t *if_statement(scan_context_t *context)
     assert(body != NULL);
 
     return make_if_expr(condition, body);
+}
+
+ast_t *for_statement(scan_context_t *context)
+{
+    char *var = NULL;
+    ast_t *iterable = NULL;
+    ast_t *body = NULL;
+
+    if (peek(context).type != TOK_FOR)
+        return NULL;
+
+    accept(context);
+
+    // Are we defining a local for each iteration?
+    if (peek(context).type == TOK_IDENTIFIER)
+    {
+        token_t t = accept(context);
+
+        if (peek(context).type == TOK_IN)
+        {
+            var = token_value(context, t);
+            accept(context);
+            iterable = primary(context);
+        }
+        else
+        {
+            backup(context);
+            iterable = primary(context);
+        }
+    }
+
+    if (iterable == NULL && match(context, 2, TOK_STRING, TOK_L_PAREN))
+    {
+        iterable = primary(context);
+    }
+
+    // TODO: Error handling!
+    assert(iterable != NULL);
+
+    body = statement_block(context);
+
+    // TODO: Error handling!
+    assert(body != NULL);
+
+    return make_for_expr(var, iterable, body);
 }
 
 ast_t *function_decl(scan_context_t *context)

@@ -22,7 +22,7 @@ typedef struct expr_t
         AST_LITERAL, AST_GROUP, AST_STMT_LIST,
         AST_FUNCTION_DECL, AST_FUNCTION_CALL,
         AST_EXPR_LIST, AST_VAR_LIST,
-        AST_IF_STMT, AST_TUPLE
+        AST_IF_STMT, FOR_STATEMENT, AST_TUPLE
     } type;
 
     union
@@ -84,6 +84,13 @@ typedef struct expr_t
             struct expr_t *condition;
             struct expr_t *body;
         } if_stmt;
+
+        struct
+        {
+            char *var;
+            struct expr_t *iterable;
+            struct expr_t *body;
+        } for_stmt;
 
         struct expr_t *group;
     } op;

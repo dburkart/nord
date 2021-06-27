@@ -344,7 +344,7 @@ token_t peek(scan_context_t *context)
                 advance = match_keyword("for", c, 3);
                 if (advance)
                 {
-                    t.type = FOR;
+                    t.type = TOK_FOR;
                     break;
                 }
 
@@ -373,7 +373,7 @@ token_t peek(scan_context_t *context)
                 advance = match_keyword("in", c, 2);
                 if (advance)
                 {
-                    t.type = IN;
+                    t.type = TOK_IN;
                     break;
                 }
 

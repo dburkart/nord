@@ -1,0 +1,10 @@
+STMT LIST
+  ↳ FOR
+  ⋅ ↳ TUPLE
+  ⋅ ⋅ ↳ LITERAL(NUMBER) -> 1
+  ⋅ ⋅ ↳ LITERAL(NUMBER) -> 2
+  ⋅ ⋅ ↳ LITERAL(NUMBER) -> 3
+  ⋅ ↳ STMT LIST
+  ⋅ ⋅ ↳ CALL_FN(print)
+  ⋅ ⋅ ⋅ ↳ ARGUMENTS
+  ⋅ ⋅ ⋅ ⋅ ↳ LITERAL(STRING) -> in loop

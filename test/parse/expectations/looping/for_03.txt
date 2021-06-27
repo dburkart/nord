@@ -1,0 +1,12 @@
+STMT LIST
+  ↳ DECLARE(IDENTIFIER) -> list
+  ⋅ ↳ TUPLE
+  ⋅ ⋅ ↳ LITERAL(NUMBER) -> 1
+  ⋅ ⋅ ↳ LITERAL(NUMBER) -> 2
+  ⋅ ⋅ ↳ LITERAL(NUMBER) -> 3
+  ↳ FOR(item)
+  ⋅ ↳ LITERAL(IDENTIFIER) -> list
+  ⋅ ↳ STMT LIST
+  ⋅ ⋅ ↳ CALL_FN(print)
+  ⋅ ⋅ ⋅ ↳ ARGUMENTS
+  ⋅ ⋅ ⋅ ⋅ ↳ LITERAL(STRING) -> in loop

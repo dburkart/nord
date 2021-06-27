@@ -124,9 +124,9 @@ const char *token_name(token_t t)
             return "VAR";
         case TOK_FN:
             return "FN";
-        case FOR:
+        case TOK_FOR:
             return "FOR";
-        case IN:
+        case TOK_IN:
             return "IN";
         case TOK_RETURN:
             return "RETURN";

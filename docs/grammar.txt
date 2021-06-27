@@ -11,9 +11,10 @@ statement       -> variable_decl
                  | expression "\n"
                  | "return" statement
                  | if_statement
+                 | for_statement
                  | function_decl ;
 if_statement    -> "if" expression statement_block ;
-for_statement   -> "for" IDENTIFIER "in" ( IDENTIFIER | STRING | tuple ) statement_block ;
+for_statement   -> "for" ( IDENTIFIER "in" )? ( IDENTIFIER | STRING | tuple ) statement_block ;
 function_decl   -> "fn" ( IDENTIFIER )? ( "(" variable_list ")" )* statement_block
 variable_list   -> IDENTIFIER ( "," variable_list )* ;
 variable_decl   -> "var" IDENTIFIER ( "=" expression ) "\n" ;
