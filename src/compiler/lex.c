@@ -48,7 +48,7 @@ bool is_whitespace(char c)
 
 bool is_boundary(char c)
 {
-    return is_whitespace(c) || is_reserved(c);
+    return is_whitespace(c) || is_reserved(c) || c == '\0';
 }
 
 ///---- Matching functions
