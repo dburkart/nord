@@ -160,6 +160,13 @@ uint8_t compile_internal(ast_t *ast, compile_context_t *context)
                     break;
 
                 // -- Logic
+                case TOK_AND:
+                    instruction = make_triplet_instr(OP_AND, context->rp, left, right);
+                    break;
+                case TOK_OR:
+                    instruction = make_triplet_instr(OP_OR, context->rp, left, right);
+                    break;
+
                 case TOK_EQUAL_EQUAL:
                     compile_comparison(context, context->rp + 2, OP_EQUAL, 1, left, right);
                     // Because we don't have proper register allocation, we need an extra instruction

@@ -55,12 +55,15 @@ typedef enum
 
     // -- Logic
 
+    // and <register-out> <register-in> <register-in>
+    OP_AND,
+    // or <register-out> <register-in> <register-in>
+    OP_OR,
+
     // equal <value-desired> <register-in> <register-in>
     OP_EQUAL,
     // lt <value-desired> <register-in> <register-in>
     OP_LESSTHAN,
-    // or <register-out> <register-in> <register-in>
-    OP_OR,
     // not <register-out> <register-in>
     OP_NOT,
 

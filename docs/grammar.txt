@@ -23,7 +23,8 @@ variable_decl   -> "var" IDENTIFIER ( "=" expression ) "\n" ;
 expression_list -> expression ( "," expression_list )* ;
 expression      -> assignment ;
 assignment      -> IDENTIFIER "=" assignment
-                 | equality ;
+                 | conjunction ;
+conjunction     -> equality ( ( "and" | "or" ) equality )* ;
 equality        -> comparison ( ( "!=" | "==") comparison )* ;
 comparison      -> term ( ( ">" | ">=" | "<" | "<=" ) term )* ;
 term            -> term_md ( ( "-" | "+" ) term_md )* ;

@@ -222,6 +222,15 @@ char *disassemble_instruction(memory_t *mem, instruction_t instruction)
                     );
             break;
 
+        case OP_AND:
+            asprintf(&assembly, FORMAT_TRIPLET,
+                     "and",
+                     instruction.fields.triplet.arg1,
+                     instruction.fields.triplet.arg2,
+                     instruction.fields.triplet.arg3
+                    );
+            break;
+
         case OP_OR:
             asprintf(&assembly, FORMAT_TRIPLET,
                      "or",

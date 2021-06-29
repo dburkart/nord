@@ -1,0 +1,15 @@
+if false or false {
+    print("Not possible")
+}
+
+if (true or false) {
+    print("true or false")
+}
+
+if 0 or false {
+    print("Not possible")
+}
+
+if false or true {
+    print("false or true")
+}

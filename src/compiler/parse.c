@@ -21,6 +21,7 @@ ast_t *variable_list(scan_context_t *);
 ast_t *variable_decl(scan_context_t *);
 ast_t *expression_list(scan_context_t *);
 ast_t *expression(scan_context_t *);
+ast_t *conjunction(scan_context_t *);
 ast_t *equality(scan_context_t *);
 ast_t *assignment(scan_context_t *);
 ast_t *comparison(scan_context_t *);
@@ -555,7 +556,7 @@ ast_t *assignment(scan_context_t *context)
     token_t name;
 
     if (peek(context).type != TOK_IDENTIFIER)
-        return equality(context);
+        return conjunction(context);
 
     name = accept(context);
 
@@ -563,7 +564,7 @@ ast_t *assignment(scan_context_t *context)
     {
         free(left);
         backup(context);
-        return equality(context);
+        return conjunction(context);
     }
 
     // Consume the '='
@@ -573,6 +574,23 @@ ast_t *assignment(scan_context_t *context)
     left = make_assign_expr(token_value(context, name), value);
     left->location.start = name.start;
     left->location.end = name.end;
+
+    return left;
+}
+
+ast_t *conjunction(scan_context_t *context)
+{
+    ast_t *left = equality(context);
+
+    while (match(context, 2, TOK_AND, TOK_OR))
+    {
+        token_t operator = accept(context);
+        ast_t *right = equality(context);
+        ast_t *new_left = make_binary_expr(left, operator, right);
+        new_left->location.start = left->location.start;
+        new_left->location.end = right->location.end;
+        left = new_left;
+    }
 
     return left;
 }

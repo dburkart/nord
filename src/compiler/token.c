@@ -73,6 +73,12 @@ const char *token_name(token_t t)
         case TOK_IF:
             return "IF";
 
+        // CONJUNCTIONS
+        case TOK_AND:
+            return "AND";
+        case TOK_OR:
+            return "OR";
+
         // COMPARATORS
         case TOK_BANG:
             return "BANG";

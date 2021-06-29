@@ -1,0 +1,11 @@
+if true and false {
+    print("Not possible!")
+}
+
+if 1 and 2 {
+    print("1 and 2")
+}
+
+if true and 1 {
+    print ("true and 1")
+}

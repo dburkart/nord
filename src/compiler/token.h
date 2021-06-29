@@ -21,6 +21,9 @@ enum token_type_e {
     // Math
     TOK_PLUS, TOK_MINUS, TOK_ASTERISK, TOK_SLASH,
 
+    // Logical Conjunctions
+    TOK_AND, TOK_OR,
+
     // Comparators
     TOK_GREATER, TOK_GREATER_EQUAL, TOK_LESS, TOK_LESS_EQUAL, TOK_EQUAL_EQUAL,
     TOK_BANG_EQUAL,

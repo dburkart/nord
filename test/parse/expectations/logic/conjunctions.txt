@@ -1,0 +1,7 @@
+STMT LIST
+  ↳ BINARY(AND)
+  ⋅ ↳ LITERAL(TRUE) -> true
+  ⋅ ↳ LITERAL(FALSE) -> false
+  ↳ BINARY(OR)
+  ⋅ ↳ LITERAL(TRUE) -> true
+  ⋅ ↳ LITERAL(FALSE) -> false

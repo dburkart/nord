@@ -1,0 +1,14 @@
+var left = 0
+var right = 10
+
+fn testbounds(n) {
+    if (n >= left) and (n <= right) {
+        return true
+    }
+    false
+}
+
+print(testbounds(0))
+print(testbounds(-1))
+print(testbounds(11))
+print(testbounds(9))

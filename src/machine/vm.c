@@ -229,6 +229,20 @@ void vm_execute(vm_t *vm)
 
                 break;
 
+            case OP_AND:
+                if (IS_NUMBERISH3(arg2) && IS_NUMBERISH3(arg3))
+                {
+                    result.contents.boolean = NUM_OR_FLOAT3(arg2) && NUM_OR_FLOAT3(arg3);
+                }
+                else
+                {
+                    // What do we do for non-numbers?
+                }
+                result.type = VAL_BOOLEAN;
+
+                vm->registers[instruction.fields.triplet.arg1] = result;
+                break;
+
             case OP_OR:
                 if (IS_NUMBERISH3(arg2) && IS_NUMBERISH3(arg3))
                 {
@@ -236,7 +250,7 @@ void vm_execute(vm_t *vm)
                 }
                 else
                 {
-                    // Error?
+                    // What do we do for non-numbers?
                 }
                 result.type = VAL_BOOLEAN;
 

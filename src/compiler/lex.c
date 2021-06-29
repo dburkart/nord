@@ -334,6 +334,21 @@ token_t peek(scan_context_t *context)
                 }
                 t.type = TOK_INVALID;
                 break;
+            case 'a':
+                advance = match_keyword("and", c, 3);
+                if (advance)
+                {
+                    t.type = TOK_AND;
+                    break;
+                }
+
+                advance = match_identifier(c);
+                if (advance)
+                {
+                    t.type = TOK_IDENTIFIER;
+                    break;
+                }
+                break;
             case 'f':
                 if (*(c + 1) == 'n') {
                     advance = 2;
@@ -389,6 +404,21 @@ token_t peek(scan_context_t *context)
                 if (advance)
                 {
                     t.type = TOK_NIL;
+                    break;
+                }
+
+                advance = match_identifier(c);
+                if (advance)
+                {
+                    t.type = TOK_IDENTIFIER;
+                    break;
+                }
+                break;
+            case 'o':
+                advance = match_keyword("or", c, 2);
+                if (advance)
+                {
+                    t.type = TOK_OR;
                     break;
                 }
 

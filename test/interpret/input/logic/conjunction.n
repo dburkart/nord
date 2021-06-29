@@ -1,0 +1,11 @@
+if (true or false) and true {
+    print("true")
+}
+
+if (true and false) or true {
+    print("true")
+}
+
+if (true and false) or false {
+    print("false")
+}
