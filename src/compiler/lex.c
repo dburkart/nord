@@ -46,6 +46,11 @@ bool is_whitespace(char c)
     return false;
 }
 
+bool is_boundary(char c)
+{
+    return is_whitespace(c) || is_reserved(c);
+}
+
 ///---- Matching functions
 
 /*
@@ -53,7 +58,7 @@ bool is_whitespace(char c)
  */
 int match_keyword(const char *to_match, const char *c, int len)
 {
-    if (memcmp(to_match, c, len) == 0)
+    if (memcmp(to_match, c, len) == 0 && is_boundary(c[len]))
     {
         return len;
     }

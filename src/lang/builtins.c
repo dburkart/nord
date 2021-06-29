@@ -105,6 +105,8 @@ void builtin__tuple(vm_t *vm)
     vm_stack_push(vm, val);
 }
 
+// -- Type handling
+
 void builtin__type(vm_t *vm)
 {
     // Error handling!
@@ -134,6 +136,56 @@ void builtin__type(vm_t *vm)
 
         case VAL_ABSENT:
             assert(false);
+            break;
+    }
+}
+
+void builtin__int(vm_t *vm)
+{
+    value_t val = vm_stack_pop(vm);
+    switch(val.type)
+    {
+        case VAL_FLOAT:
+            val.contents.number = (int)val.contents.real;
+            val.type = VAL_INT;
+            vm_stack_push(vm, val);
+            break;
+
+        case VAL_BOOLEAN:
+            val.contents.number = (val.contents.boolean) ? 1 : 0;
+            val.type = VAL_INT;
+            vm_stack_push(vm, val);
+            break;
+
+        // TODO: Handle strings
+        default:
+            break;
+    }
+}
+
+void builtin__string(vm_t *vm)
+{
+    char *str;
+    value_t val = vm_stack_pop(vm);
+    switch(val.type)
+    {
+        case VAL_INT:
+            asprintf(&str, "%d", val.contents.number);
+            vm_stack_push(vm, string_create(str));
+            break;
+
+        case VAL_FLOAT:
+            asprintf(&str, "%f", val.contents.real);
+            vm_stack_push(vm, string_create(str));
+            break;
+
+        case VAL_BOOLEAN:
+            asprintf(&str, "%s", (val.contents.boolean) ? "true" : "false");
+            vm_stack_push(vm, string_create(str));
+            break;
+
+        // TODO: Handle strings
+        default:
             break;
     }
 }
