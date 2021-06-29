@@ -1,0 +1,3 @@
+STMT LIST
+  ↳ DECLARE(IDENTIFIER) -> foo
+  ⋅ ↳ LITERAL(STRING) -> bar

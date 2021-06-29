@@ -203,6 +203,16 @@ token_t peek(scan_context_t *context)
                 t.type = TOK_EOL;
                 advance = 1;
                 break;
+            case '#':
+                c += 1;
+                advance = 1;
+                while (*c != '\n')
+                {
+                    c += 1;
+                    advance += 1;
+                }
+                token_found = false;
+                break;
             case '=':
                 if (*(c+1) == '=')
                 {

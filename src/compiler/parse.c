@@ -344,7 +344,10 @@ ast_t *statement(scan_context_t *context)
     if (peek(context).type == TOK_EOL)
     {
         accept(context);
-        return left;
+        if (left == NULL)
+            return statement(context);
+        else
+            return left;
     }
 
     if (peek(context).type == TOK_EOF)
