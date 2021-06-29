@@ -1,0 +1,5 @@
+Without parenthesis (expected: 14):
+14
+ 
+With parenthesis (expected: 20):
+20

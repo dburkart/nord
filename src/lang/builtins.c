@@ -58,12 +58,21 @@ void print_internal(value_t val)
 // Returns true
 void builtin__print(vm_t *vm)
 {
+    int num_args = vm->registers[0].contents.number;
+
+    if (!num_args)
+    {
+        printf("\n");
+        goto print_ret;
+    }
+
     value_t result;
     value_t val = vm_stack_pop(vm);
 
     print_internal(val);
     printf("\n");
 
+print_ret:
     result.type = VAL_BOOLEAN;
     result.contents.boolean = true;
 
@@ -94,4 +103,37 @@ void builtin__tuple(vm_t *vm)
     }
 
     vm_stack_push(vm, val);
+}
+
+void builtin__type(vm_t *vm)
+{
+    // Error handling!
+    assert(vm->registers[0].contents.number == 1);
+    value_t val = vm_stack_pop(vm);
+    switch (val.type)
+    {
+        case VAL_FLOAT:
+            vm_stack_push(vm, string_create("float"));
+            break;
+
+        case VAL_INT:
+            vm_stack_push(vm, string_create("integer"));
+            break;
+
+        case VAL_BOOLEAN:
+            vm_stack_push(vm, string_create("boolean"));
+            break;
+
+        case VAL_STRING:
+            vm_stack_push(vm, string_create("string"));
+            break;
+
+        case VAL_TUPLE:
+            vm_stack_push(vm, string_create("tuple"));
+            break;
+
+        case VAL_ABSENT:
+            assert(false);
+            break;
+    }
 }

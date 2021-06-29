@@ -1,0 +1,5 @@
+print("Print just a newline:")
+print()
+
+print("Print just a newline:")
+print("")

@@ -9,4 +9,4 @@ STMT LIST
   ⋅ ↳ STMT LIST
   ⋅ ⋅ ↳ CALL_FN(print)
   ⋅ ⋅ ⋅ ↳ ARGUMENTS
-  ⋅ ⋅ ⋅ ⋅ ↳ LITERAL(STRING) -> in loop
+  ⋅ ⋅ ⋅ ⋅ ↳ LITERAL(IDENTIFIER) -> item

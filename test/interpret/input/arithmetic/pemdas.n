@@ -1,0 +1,5 @@
+print("Without parenthesis (expected: 14):")
+print(2 + 3 * 4)
+print(" ")
+print("With parenthesis (expected: 20):")
+print((2 + 3) * 4)
