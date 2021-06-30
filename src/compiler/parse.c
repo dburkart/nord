@@ -131,7 +131,7 @@ void print_ast_internal(scan_context_t *context, ast_t *ast, int indent)
             print_ast_internal(context, ast->op.if_stmt.body, indent + 2);
             break;
 
-        case FOR_STATEMENT:
+        case AST_FOR_STMT:
             if (ast->op.for_stmt.var != NULL)
             {
                 printf("FOR(%s)\n", ast->op.for_stmt.var);
@@ -254,7 +254,7 @@ ast_t *make_if_expr(ast_t *condition, ast_t *body)
 ast_t *make_for_expr(char *var, ast_t *iterable, ast_t *body)
 {
     ast_t *for_expr = (ast_t *)malloc(sizeof(ast_t));
-    for_expr->type = FOR_STATEMENT;
+    for_expr->type = AST_FOR_STMT;
     for_expr->op.for_stmt.var = var;
     for_expr->op.for_stmt.iterable = iterable;
     for_expr->op.for_stmt.body = body;
