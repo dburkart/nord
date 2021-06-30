@@ -55,6 +55,9 @@ void value_print(value_t v)
         case VAL_TUPLE:
             printf("{TUPLE}\n");
             break;
+        case VAL_ITERATOR:
+            printf("{ITERATOR}\n");
+            break;
     }
 }
 

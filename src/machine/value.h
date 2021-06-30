@@ -19,7 +19,8 @@ typedef enum
     VAL_STRING,
     VAL_FLOAT,
     VAL_BOOLEAN,
-    VAL_TUPLE
+    VAL_TUPLE,
+    VAL_ITERATOR
 } value_type_e;
 
 // The value_t struct encapsulates all possible values in the nord language.
@@ -43,6 +44,19 @@ typedef struct obj_t
 {
     value_type_e type;
 } object_t;
+
+// Iterator
+typedef struct
+{
+    object_t object;
+    int index;
+    value_t iterable;
+} iterator_t;
+
+value_t iterator_create(value_t collection);
+
+// Returns whether or not the specified value is a collection
+bool is_collection(value_t value);
 
 // String object
 typedef struct

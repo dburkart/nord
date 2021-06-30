@@ -4,10 +4,34 @@
  * SPDX-License-Identifier: BSD-2-Clause
  */
 
+#include <assert.h>
 #include <stdlib.h>
 #include <string.h>
 
 #include "value.h"
+
+bool is_collection(value_t value)
+{
+    return value.type == VAL_STRING || value.type == VAL_TUPLE;
+}
+
+value_t iterator_create(value_t collection)
+{
+    // TODO: Handle errors
+    assert(is_collection(collection));
+
+    value_t val;
+    iterator_t *iter = (iterator_t *)malloc(sizeof(iterator_t));
+
+    iter->object.type = VAL_ITERATOR;
+    iter->iterable = collection;
+    iter->index = 0;
+
+    val.type = VAL_ITERATOR;
+    val.contents.object = (object_t *)iter;
+
+    return val;
+}
 
 value_t string_create(char *string)
 {

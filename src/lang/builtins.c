@@ -16,6 +16,7 @@ void print_internal(value_t val)
 {
     string_t *s1;
     tuple_t *t1;
+    iterator_t *i1;
 
     switch(val.type)
     {
@@ -50,6 +51,11 @@ void print_internal(value_t val)
                     printf(", ");
             }
             printf(")");
+            break;
+        case VAL_ITERATOR:
+            i1 = (iterator_t *)val.contents.object;
+            printf("Iterator over ");
+            print_internal((i1->iterable));
             break;
     }
 }
@@ -88,6 +94,25 @@ void builtin__time(vm_t *vm)
     result.contents.number = tm;
 
     vm_stack_push(vm, result);
+}
+
+// -- Object creation
+
+void builtin__iter(vm_t *vm)
+{
+    assert(vm->registers[0].type == VAL_INT);
+    int num_args = vm->registers[0].contents.number;
+
+    // TODO: Handle errors
+    assert(num_args == 1);
+    value_t collection = vm_stack_pop(vm);
+
+    // TODO: Handle errors
+    assert(is_collection(collection));
+
+    value_t iter = iterator_create(collection);
+
+    vm_stack_push(vm, iter);
 }
 
 void builtin__tuple(vm_t *vm)
@@ -132,6 +157,10 @@ void builtin__type(vm_t *vm)
 
         case VAL_TUPLE:
             vm_stack_push(vm, string_create("tuple"));
+            break;
+
+        case VAL_ITERATOR:
+            vm_stack_push(vm, string_create("iterator"));
             break;
 
         case VAL_ABSENT:
