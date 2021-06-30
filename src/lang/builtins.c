@@ -57,6 +57,9 @@ void print_internal(value_t val)
             printf("Iterator over ");
             print_internal((i1->iterable));
             break;
+        case VAL_NIL:
+            printf("nil");
+            break;
     }
 }
 
@@ -161,6 +164,10 @@ void builtin__type(vm_t *vm)
 
         case VAL_ITERATOR:
             vm_stack_push(vm, string_create("iterator"));
+            break;
+
+        case VAL_NIL:
+            vm_stack_push(vm, string_create("nil"));
             break;
 
         case VAL_ABSENT:

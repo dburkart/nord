@@ -336,6 +336,13 @@ uint8_t compile_internal(ast_t *ast, compile_context_t *context)
                 code_block_write(context->binary->code, instruction);
             }
 
+            if (ast->op.literal.token.type == TOK_NIL)
+            {
+                result = context->rp;
+                instruction = make_single_instr(OP_NIL, result);
+                code_block_write(context->binary->code, instruction);
+            }
+
             break;
 
         case AST_GROUP:

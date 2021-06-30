@@ -63,6 +63,13 @@ char *disassemble_instruction(memory_t *mem, instruction_t instruction)
 
     switch (instruction.opcode)
     {
+        case OP_NIL:
+            asprintf(&assembly, FORMAT_SINGLE,
+                     "nil",
+                     instruction.fields.pair.arg1
+                    );
+            break;
+
         // load <register> <address>
         case OP_LOAD:
             value = memory_get(mem, instruction.fields.pair.arg2);

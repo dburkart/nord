@@ -15,6 +15,7 @@ struct obj_t;
 typedef enum
 {
     VAL_ABSENT,
+    VAL_NIL,
     VAL_INT,
     VAL_STRING,
     VAL_FLOAT,
@@ -50,6 +51,7 @@ typedef struct
 {
     object_t object;
     int index;
+    int length;
     value_t iterable;
 } iterator_t;
 

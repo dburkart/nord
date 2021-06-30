@@ -58,6 +58,9 @@ void value_print(value_t v)
         case VAL_ITERATOR:
             printf("{ITERATOR}\n");
             break;
+        case VAL_NIL:
+            printf("{NIL}\n");
+            break;
     }
 }
 
@@ -126,11 +129,18 @@ void vm_execute(vm_t *vm)
         value_t ret;
         value_t result;
         string_t *s1, *s2;
+        tuple_t *t1;
+        iterator_t *iter;
         char *stmp;
         memory_t *mem;
 
         switch (instruction.opcode)
         {
+            case OP_NIL:
+                result.type = VAL_NIL;
+                vm->registers[instruction.fields.pair.arg1] = result;
+                break;
+
             // Load a value into the specified register
             case OP_LOAD:
                 if (instruction.fields.pair.arg1 & 0x70)
@@ -342,6 +352,41 @@ void vm_execute(vm_t *vm)
                     default:
                         ;
                 }
+                vm->registers[instruction.fields.pair.arg1] = result;
+                break;
+
+            case OP_DEREF:
+                ret = vm->registers[instruction.fields.triplet.arg2];
+                // TODO: Error handling!
+                assert(ret.type == VAL_ITERATOR);
+                iter = (iterator_t *)ret.contents.object;
+
+                if (iter->index == iter->length - 1)
+                {
+                    result.type = VAL_NIL;
+                    vm->registers[instruction.fields.pair.arg1] = result;
+                    break;
+                }
+
+                ret = iter->iterable;
+                assert(is_collection(ret));
+                // First store the value referenced by the iterator in arg1
+                switch (ret.type)
+                {
+                    case VAL_TUPLE:
+                        t1 = (tuple_t *)ret.contents.object;
+                        result = t1->values[iter->index];
+                        break;
+
+                    case VAL_STRING:
+                        // TODO: Handle
+                        break;
+
+                    default:
+                        ;
+                };
+
+                iter->index += instruction.fields.triplet.arg3;
                 vm->registers[instruction.fields.pair.arg1] = result;
                 break;
 

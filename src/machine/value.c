@@ -27,6 +27,20 @@ value_t iterator_create(value_t collection)
     iter->iterable = collection;
     iter->index = 0;
 
+    switch (collection.type)
+    {
+        case VAL_STRING:
+            iter->length = ((string_t *)collection.contents.object)->length;
+            break;
+
+        case VAL_TUPLE:
+            iter->length = ((tuple_t *)collection.contents.object)->length;
+            break;
+
+        default:
+            ;
+    }
+
     val.type = VAL_ITERATOR;
     val.contents.object = (object_t *)iter;
 

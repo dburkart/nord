@@ -698,7 +698,7 @@ ast_t *primary(scan_context_t *context)
     if (left != NULL)
         return left;
 
-    if (match(context, 6, TOK_IDENTIFIER, TOK_NUMBER, TOK_FLOAT, TOK_STRING, TOK_TRUE, TOK_FALSE, TOK_NIL))
+    if (match(context, 7, TOK_IDENTIFIER, TOK_NUMBER, TOK_FLOAT, TOK_STRING, TOK_TRUE, TOK_FALSE, TOK_NIL))
     {
         token_t tok = accept(context);
         ast_t *literal = make_literal_expr(tok);

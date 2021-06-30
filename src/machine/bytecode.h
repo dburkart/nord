@@ -13,6 +13,11 @@
 // Opcodes for VM instructions
 typedef enum
 {
+    // -- Constants
+
+    // nil <register>
+    OP_NIL,
+
     // -- Loading to and from memory and registers
 
     // load <register> <address>
@@ -66,6 +71,11 @@ typedef enum
     OP_LESSTHAN,
     // not <register-out> <register-in>
     OP_NOT,
+
+    // -- Iteration
+
+    // deref <register-out> <register-in> <register-post-advance>
+    OP_DEREF,
 
     // -- Functions
 
