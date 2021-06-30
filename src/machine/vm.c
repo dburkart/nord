@@ -221,6 +221,10 @@ void vm_execute(vm_t *vm)
                     s2 = (string_t *)vm->registers[instruction.fields.triplet.arg3].contents.object;
                     result.contents.boolean = !strcmp(s1->string, s2->string);
                 }
+                else if (REG_TYPE3(arg2, VAL_NIL) && REG_TYPE3(arg3, VAL_NIL))
+                {
+                    result.contents.boolean = true;
+                }
 
                 if (result.contents.boolean != instruction.fields.triplet.arg1)
                     vm->pc += 1;
@@ -361,7 +365,7 @@ void vm_execute(vm_t *vm)
                 assert(ret.type == VAL_ITERATOR);
                 iter = (iterator_t *)ret.contents.object;
 
-                if (iter->index == iter->length - 1)
+                if (iter->index == iter->length)
                 {
                     result.type = VAL_NIL;
                     vm->registers[instruction.fields.pair.arg1] = result;

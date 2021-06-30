@@ -20,6 +20,7 @@
 #define FORMAT_PAIR_CONST_STR   "%-10s $%d %s\n"
 #define FORMAT_TRIPLET          "%-10s $%d $%d $%d\n"
 #define FORMAT_TRIPLET_CMP      "%-10s %d $%d $%d\n"
+#define FORMAT_TRIPLET_VAL      "%-10s $%d $%d %d\n"
 
 char *disassemble_instruction(memory_t *mem, instruction_t);
 
@@ -67,6 +68,15 @@ char *disassemble_instruction(memory_t *mem, instruction_t instruction)
             asprintf(&assembly, FORMAT_SINGLE,
                      "nil",
                      instruction.fields.pair.arg1
+                    );
+            break;
+
+        case OP_DEREF:
+            asprintf(&assembly, FORMAT_TRIPLET_VAL,
+                     "deref",
+                     instruction.fields.triplet.arg1,
+                     instruction.fields.triplet.arg2,
+                     instruction.fields.triplet.arg3
                     );
             break;
 

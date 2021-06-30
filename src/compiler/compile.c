@@ -92,6 +92,50 @@ void compile_comparison(compile_context_t *context, uint8_t reg, uint8_t opcode,
     code_block_write(context->binary->code, instruction);
 }
 
+uint8_t compile_builtin_fn_call(compile_context_t *context, char *name, uint8_t rp_reset, uint8_t nargs, uint8_t *args)
+{
+    instruction_t instruction;
+    symbol_t sym = symbol_map_get(context->symbols, name);
+
+    // Undefined symbols for builtin calls simply haven't been called yet.
+    // TODO: validate builtin name here
+    if (sym.location.type == LOC_UNDEF)
+    {
+        memory_set(context->binary->data, context->mp, string_create(name));
+        sym.location.type = LOC_MEMORY;
+        sym.location.address = context->mp++;
+        sym.name = name;
+        sym.type = SYM_FN;
+
+        symbol_map_t *map = context->symbols;
+        while (map->parent != NULL)
+            map = map->parent;
+        symbol_map_set(map, sym);
+    }
+
+    // We push args onto the stack in reverse order because we'll pop them
+    // off in the builtin
+    for (int i = nargs - 1; i >= 0; i--)
+    {
+        instruction = make_single_instr(OP_PUSH, args[i]);
+        code_block_write(context->binary->code, instruction);
+    }
+
+    context->rp = rp_reset;
+
+    // Number of args -> $0
+    instruction = make_pair_instr(OP_LOADV, 0, nargs);
+    code_block_write(context->binary->code, instruction);
+
+    instruction = make_singlew_instr(OP_CALL_DYNAMIC, sym.location.address);
+    code_block_write(context->binary->code, instruction);
+
+    instruction = make_single_instr(OP_POP, context->rp);
+    code_block_write(context->binary->code, instruction);
+
+    return context->rp;
+}
+
 uint8_t spill(compile_context_t *context, uint8_t low_reg)
 {
     uint8_t num_spilled = 0;
@@ -107,11 +151,11 @@ uint8_t spill(compile_context_t *context, uint8_t low_reg)
 
 uint8_t compile_internal(ast_t *ast, compile_context_t *context)
 {
-    uint8_t result = 0, left, right, *regs;
+    uint8_t result = 0, left, right, var, nil, *regs;
     symbol_t sym;
     instruction_t instruction;
     value_t val;
-    int tmp, addr;
+    int tmp, addr, begin, end;
     ast_t *args;
 
     switch (ast->type)
@@ -435,6 +479,76 @@ uint8_t compile_internal(ast_t *ast, compile_context_t *context)
             context->binary->code->code[tmp].fields.pair.arg2 = addr;
             break;
 
+        case AST_FOR_STMT:
+            // First, we compile our collection
+            result = compile_internal(ast->op.for_stmt.iterable, context);
+
+            // Next, make an iterator over the collection
+            left = compile_builtin_fn_call(
+                context,
+                "iter",
+                context->rp,
+                1,
+                &result
+            );
+
+            // Need to keep track of our iterator
+            context->rp += 1;
+
+            // Now, define a new symbol map for the for loop
+            symbol_map_t *for_map = symbol_map_create();
+            for_map->parent = context->symbols;
+            context->symbols = for_map;
+
+            // This will point to our local variable. We'll need this even if it's not
+            // defined by the user.
+            var = context->rp++;
+            nil = context->rp++;
+
+            instruction = make_single_instr(OP_NIL, nil);
+            code_block_write(context->binary->code, instruction);
+
+            // If a local variable was defined, set it in the synbol map
+            if (ast->op.for_stmt.var != NULL)
+            {
+                sym.type = SYM_VAR;
+                sym.name = ast->op.for_stmt.var;
+                sym.location.type = LOC_REGISTER;
+                sym.location.address = var;
+                symbol_map_set(context->symbols, sym);
+            }
+
+            // Begin for-loop
+            begin = context->binary->code->size;
+            instruction = make_triplet_instr(OP_DEREF, var, left, 1);
+            code_block_write(context->binary->code, instruction);
+
+            // Dummy exit jump
+            end = context->binary->code->size;
+            instruction = make_pair_instr(OP_LOADV, context->rp, 0);
+            code_block_write(context->binary->code, instruction);
+
+            instruction = make_triplet_instr(OP_EQUAL, 1, var, nil);
+            code_block_write(context->binary->code, instruction);
+
+            // Save our instruction for modification later
+            instruction = make_single_instr(OP_JMP, context->rp);
+            code_block_write(context->binary->code, instruction);
+
+            // Now, compile our for block
+            compile_internal(ast->op.for_stmt.body, context);
+
+            // Jump to the start of the loop
+            instruction = make_pair_instr(OP_LOADV, context->rp, begin);
+            code_block_write(context->binary->code, instruction);
+            instruction = make_single_instr(OP_JMP, context->rp);
+            code_block_write(context->binary->code, instruction);
+
+            // Now, fix up our exit jump
+            context->binary->code->code[end].fields.pair.arg2 = context->binary->code->size;
+
+            break;
+
         case AST_FUNCTION_DECL:
             args = ast->op.fn.args;
 
@@ -511,41 +625,14 @@ uint8_t compile_internal(ast_t *ast, compile_context_t *context)
             sym = symbol_map_get(context->symbols, ast->op.call.name);
             args = ast->op.call.args;
 
-            // If the symbol is undefined, we assume that it is a builtin.
-            // In the future, it could also be an imported symbol. On first
-            // reference of a builtin, we put the symbol in our constant
-            // pool and create an entry in the root symbol map.
-            if (sym.location.type == LOC_UNDEF)
+            if (sym.location.type == LOC_UNDEF || sym.location.type == LOC_MEMORY)
             {
-                val = string_create(ast->op.call.name);
-                memory_set(context->binary->data, context->mp, val);
-                sym.location.type = LOC_MEMORY;
-                sym.location.address = context->mp++;
-                sym.name = ast->op.call.name;
-                sym.type = SYM_FN;
-
-                // Set the symbol in our root context, since builtins are
-                // global symbols.
-                symbol_map_t *map = context->symbols;
-                while (map->parent != NULL)
-                {
-                    map = map->parent;
-                }
-                symbol_map_set(map, sym);
-            }
-
-            // Currently, functions with symbols that reside in memory are
-            // functions which are builtin to the language. Eventually symbols
-            // of this nature might also represent symbols imported from a
-            // package.
-            if (sym.location.type == LOC_MEMORY)
-            {
-                addr = sym.location.address;
+                regs = NULL;
+                tmp = context->rp;
 
                 if (args != NULL)
                 {
                     regs = (uint8_t *)malloc(sizeof(uint8_t) * args->op.list.size);
-                    tmp = context->rp;
 
                     // First, calculate the values of our arguments
                     for (int i = 0; i < args->op.list.size; i++)
@@ -555,29 +642,17 @@ uint8_t compile_internal(ast_t *ast, compile_context_t *context)
                         if (regs[i] == context->rp)
                             context->rp++;
                     }
-
-                    // Now, push them on the stack in reverse order
-                    for (int i = args->op.list.size - 1; i >= 0; i--)
-                    {
-                        instruction = make_single_instr(OP_PUSH, regs[i]);
-                        code_block_write(context->binary->code, instruction);
-                    }
-
-                    context->rp = tmp;
-                    free(regs);
                 }
 
-                // Builtins don't require spilling since they are currently all
-                // implemented in C.
-                instruction = make_pair_instr(OP_LOADV, 0, (args) ? args->op.list.size : 0);
-                code_block_write(context->binary->code, instruction);
+                result = compile_builtin_fn_call(
+                    context,
+                    ast->op.call.name,
+                    tmp,
+                    (args == NULL) ? 0 : args->op.list.size,
+                    regs
+                );
 
-                instruction = make_singlew_instr(OP_CALL_DYNAMIC, addr);
-                code_block_write(context->binary->code, instruction);
-
-                instruction = make_single_instr(OP_POP, context->rp);
-                result = context->rp;
-                code_block_write(context->binary->code, instruction);
+                free(regs);
 
                 break;
             }
