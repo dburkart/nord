@@ -103,10 +103,14 @@ int match_number(const char *c)
 {
     int len = 0;
 
-    while (!is_whitespace(*c) && *c != 0 && !is_reserved(*c))
+    while (!is_boundary(*c))
     {
         if (*c < '0' || *c > '9')
+        {
+            if (*c == '.' && *(c+1) == '.')
+                return len;
             return 0;
+        }
 
         len = len + 1;
         c = c + 1;
@@ -338,6 +342,13 @@ token_t peek(scan_context_t *context)
                 if (advance)
                 {
                     t.type = TOK_FLOAT;
+                    break;
+                }
+
+                if (*c == '.' && *(c+1) == '.')
+                {
+                    t.type = TOK_DOT_DOT;
+                    advance = 2;
                     break;
                 }
 

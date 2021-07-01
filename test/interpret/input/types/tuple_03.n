@@ -1,0 +1,4 @@
+var t = 1 .. 10
+
+print(type(t))
+print(t)

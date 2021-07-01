@@ -133,6 +133,49 @@ void builtin__tuple(vm_t *vm)
     vm_stack_push(vm, val);
 }
 
+void builtin__range(vm_t *vm)
+{
+    assert(vm->registers[0].type == VAL_INT);
+    assert(vm->registers[0].contents.number == 2);
+
+    value_t begin = vm_stack_pop(vm);
+    value_t end = vm_stack_pop(vm);
+    value_t val;
+
+    // TODO: Error handling!
+    assert(begin.type == end.type);
+    assert(begin.type == VAL_INT);
+
+    if (begin.contents.number == end.contents.number)
+    {
+        val = tuple_create(0);
+    }
+    else if (begin.contents.number < end.contents.number)
+    {
+        int len = end.contents.number - begin.contents.number + 1;
+        val = tuple_create(len);
+        tuple_t *tuple = (tuple_t *)val.contents.object;
+
+        for (int i = 0; i < len; i++)
+        {
+            tuple->values[i] = (value_t){VAL_INT, .contents={ .number=begin.contents.number + i } };
+        }
+    }
+    else
+    {
+        int len = begin.contents.number - end.contents.number + 1;
+        val = tuple_create(len);
+        tuple_t *tuple = (tuple_t *)val.contents.object;
+
+        for (int i = 0; i < len; i++)
+        {
+            tuple->values[i] = (value_t){VAL_INT, .contents={ .number=begin.contents.number - i } };
+        }
+    }
+
+    vm_stack_push(vm, val);
+}
+
 // -- Type handling
 
 void builtin__type(vm_t *vm)

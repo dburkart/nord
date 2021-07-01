@@ -393,6 +393,24 @@ uint8_t compile_internal(ast_t *ast, compile_context_t *context)
             result = compile_internal(ast->op.group, context);
             break;
 
+        case AST_RANGE:
+            tmp = context->rp;
+
+            regs = malloc(sizeof(uint8_t) * 2);
+            regs[0] = compile_internal(ast->op.range.begin, context);
+            context->rp++;
+            regs[1] = compile_internal(ast->op.range.end, context);
+
+            result = compile_builtin_fn_call(
+                context,
+                "range",
+                tmp,
+                2,
+                regs
+            );
+
+            break;
+
         case AST_TUPLE:
             regs = (uint8_t *)malloc(sizeof(uint8_t) * ast->op.list.size);
             tmp = context->rp;
@@ -546,6 +564,8 @@ uint8_t compile_internal(ast_t *ast, compile_context_t *context)
 
             // Now, fix up our exit jump
             context->binary->code->code[end].fields.pair.arg2 = context->binary->code->size;
+
+            context->rp -= 2;
 
             break;
 

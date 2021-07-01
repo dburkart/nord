@@ -1,0 +1,9 @@
+STMT LIST
+  ↳ FOR(i)
+  ⋅ ↳ RANGE
+  ⋅ ⋅ ↳ LITERAL(NUMBER) -> 1
+  ⋅ ⋅ ↳ LITERAL(NUMBER) -> 10
+  ⋅ ↳ STMT LIST
+  ⋅ ⋅ ↳ CALL_FN(print)
+  ⋅ ⋅ ⋅ ↳ ARGUMENTS
+  ⋅ ⋅ ⋅ ⋅ ↳ LITERAL(IDENTIFIER) -> i

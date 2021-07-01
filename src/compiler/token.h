@@ -28,9 +28,6 @@ enum token_type_e {
     TOK_GREATER, TOK_GREATER_EQUAL, TOK_LESS, TOK_LESS_EQUAL, TOK_EQUAL_EQUAL,
     TOK_BANG_EQUAL,
 
-    // Arrows
-    TOK_R_ARROW,
-
     // Literals
     TOK_IDENTIFIER, TOK_STRING, TOK_NUMBER, TOK_FLOAT,
 
@@ -39,6 +36,9 @@ enum token_type_e {
 
     // Branching
     TOK_IF,
+
+    // Other
+    TOK_R_ARROW, TOK_DOT_DOT,
 
     // Invalid token
     TOK_INVALID,

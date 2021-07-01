@@ -105,10 +105,6 @@ const char *token_name(token_t t)
         case TOK_SLASH:
             return "SLASH";
 
-        // Arrows
-        case TOK_R_ARROW:
-            return "R_ARROW";
-
         // Literals
         case TOK_IDENTIFIER:
             return "IDENTIFIER";
@@ -138,6 +134,12 @@ const char *token_name(token_t t)
             return "RETURN";
         case TOK_INVALID:
             return "INVALID";
+
+        // Other
+        case TOK_DOT_DOT:
+            return "DOT_DOT";
+        case TOK_R_ARROW:
+            return "R_ARROW";
 
         // EOF
         case TOK_EOF:

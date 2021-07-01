@@ -30,6 +30,7 @@ ast_t *term_md(scan_context_t *);
 ast_t *unary(scan_context_t *);
 ast_t *primary(scan_context_t *);
 ast_t *tuple(scan_context_t *);
+ast_t *range(scan_context_t *);
 ast_t *function_call(scan_context_t *);
 
 ast_t *parse(scan_context_t *context)
@@ -142,6 +143,12 @@ void print_ast_internal(scan_context_t *context, ast_t *ast, int indent)
             }
             print_ast_internal(context, ast->op.for_stmt.iterable, indent + 2);
             print_ast_internal(context, ast->op.for_stmt.body, indent + 2);
+            break;
+
+        case AST_RANGE:
+            printf("RANGE\n");
+            print_ast_internal(context, ast->op.range.begin, indent + 2);
+            print_ast_internal(context, ast->op.range.end, indent + 2);
             break;
 
     }
@@ -259,6 +266,15 @@ ast_t *make_for_expr(char *var, ast_t *iterable, ast_t *body)
     for_expr->op.for_stmt.iterable = iterable;
     for_expr->op.for_stmt.body = body;
     return for_expr;
+}
+
+ast_t *make_range_expr(ast_t *begin, ast_t *end)
+{
+    ast_t *range_expr = (ast_t *)malloc(sizeof(ast_t));
+    range_expr->type = AST_RANGE;
+    range_expr->op.range.begin = begin;
+    range_expr->op.range.end = end;
+    return range_expr;
 }
 
 void list_expr_append(ast_t *list, ast_t *item)
@@ -406,7 +422,7 @@ ast_t *for_statement(scan_context_t *context)
         }
     }
 
-    if (iterable == NULL && match(context, 2, TOK_STRING, TOK_L_PAREN))
+    if (iterable == NULL && match(context, 2, TOK_STRING, TOK_L_PAREN, TOK_NUMBER))
     {
         iterable = primary(context);
     }
@@ -698,6 +714,10 @@ ast_t *primary(scan_context_t *context)
     if (left != NULL)
         return left;
 
+    left = range(context);
+    if (left != NULL)
+        return left;
+
     if (match(context, 7, TOK_IDENTIFIER, TOK_NUMBER, TOK_FLOAT, TOK_STRING, TOK_TRUE, TOK_FALSE, TOK_NIL))
     {
         token_t tok = accept(context);
@@ -750,6 +770,38 @@ ast_t *tuple(scan_context_t *context)
     }
 
     return NULL;
+}
+
+ast_t *range(scan_context_t *context)
+{
+    ast_t *range = NULL;
+    ast_t *begin, *end;
+
+    if (match(context, 2, TOK_IDENTIFIER, TOK_NUMBER))
+    {
+        token_t tok = accept(context);
+
+        if (peek(context).type != TOK_DOT_DOT)
+        {
+            backup(context);
+            return NULL;
+        }
+
+        begin = make_literal_expr(tok);
+        begin->op.literal.value = token_value(context, tok);
+
+        accept(context);
+
+        // TODO: Error handling!
+        assert(match(context, 2, TOK_IDENTIFIER, TOK_NUMBER));
+
+        tok = accept(context);
+        end = make_literal_expr(tok);
+        end->op.literal.value = token_value(context, tok);
+        range = make_range_expr(begin, end);
+    }
+
+    return range;
 }
 
 ast_t *function_call(scan_context_t *context)

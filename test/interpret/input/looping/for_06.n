@@ -1,0 +1,8 @@
+fn list_nums(n) {
+    for i in 1..n {
+        print(i)
+    }
+}
+
+list_nums(5)
+list_nums(3)
