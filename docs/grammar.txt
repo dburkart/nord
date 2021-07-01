@@ -13,7 +13,8 @@ statement       -> variable_decl
                  | if_statement
                  | for_statement
                  | function_decl ;
-if_statement    -> "if" expression statement_block ;
+if_statement    -> "if" expression statement_block
+                 | "if" expression statement ;
 for_statement   -> "for" ( IDENTIFIER "in" )? ( IDENTIFIER | STRING | tuple | range ) statement_block ;
 function_decl   -> "fn" ( IDENTIFIER )? ( "(" variable_list ")" )* statement_block
 variable_list   -> IDENTIFIER ( "," variable_list )* ;

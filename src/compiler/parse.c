@@ -291,9 +291,23 @@ void list_expr_append(ast_t *list, ast_t *item)
 ast_t *statement_block(scan_context_t* context)
 {
     ast_t *left;
+    bool rewind = false;
 
-    // TODO: Proper error handling
-    assert(accept(context).type == TOK_L_BRACE);
+    // Allow up to one EOL before the brace to account for coding style
+    // preferences.
+    if (peek(context).type == TOK_EOL)
+    {
+        accept(context);
+        rewind = true;
+    }
+
+    if (peek(context).type != TOK_L_BRACE)
+    {
+        backup(context);
+        return NULL;
+    }
+
+    accept(context);
 
     while (peek(context).type == TOK_EOL)
         accept(context);
@@ -302,7 +316,16 @@ ast_t *statement_block(scan_context_t* context)
 
     // TODO: Proper error handling
     assert(left != NULL);
-    assert(accept(context).type == TOK_R_BRACE);
+
+    token_t invalid;
+    if ((invalid = accept(context)).type != TOK_R_BRACE)
+    {
+        char *error;
+        location_t loc = {invalid.start, invalid.end};
+        asprintf(&error, "Expected closing brace of statement block (\"}\").");
+        printf("%s", format_error(context->name, context->buffer, error, loc));
+        exit(1);
+    }
 
     return left;
 }
@@ -378,17 +401,37 @@ ast_t *if_statement(scan_context_t *context)
         return NULL;
 
     // Pull off the "if" keyword
-    accept(context);
+    token_t if_kw = accept(context);
 
     ast_t *condition = expression(context);
 
-    // TODO: Proper error handling!
-    assert(condition != NULL);
+    if (condition == NULL)
+    {
+        char *error;
+        token_t invalid = accept(context);
+        location_t loc = {if_kw.end, if_kw.end + 1};
+        asprintf(&error, "Expected expression following if keyword.");
+        printf("%s", format_error(context->name, context->buffer, error, loc));
+        exit(1);
+    }
 
     ast_t *body = statement_block(context);
 
-    // TODO: Proper error handling!
-    assert(body != NULL);
+    if (body == NULL)
+    {
+        body = statement(context);
+    }
+
+    if (body == NULL)
+    {
+        char *error;
+        token_t invalid = accept(context);
+        location_t loc = {condition->location.end, condition->location.end + 1};
+        asprintf(&error, "Expected statement or body following if-statement.");
+        // TODO: Refactor error handling to handle custom "Found here." text
+        printf("%s", format_error(context->name, context->buffer, error, loc));
+        exit(1);
+    }
 
     return make_if_expr(condition, body);
 }
@@ -402,7 +445,7 @@ ast_t *for_statement(scan_context_t *context)
     if (peek(context).type != TOK_FOR)
         return NULL;
 
-    accept(context);
+    token_t for_kw = accept(context);
 
     // Are we defining a local for each iteration?
     if (peek(context).type == TOK_IDENTIFIER)
@@ -427,13 +470,29 @@ ast_t *for_statement(scan_context_t *context)
         iterable = primary(context);
     }
 
-    // TODO: Error handling!
-    assert(iterable != NULL);
+    if (iterable == NULL)
+    {
+        char *error;
+        token_t invalid = accept(context);
+        location_t loc = {for_kw.end, invalid.start};
+        asprintf(&error, "Expected iterable type after \"for\" keyword.");
+        // TODO: Refactor error handling to handle custom "Found here." text
+        printf("%s", format_error(context->name, context->buffer, error, loc));
+        exit(1);
+    }
 
     body = statement_block(context);
 
-    // TODO: Error handling!
-    assert(body != NULL);
+    if (body == NULL)
+    {
+        char *error;
+        token_t invalid = accept(context);
+        location_t loc = {iterable->location.end, iterable->location.end + 1};
+        asprintf(&error, "Expected statement or body following for statement.");
+        // TODO: Refactor error handling to handle custom "Found here." text
+        printf("%s", format_error(context->name, context->buffer, error, loc));
+        exit(1);
+    }
 
     return make_for_expr(var, iterable, body);
 }

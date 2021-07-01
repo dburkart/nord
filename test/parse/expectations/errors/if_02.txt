@@ -1,0 +1,4 @@
+parse/input/errors/if_02.n:1:7: Expected statement or body following if-statement.
+
+if true
+       ^ Found here.

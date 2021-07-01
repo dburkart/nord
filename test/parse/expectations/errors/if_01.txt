@@ -1,0 +1,4 @@
+parse/input/errors/if_01.n:1:2: Expected expression following if keyword.
+
+if {
+  ^ Found here.

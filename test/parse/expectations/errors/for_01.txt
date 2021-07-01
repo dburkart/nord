@@ -1,0 +1,4 @@
+parse/input/errors/for_01.n:1:3: Expected iterable type after "for" keyword.
+
+for {
+   ^ Found here.

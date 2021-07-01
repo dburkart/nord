@@ -1,0 +1,7 @@
+STMT LIST
+  ↳ IF
+  ⋅ ↳ LITERAL(TRUE) -> true
+  ⋅ ↳ STMT LIST
+  ⋅ ⋅ ↳ CALL_FN(print)
+  ⋅ ⋅ ⋅ ↳ ARGUMENTS
+  ⋅ ⋅ ⋅ ⋅ ↳ LITERAL(STRING) -> true
