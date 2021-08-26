@@ -134,6 +134,8 @@ const char *token_name(token_t t)
             return "RETURN";
         case TOK_INVALID:
             return "INVALID";
+        case TOK_LET:
+            return "LET";
 
         // Other
         case TOK_DOT_DOT:

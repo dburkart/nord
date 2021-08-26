@@ -425,6 +425,21 @@ token_t peek(scan_context_t *context)
                     break;
                 }
                 break;
+            case 'l':
+                advance = match_keyword("let", c, 3);
+                if (advance)
+                {
+                    t.type = TOK_LET;
+                    break;
+                }
+
+                advance = match_identifier(c);
+                if (advance)
+                {
+                    t.type = TOK_IDENTIFIER;
+                    break;
+                }
+                break;
             case 'n':
                 advance = match_keyword("nil", c, 3);
                 if (advance)

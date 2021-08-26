@@ -1,5 +1,5 @@
 STMT LIST
-  ↳ DECLARE(IDENTIFIER) -> list
+  ↳ DECLARE(var) -> list
   ⋅ ↳ TUPLE
   ⋅ ⋅ ↳ LITERAL(NUMBER) -> 1
   ⋅ ⋅ ↳ LITERAL(NUMBER) -> 2

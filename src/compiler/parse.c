@@ -70,7 +70,7 @@ void print_ast_internal(scan_context_t *context, ast_t *ast, int indent)
             break;
         case AST_DECLARE:
             token_val = ast->op.declare.name;
-            printf("DECLARE(IDENTIFIER) -> %s\n", token_val);
+            printf("DECLARE(%s) -> %s\n", token_value(context, ast->op.declare.var_type), token_val);
             if (ast->op.declare.initial_value)
             {
                 print_ast_internal(context, ast->op.declare.initial_value, indent + 2);
@@ -566,7 +566,7 @@ ast_t *variable_decl(scan_context_t *context)
 {
     ast_t *left;
 
-    if (peek(context).type != TOK_VAR)
+    if (peek(context).type != TOK_VAR && peek(context).type != TOK_LET)
         return NULL;
 
     token_t var_type = accept(context);

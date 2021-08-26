@@ -1,5 +1,5 @@
 STMT LIST
-  ↳ DECLARE(IDENTIFIER) -> x
+  ↳ DECLARE(var) -> x
   ⋅ ↳ BINARY(ASTERISK)
   ⋅ ⋅ ↳ LITERAL(NUMBER) -> 13
   ⋅ ⋅ ↳ LITERAL(NUMBER) -> 4

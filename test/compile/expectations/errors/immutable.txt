@@ -1,0 +1,5 @@
+compile/input/errors/immutable.n:3:1: Cannot assign to constant "foo", value is immutable
+
+
+foo = "bar"
+^~~ Found here.

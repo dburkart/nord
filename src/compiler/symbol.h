@@ -9,6 +9,7 @@
 
 typedef enum {
     SYM_VAR,
+    SYM_CONSTANT,
     SYM_FN
 } sym_type_e;
 

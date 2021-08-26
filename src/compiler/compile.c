@@ -284,7 +284,7 @@ uint8_t compile_internal(ast_t *ast, compile_context_t *context)
             }
 
             sym.name = ast->op.declare.name;
-            sym.type = SYM_VAR;
+            sym.type = (ast->op.declare.var_type.type == TOK_VAR) ? SYM_VAR : SYM_CONSTANT;
             symbol_map_set(context->symbols, sym);
             break;
 
@@ -304,6 +304,15 @@ uint8_t compile_internal(ast_t *ast, compile_context_t *context)
                 char *error;
                 location_t loc = {ast->location.start, ast->location.end};
                 asprintf(&error, "Use of undeclared identifier \"%s\"", ast->op.assign.name);
+                printf("%s", format_error(context->name, context->listing, error, loc));
+                exit(1);
+            }
+
+            if (sym.type == SYM_CONSTANT)
+            {
+                char *error;
+                location_t loc = {ast->location.start, ast->location.end};
+                asprintf(&error, "Cannot assign to constant \"%s\", value is immutable", ast->op.assign.name);
                 printf("%s", format_error(context->name, context->listing, error, loc));
                 exit(1);
             }

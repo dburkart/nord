@@ -33,6 +33,7 @@ enum token_type_e {
 
     // Keywords
     TOK_VAR, TOK_FN, TOK_RETURN, TOK_TRUE, TOK_FALSE, TOK_NIL, TOK_FOR, TOK_IN,
+    TOK_LET,
 
     // Branching
     TOK_IF,

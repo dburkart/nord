@@ -1,5 +1,5 @@
 STMT LIST
-  ↳ DECLARE(IDENTIFIER) -> foo
+  ↳ DECLARE(var) -> foo
   ⋅ ↳ LITERAL(STRING) -> bar
-  ↳ DECLARE(IDENTIFIER) -> bar
+  ↳ DECLARE(var) -> bar
   ⋅ ↳ LITERAL(STRING) -> foo

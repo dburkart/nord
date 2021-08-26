@@ -1,5 +1,5 @@
 STMT LIST
-  ↳ DECLARE(IDENTIFIER) -> foo
+  ↳ DECLARE(var) -> foo
   ⋅ ↳ ASSIGN(IDENTIFIER) -> x
   ⋅ ⋅ ↳ ASSIGN(IDENTIFIER) -> y
   ⋅ ⋅ ⋅ ↳ BINARY(PLUS)

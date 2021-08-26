@@ -1,7 +1,7 @@
 STMT LIST
   ↳ FUNCTION_DECL(generate_incr)
   ⋅ ↳ STMT LIST
-  ⋅ ⋅ ↳ DECLARE(IDENTIFIER) -> i
+  ⋅ ⋅ ↳ DECLARE(var) -> i
   ⋅ ⋅ ⋅ ↳ LITERAL(NUMBER) -> 0
   ⋅ ⋅ ↳ FUNCTION_DECL(__anonymous)
   ⋅ ⋅ ⋅ ↳ STMT LIST
