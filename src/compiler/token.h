@@ -51,8 +51,8 @@ enum token_type_e {
 typedef struct {
     enum token_type_e type;
     // Positional data, relative to the original buffer
-    uint64_t start;
-    uint64_t end;
+    unsigned long start;
+    unsigned long end;
 } token_t;
 
 // List of tokens to be fed to the parser
