@@ -25,7 +25,7 @@ char *format_error(const char *listing_name, const char *listing, const char *st
 
     for (int i = position; nl == 0; i++)
     {
-        if (listing[i] == '\n')
+        if (listing[i] == '\n' || listing[i] == '\0')
             nl = i;
     }
 
