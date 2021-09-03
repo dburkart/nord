@@ -32,4 +32,4 @@ interpret/run:
 
 clean:
 	rm -f */run */*.o
-	testrunner
+	rm -f testrunner
