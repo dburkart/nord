@@ -2,6 +2,7 @@ sudo: false
 language: c
 compiler:
   - clang
+  - gcc
 
 script: make test
 
@@ -10,3 +11,4 @@ notifications:
 
 os:
   - osx
+  - linux
