@@ -61,7 +61,7 @@ char *format_error(const char *listing_name, const char *listing, const char *st
              "%s:%d:%lu: %s\n\n%s\n%s%s Found here.\n",
              listing_name,
              lineno,
-             loc.start - (position - 1),
+             (unsigned long)loc.start - (position - 1),
              str,
              line,
              spacing,
