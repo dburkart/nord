@@ -58,7 +58,7 @@ char *format_error(const char *listing_name, const char *listing, const char *st
     caret_pointer[loc.end - loc.start] = 0;
 
     asprintf(&error,
-             "%s:%d:%llu: %s\n\n%s\n%s%s Found here.\n",
+             "%s:%d:%lu: %s\n\n%s\n%s%s Found here.\n",
              listing_name,
              lineno,
              loc.start - (position - 1),

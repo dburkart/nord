@@ -13,7 +13,7 @@ $(OBJECTS): %.o: %.c
 
 $(BINARY):
 	$(CC) -c $(CFLAGS) $(BASE)/src/main.c -o $(BASE)/src/main.o
-	$(CC) $(CFLAGS) -o $(BINARY) $(OBJECTS) $(BASE)/src/main.o
+	$(CC) $(CFLAGS) $(LDFLAGS) -o $(BINARY) $(OBJECTS) $(BASE)/src/main.o
 
 test: $(OBJECTS)
 	make -C test

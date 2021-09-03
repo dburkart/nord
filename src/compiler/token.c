@@ -158,7 +158,7 @@ void token_list_print(token_list_t list)
     for (int i = 0; i < list.size; i++)
     {
         token_t t = list.tokens[i];
-        printf("[%s:%llu-%llu]\n", token_name(t), t.start, t.end);
+        printf("[%s:%lu-%lu]\n", token_name(t), t.start, t.end);
     }
 
     printf("\n");

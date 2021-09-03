@@ -3,9 +3,6 @@
  *
  * SPDX-License-Identifier: BSD-2-Clause
  */
-
-#include "common.h"
-
 #include <stdio.h>
 
 #include "machine/binary.h"

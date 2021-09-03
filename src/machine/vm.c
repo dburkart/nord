@@ -13,6 +13,13 @@
 #include "vm.h"
 #include "value.h"
 
+// How we should load symbols
+#if PLATFORM == LINUX
+#define SYMBOL_LOAD_TYPE RTLD_DEFAULT
+#else
+#define SYMBOL_LOAD_TYPE RTLD_SELF
+#endif
+
 // Defines to make handling type information less verbose
 #define REG_TYPE3(a, t) vm->registers[instruction.fields.triplet.a].type == t
 #define BOOL2(a) vm->registers[instruction.fields.pair.a].contents.boolean
@@ -414,7 +421,7 @@ void vm_execute(vm_t *vm)
                 char *builtin_name;
                 asprintf(&builtin_name, "builtin__%s", s1->string);
                 void (*builtin)(vm_t *);
-                builtin = (void (*)(vm_t *))dlsym(RTLD_SELF, builtin_name);
+                builtin = (void (*)(vm_t *))dlsym(SYMBOL_LOAD_TYPE, builtin_name);
                 free(builtin_name);
 
                 // TODO: Maintain a symbol map for future calls?

@@ -1,5 +1,18 @@
+ifeq ($(shell which clang),)
+CC=gcc
+else
 CC=clang
-CFLAGS=-Werror -Isrc -std=gnu99 -g
+endif
+
+PLATFORM ?= $(shell uname -s)
+
+CFLAGS := -Werror -Isrc -std=gnu99 -g -DPLATFORM=$(PLATFORM)
+LDFLAGS :=
+
+ifeq ($(PLATFORM),Linux)
+CFLAGS += -D_GNU_SOURCE
+LDFLAGS += -Wl,--no-as-needed -ldl
+endif
 
 SOURCES=$(BASE)/src/compiler/token.c \
         $(BASE)/src/compiler/lex.c \

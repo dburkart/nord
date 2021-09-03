@@ -4,8 +4,6 @@
  * SPDX-License-Identifier: BSD-2-Clause
  */
 
-#include "common.h"
-
 /*
  * This test runner takes any number of files as inputs, and prints out a
  * single scanned token per line.

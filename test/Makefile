@@ -12,23 +12,23 @@ runner: testrunner.c
 
 lex/run:
 	$(CC) -c $(CFLAGS) -I$(BASE)/src $@.c -o $@.o
-	$(CC) $(CFLAGS) -I$(BASE)/src -o $@ $(OBJECTS) $@.o
+	$(CC) $(CFLAGS) $(LDFLAGS) -I$(BASE)/src -o $@ $(OBJECTS) $@.o
 
 parse/run:
 	$(CC) -c $(CFLAGS) -I$(BASE)/src $@.c -o $@.o
-	$(CC) $(CFLAGS) -I$(BASE)/src -o $@ $(OBJECTS) $@.o
+	$(CC) $(CFLAGS) $(LDFLAGS) -I$(BASE)/src -o $@ $(OBJECTS) $@.o
 
 compile/run:
 	$(CC) -c $(CFLAGS) -I$(BASE)/src $@.c -o $@.o
-	$(CC) $(CFLAGS) -I$(BASE)/src -o $@ $(OBJECTS) $@.o
+	$(CC) $(CFLAGS) $(LDFLAGS) -I$(BASE)/src -o $@ $(OBJECTS) $@.o
 
 vm/run:
 	$(CC) -c $(CFLAGS) -I$(BASE)/src $@.c -o $@.o
-	$(CC) $(CFLAGS) -I$(BASE)/src -o $@ $(OBJECTS) $@.o
+	$(CC) $(CFLAGS) $(LDFLAGS) -I$(BASE)/src -o $@ $(OBJECTS) $@.o
 
 interpret/run:
 	$(CC) -c $(CFLAGS) -I$(BASE)/src $@.c -o $@.o
-	$(CC) $(CFLAGS) -I$(BASE)/src -o $@ $(OBJECTS) $@.o
+	$(CC) $(CFLAGS) $(LDFLAGS) -I$(BASE)/src -o $@ $(OBJECTS) $@.o
 
 clean:
 	rm -f lex/run{,.o}
