@@ -5,20 +5,13 @@
  */
 
 #include <assert.h>
-#include <dlfcn.h>
 #include <stdio.h>
 #include <string.h>
 
 #include "bytecode.h"
 #include "vm.h"
 #include "value.h"
-
-// How we should load symbols
-#if PLATFORM == LINUX
-#define SYMBOL_LOAD_TYPE RTLD_DEFAULT
-#else
-#define SYMBOL_LOAD_TYPE RTLD_SELF
-#endif
+#include "util/dl.h"
 
 // Defines to make handling type information less verbose
 #define REG_TYPE3(a, t) vm->registers[instruction.fields.triplet.a].type == t
@@ -421,7 +414,7 @@ void vm_execute(vm_t *vm)
                 char *builtin_name;
                 asprintf(&builtin_name, "builtin__%s", s1->string);
                 void (*builtin)(vm_t *);
-                builtin = (void (*)(vm_t *))dlsym(SYMBOL_LOAD_TYPE, builtin_name);
+                builtin = (void (*)(vm_t *))dynamic_load_self(builtin_name);
                 free(builtin_name);
 
                 // TODO: Maintain a symbol map for future calls?

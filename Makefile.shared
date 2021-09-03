@@ -11,7 +11,7 @@ LDFLAGS :=
 
 ifeq ($(PLATFORM),Linux)
 CFLAGS += -D_GNU_SOURCE
-LDFLAGS += -Wl,--no-as-needed -ldl
+LDFLAGS += -Wl,--no-as-needed,--export-dynamic -ldl
 endif
 
 SOURCES=$(BASE)/src/compiler/token.c \
@@ -20,6 +20,7 @@ SOURCES=$(BASE)/src/compiler/token.c \
         $(BASE)/src/machine/bytecode.c \
         $(BASE)/src/util/hash.c \
         $(BASE)/src/util/error.c \
+        $(BASE)/src/util/dl.c \
         $(BASE)/src/compiler/symbol.c \
         $(BASE)/src/compiler/compile.c \
         $(BASE)/src/machine/memory.c \

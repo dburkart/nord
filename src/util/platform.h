@@ -7,7 +7,7 @@
 #ifndef PLATFORM_H
 #define PLATFORM_H
 
-#define MACOS "Darwin"
-#define LINUX "Linux"
+#define MACOS Darwin
+#define LINUX Linux
 
 #endif

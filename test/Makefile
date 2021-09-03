@@ -31,8 +31,5 @@ interpret/run:
 	$(CC) $(CFLAGS) $(LDFLAGS) -I$(BASE)/src -o $@ $(OBJECTS) $@.o
 
 clean:
-	rm -f lex/run{,.o}
-	rm -f parse/run{,.o}
-	rm -f compile/run{,.o}
-	rm -f vm/run{,.o}
-	rm -f interpret/run{,.o}
+	rm -f */run */*.o
+	testrunner
