@@ -1,7 +1,7 @@
 ifeq ($(shell which clang),)
-CC=gcc
+CC?=gcc
 else
-CC=clang
+CC?=clang
 endif
 
 PLATFORM ?= $(shell uname -s)

@@ -173,6 +173,9 @@ void binary_write(binary_t *binary, const char *path)
             case VAL_NIL:
                 // TODO: Handle
                 ;
+            case VAL_FUNCTION:
+                // TODO: Handle
+                ;
         }
     }
 
