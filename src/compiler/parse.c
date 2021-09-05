@@ -366,7 +366,10 @@ ast_t *statement(scan_context_t *context)
     ast_t *left = variable_decl(context);
 
     if (peek(context).type == TOK_RETURN)
-        return make_unary_expr(accept(context), statement(context));
+    {
+        token_t ret = accept(context);
+        return make_unary_expr(ret, statement(context));
+    }
 
     if (left == NULL)
         left = expression(context);
