@@ -61,6 +61,9 @@ void value_print(value_t v)
         case VAL_NIL:
             printf("{NIL}\n");
             break;
+        case VAL_FUNCTION:
+            printf("{FUNCTION}\n");
+            break;
     }
 }
 

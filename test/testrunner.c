@@ -83,8 +83,6 @@ void discover_tests(test_list_t *list, char *base)
         // Calculate the name for this path
         asprintf(&entry_path, "%s/%s", base, entry->d_name);
 
-        printf("Checking %s\n", entry_path);
-
         switch (entry->d_type)
         {
             case DT_REG:
