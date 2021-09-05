@@ -24,6 +24,10 @@ typedef struct
     uint64_t mp;
 } compile_context_t;
 
+static inline instruction_t make_zero_instr(uint8_t opcode)
+{
+    return (instruction_t){ opcode, .fields={ .pair={ 0, 0 } } };
+}
 
 static inline instruction_t make_single_instr(uint8_t opcode, uint8_t arg1)
 {
@@ -102,7 +106,7 @@ uint8_t compile_builtin_fn_call(compile_context_t *context, char *name, uint8_t 
     if (sym.location.type == LOC_UNDEF)
     {
         memory_set(context->binary->data, context->mp, string_create(name));
-        sym.location.type = LOC_MEMORY;
+        sym.location.type = LOC_BUILTIN;
         sym.location.address = context->mp++;
         sym.name = name;
         sym.type = SYM_FN;
@@ -134,19 +138,6 @@ uint8_t compile_builtin_fn_call(compile_context_t *context, char *name, uint8_t 
     code_block_write(context->binary->code, instruction);
 
     return context->rp;
-}
-
-uint8_t spill(compile_context_t *context, uint8_t low_reg)
-{
-    uint8_t num_spilled = 0;
-
-    for (int i = context->rp - 1; i >= low_reg; i--)
-    {
-        code_block_write(context->binary->code, make_single_instr(OP_SAVE, i));
-        num_spilled += 1;
-    }
-
-    return num_spilled;
 }
 
 uint8_t compile_internal(ast_t *ast, compile_context_t *context)
@@ -607,22 +598,9 @@ uint8_t compile_internal(ast_t *ast, compile_context_t *context)
                     sym.name = args->op.list.items[i]->op.literal.value;
                     sym.type = SYM_VAR;
                     symbol_map_set(context->symbols, sym);
-                    instruction = make_single_instr(OP_POP, context->rp + i);
-                    code_block_write(context->binary->code, instruction);
                 }
                 context->rp += args->op.list.size;
             }
-
-
-            // Set symbol information for the function itself
-            sym.name = ast->op.fn.name;
-            sym.low_reg = rp;
-            sym.location.type = LOC_CODE;
-            sym.location.address = addr;
-
-            // We need to write out the function symbol to our new symbol map
-            // to support recursive calls
-            symbol_map_set(context->symbols, sym);
 
             // Now, write out the block
             result = compile_internal(ast->op.fn.body, context);
@@ -644,7 +622,35 @@ uint8_t compile_internal(ast_t *ast, compile_context_t *context)
             context->symbols = context->symbols->parent;
             symbol_map_destroy(map);
 
-            context->rp = sym.low_reg;
+            // Construct locals to keep track of
+            uint8_t *locals = (uint8_t *)malloc(context->rp - rp + 1);
+            for (int i = rp; i < context->rp + 1; i++)
+            {
+                locals[i - rp] = i;
+            }
+            locals[context->rp - rp + 1] = 0;
+
+            // Create the function definition
+            value_t func = function_def_create(
+                ast->op.fn.name,
+                addr,
+                (args == NULL) ? 0 : args->op.list.size,
+                locals
+            );
+            memory_set(context->binary->data, context->mp, func);
+
+            // Set symbol information for the function itself
+            sym.name = ast->op.fn.name;
+            sym.type = SYM_FN;
+            sym.low_reg = rp;
+            sym.location.type = LOC_MEMORY;
+            sym.location.address = context->mp++;
+
+            // We need to write out the function symbol to our new symbol map
+            // to support recursive calls
+            symbol_map_set(context->symbols, sym);
+
+            context->rp = rp;
 
             // Store our function in the symbol map
             symbol_map_set(context->symbols, sym);
@@ -654,7 +660,8 @@ uint8_t compile_internal(ast_t *ast, compile_context_t *context)
             sym = symbol_map_get(context->symbols, ast->op.call.name);
             args = ast->op.call.args;
 
-            if (sym.location.type == LOC_UNDEF || sym.location.type == LOC_MEMORY)
+            // Assume undefined symbols are builtins
+            if (sym.location.type == LOC_UNDEF || sym.location.type == LOC_BUILTIN)
             {
                 regs = NULL;
                 tmp = context->rp;
@@ -686,36 +693,68 @@ uint8_t compile_internal(ast_t *ast, compile_context_t *context)
                 break;
             }
 
-            // Spill symbols
-            tmp = spill(context, sym.low_reg);
+            // First thing we do is load the function we're calling into the
+            // frame register of the VM.
+            instruction = make_singlew_instr(OP_LOADF, sym.location.address);
+            code_block_write(context->binary->code, instruction);
 
-            if (args != NULL)
+            // We'll use the function definition for analysis and register spilling
+            function_t *function = (function_t *)memory_get(context->binary->data, sym.location.address).contents.object;
+
+            // Now, iterate through locals and save any that need saving
+            for (uint8_t i = 0, reg = function->locals[i]; i != 0; i++, reg = function->locals[i])
             {
-                for (int i = 0; i < args->op.list.size; i++)
+                if (reg < context->rp)
                 {
-                    uint8_t val = compile_internal(args->op.list.items[i], context);
-                    instruction = make_single_instr(OP_PUSH, val);
+                    instruction = make_pair_instr(OP_SAVE, i, reg);
                     code_block_write(context->binary->code, instruction);
                 }
             }
 
+            if (args != NULL)
+            {
+                if (args->op.list.size != function->nargs)
+                {
+                    char *error;
+                    location_t loc = {args->location.start, args->location.end};
+                    asprintf(&error, "Function \"%s\" expected %d arguments, but was passed %ld.",
+                        function->name,
+                        function->nargs,
+                        args->op.list.size
+                    );
+                    printf("%s", format_error(context->name, context->listing, error, loc));
+                    exit(1);
+                }
+
+                rp = context->rp;
+
+                // First, set the register pointer to our first local of the function we're calling
+                context->rp = function->locals[0];
+
+                for (int i = 0; i < args->op.list.size; i++)
+                {
+                    uint8_t val = compile_internal(args->op.list.items[i], context);
+
+                    // If we weren't serendipitous, move things around
+                    if (val != function->locals[i])
+                    {
+                        instruction = make_pair_instr(OP_MOVE, function->locals[i], val);
+                        code_block_write(context->binary->code, instruction);
+                    }
+
+                    context->rp += 1;
+                }
+            }
+
             // Call the function
-            instruction = make_pair_instr(OP_LOADV, context->rp, sym.location.address);
+            instruction = make_zero_instr(OP_CALL);
             code_block_write(context->binary->code, instruction);
 
-            instruction = make_single_instr(OP_CALL, context->rp);
-            code_block_write(context->binary->code, instruction);
+            context->rp = rp;
 
             instruction = make_single_instr(OP_POP, context->rp);
             result = context->rp;
             code_block_write(context->binary->code, instruction);
-
-            if (tmp)
-            {
-                instruction.opcode = OP_RESTORE;
-                instruction.fields.pair.arg2 = tmp;
-                code_block_write(context->binary->code, instruction);
-            }
 
             break;
 

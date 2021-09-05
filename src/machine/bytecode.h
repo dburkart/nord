@@ -35,8 +35,6 @@ typedef enum
     OP_PUSH,
     // pop <register>
     OP_POP,
-    // save <register>
-    OP_SAVE,
     // restore <num-registers>
     OP_RESTORE,
 
@@ -79,7 +77,13 @@ typedef enum
 
     // -- Functions
 
-    // call <register-addr>
+    // loadf @<memory-addr>
+    OP_LOADF,
+
+    // save <register>
+    OP_SAVE,
+
+    // call
     OP_CALL,
 
     // calld @<memory-addr>

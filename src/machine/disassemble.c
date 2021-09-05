@@ -18,6 +18,7 @@
 #define FORMAT_PAIR_ADDR        "%-10s $%d @%d\n"
 #define FORMAT_PAIR_CONST_NUM   "%-10s $%d %d\n"
 #define FORMAT_PAIR_CONST_STR   "%-10s $%d %s\n"
+#define FORMAT_PAIR_CONST_REG   "%-10s %d $%d\n"
 #define FORMAT_TRIPLET          "%-10s $%d $%d $%d\n"
 #define FORMAT_TRIPLET_CMP      "%-10s %d $%d $%d\n"
 #define FORMAT_TRIPLET_VAL      "%-10s $%d $%d %d\n"
@@ -161,13 +162,6 @@ char *disassemble_instruction(memory_t *mem, instruction_t instruction)
                     );
             break;
 
-        case OP_SAVE:
-            asprintf(&assembly, FORMAT_SINGLE,
-                     "save",
-                     instruction.fields.pair.arg1
-                    );
-            break;
-
         case OP_RESTORE:
             asprintf(&assembly, FORMAT_SINGLE_CONST,
                      "restore",
@@ -275,11 +269,23 @@ char *disassemble_instruction(memory_t *mem, instruction_t instruction)
             break;
 
         // -- Functions
-        case OP_CALL:
-            asprintf(&assembly, FORMAT_SINGLE,
-                     "call",
-                     instruction.fields.pair.arg1
+        case OP_LOADF:
+            asprintf(&assembly, FORMAT_SINGLE_ADDR,
+                     "loadf",
+                     instruction.fields.pair.arg2
                     );
+            break;
+
+        case OP_SAVE:
+            asprintf(&assembly, FORMAT_PAIR_CONST_REG,
+                     "save",
+                     instruction.fields.pair.arg1,
+                     instruction.fields.pair.arg2
+                    );
+            break;
+
+        case OP_CALL:
+            asprintf(&assembly, "call\n");
             break;
 
         case OP_CALL_DYNAMIC:

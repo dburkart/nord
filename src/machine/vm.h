@@ -32,7 +32,12 @@ typedef struct
     int pc;
 
     // Registers
+
+    //-- General purpose registers
     value_t registers[VM_NUM_REGISTERS];
+
+    //-- Special purpose registers
+    value_t frame;
 } vm_t;
 
 vm_t *vm_create(binary_t *);

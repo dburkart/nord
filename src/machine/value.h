@@ -8,6 +8,7 @@
 #define VALUE_H
 
 #include <stdbool.h>
+#include <stdint.h>
 
 struct obj_t;
 
@@ -21,7 +22,8 @@ typedef enum
     VAL_FLOAT,
     VAL_BOOLEAN,
     VAL_TUPLE,
-    VAL_ITERATOR
+    VAL_ITERATOR,
+    VAL_FUNCTION
 } value_type_e;
 
 // The value_t struct encapsulates all possible values in the nord language.
@@ -78,5 +80,18 @@ typedef struct
 } tuple_t;
 
 value_t tuple_create(int length);
+
+typedef struct
+{
+    object_t object;
+    char *name;
+    uint32_t addr;           // Where this function lives in code
+    uint32_t return_addr;    // Return address
+    uint8_t nargs;           // number of args
+    const uint8_t *locals;   // Which registers are used by this function, 0 terminated
+    value_t *save;           // Registers to restore upon return
+} function_t;
+
+value_t function_def_create(char *name, uint32_t address, uint8_t nargs, const uint8_t *locals);
 
 #endif

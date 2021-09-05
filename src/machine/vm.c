@@ -133,6 +133,7 @@ void vm_execute(vm_t *vm)
         iterator_t *iter;
         char *stmp;
         memory_t *mem;
+        function_t *fn;
 
         switch (instruction.opcode)
         {
@@ -175,17 +176,6 @@ void vm_execute(vm_t *vm)
 
             case OP_POP:
                 vm->registers[instruction.fields.pair.arg1] = vm_stack_pop(vm);
-                break;
-
-            case OP_SAVE:
-                // Key
-                ret.type = VAL_INT;
-                ret.contents.number = instruction.fields.pair.arg1;
-                vm_stack_push(vm, ret);
-
-                // Value
-                vm_stack_push(vm, vm->registers[instruction.fields.pair.arg1]);
-
                 break;
 
             case OP_RESTORE:
@@ -394,12 +384,60 @@ void vm_execute(vm_t *vm)
                 vm->registers[instruction.fields.pair.arg1] = result;
                 break;
 
+            case OP_LOADF:
+                ret = memory_get(vm->memory, instruction.fields.pair.arg2);
+
+                // This must be of type VAL_FUNCTION
+                assert(ret.type == VAL_FUNCTION);
+
+                // Save the current frame if it's set
+                if (vm->frame.type == VAL_FUNCTION)
+                {
+                    vm_cstack_push(vm, vm->frame);
+                }
+
+                // Make a copy so we don't pollute the function definition later
+                fn = (function_t *)ret.contents.object;
+                ret = function_def_create(
+                    fn->name,
+                    fn->addr,
+                    fn->nargs,
+                    fn->locals
+                );
+
+                vm->frame = ret;
+
+                break;
+
+            case OP_SAVE:
+                fn = (function_t *)vm->frame.contents.object;
+
+                // Initialize save buffer, if not null
+                if (fn->save == NULL)
+                {
+                    uint8_t count = 0;
+
+                    while (fn->locals[count] != 0)
+                    {
+                        count += 1;
+                    }
+
+                    fn->save = (value_t *)malloc(sizeof(value_t) * count);
+                }
+
+                fn->save[instruction.fields.pair.arg1] = vm->registers[instruction.fields.pair.arg2];
+
+                break;
+
             case OP_CALL:
-                // First, push the return address down
-                ret.type = VAL_INT;
-                ret.contents.number = vm->pc;
-                vm_cstack_push(vm, ret);
-                vm->pc = vm->registers[instruction.fields.pair.arg1].contents.number;
+                fn = (function_t *)vm->frame.contents.object;
+
+                // First, set the return address in the current frame
+                fn->return_addr = vm->pc;
+
+                // Now set the program counter
+                vm->pc = fn->addr;
+
                 break;
 
             case OP_CALL_DYNAMIC:
@@ -428,9 +466,12 @@ void vm_execute(vm_t *vm)
                 break;
 
             case OP_RETURN:
-                ret = vm_cstack_pop(vm);
+                fn = (function_t *)vm->frame.contents.object;
+
+                // If the call stack has stuff on it, juggle some stuff
+
                 vm_stack_push(vm, vm->registers[instruction.fields.pair.arg1]);
-                vm->pc = ret.contents.number;
+                vm->pc = fn->return_addr;
                 break;
 
         }

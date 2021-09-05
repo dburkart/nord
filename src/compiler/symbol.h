@@ -22,6 +22,7 @@ typedef struct
         LOC_REGISTER,
         LOC_MEMORY,
         LOC_CODE,
+        LOC_BUILTIN,
         // Used to indicate a symbol has been declared but not assigned
         LOC_NONE
     } type;
