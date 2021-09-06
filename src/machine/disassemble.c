@@ -285,7 +285,10 @@ char *disassemble_instruction(memory_t *mem, instruction_t instruction)
             break;
 
         case OP_CALL:
-            asprintf(&assembly, "call\n");
+            asprintf(&assembly, FORMAT_SINGLE_ADDR,
+                     "call",
+                     instruction.fields.pair.arg2
+                    );
             break;
 
         case OP_CALL_DYNAMIC:

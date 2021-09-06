@@ -77,7 +77,7 @@ value_t tuple_create(int length)
     return val;
 }
 
-value_t function_def_create(char *name, uint32_t address, uint8_t nargs, const uint8_t *locals)
+value_t function_def_create(char *name, uint32_t address, uint8_t nargs, uint8_t *locals, uint8_t low)
 {
     value_t val;
     function_t *func = (function_t *)malloc(sizeof(function_t));
@@ -87,6 +87,7 @@ value_t function_def_create(char *name, uint32_t address, uint8_t nargs, const u
     func->addr = address;
     func->nargs = nargs;
     func->locals = locals;
+    func->low_reg = low;
     func->save = NULL;
 
     val.type = VAL_FUNCTION;

@@ -388,6 +388,16 @@ void vm_execute(vm_t *vm)
                 break;
 
             case OP_LOADF:
+
+
+                break;
+
+            case OP_SAVE:
+
+
+                break;
+
+            case OP_CALL:
                 ret = memory_get(vm->memory, instruction.fields.pair.arg2);
 
                 // This must be of type VAL_FUNCTION
@@ -405,17 +415,21 @@ void vm_execute(vm_t *vm)
                     fn->name,
                     fn->addr,
                     fn->nargs,
-                    fn->locals
+                    fn->locals,
+                    fn->low_reg
                 );
 
                 vm->frame = ret;
 
-                break;
-
-            case OP_SAVE:
                 fn = (function_t *)vm->frame.contents.object;
 
-                // Initialize save buffer, if not null
+                // First, set the return address in the current frame
+                fn->return_addr = vm->pc;
+
+                // Now set the program counter
+                vm->pc = fn->addr;
+
+                // Initialize save buffer, if null
                 if (fn->save == NULL)
                 {
                     uint8_t count = 0;
@@ -428,18 +442,11 @@ void vm_execute(vm_t *vm)
                     fn->save = (value_t *)malloc(sizeof(value_t) * count);
                 }
 
-                fn->save[instruction.fields.pair.arg1] = vm->registers[instruction.fields.pair.arg2];
-
-                break;
-
-            case OP_CALL:
-                fn = (function_t *)vm->frame.contents.object;
-
-                // First, set the return address in the current frame
-                fn->return_addr = vm->pc;
-
-                // Now set the program counter
-                vm->pc = fn->addr;
+                // Finally, save out locals
+                for (uint8_t i = fn->nargs, reg = fn->locals[i]; reg != 0; i++, reg = fn->locals[i])
+                {
+                    fn->save[i] = vm->registers[reg];
+                }
 
                 break;
 
@@ -471,7 +478,22 @@ void vm_execute(vm_t *vm)
             case OP_RETURN:
                 fn = (function_t *)vm->frame.contents.object;
 
-                // If the call stack has stuff on it, juggle some stuff
+                // Restore our save buffer
+                for (uint8_t i = 0, reg = fn->locals[i]; i != 0; i++, reg = fn->locals[i])
+                {
+                    vm->registers[reg] = fn->save[i];
+                }
+
+                // Free our save buffer
+                free(fn->save);
+                free(fn);
+                vm->frame = (value_t){VAL_ABSENT};
+
+                // If our call stack has something on it, pop it into the frame register
+                if (vm->csp > 0)
+                {
+                    vm->frame = vm_cstack_pop(vm);
+                }
 
                 vm_stack_push(vm, vm->registers[instruction.fields.pair.arg1]);
                 vm->pc = fn->return_addr;

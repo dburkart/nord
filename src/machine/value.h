@@ -88,10 +88,11 @@ typedef struct
     uint32_t addr;           // Where this function lives in code
     uint32_t return_addr;    // Return address
     uint8_t nargs;           // number of args
-    const uint8_t *locals;   // Which registers are used by this function, 0 terminated
+    uint8_t *locals;         // Which registers are used by this function, 0 terminated
+    uint8_t low_reg;
     value_t *save;           // Registers to restore upon return
 } function_t;
 
-value_t function_def_create(char *name, uint32_t address, uint8_t nargs, const uint8_t *locals);
+value_t function_def_create(char *name, uint32_t address, uint8_t nargs, uint8_t *locals, uint8_t low);
 
 #endif
