@@ -1,0 +1,6 @@
+fn hello() {
+    print("hello")
+}
+
+var f = hello
+f()
