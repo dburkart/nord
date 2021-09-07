@@ -242,7 +242,7 @@ void vm_execute(vm_t *vm)
             case OP_AND:
                 if (IS_NUMBERISH3(arg2) && IS_NUMBERISH3(arg3))
                 {
-                    result.contents.boolean = NUM_OR_FLOAT3(arg2) && NUM_OR_FLOAT3(arg3);
+                    result.contents.boolean = NUM_OR_FLOAT_OR_BOOL3(arg2) && NUM_OR_FLOAT_OR_BOOL3(arg3);
                 }
                 else
                 {
