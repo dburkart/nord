@@ -1,10 +1,7 @@
-loadv      $1 5
+loadv      $1 4
 jump       $1
-pop        $1
 multiply   $2 $1 $1
 return     $2
 loadv      $1 100
-push       $1
-loadv      $1 2
-call       $1
+call       @2
 pop        $1

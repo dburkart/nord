@@ -1,11 +1,11 @@
 [memory contents]
    0000 {BOOLEAN:false}
    0001 {BOOLEAN:true}
+   0002 {FUNCTION}
 
 [stack contents]
 
 [register contents]
    0001 {INT:16}
-   0002 {INT:16}
 
 stack pointer: 0

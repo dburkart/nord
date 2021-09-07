@@ -3,14 +3,13 @@ jump       $1
 set        $1 "foo"
 push       $1
 loadv      $0 1
-calld      @3
+calld      @4
 pop        $1
 return     $1
-loadv      $1 2
-call       $1
+call       @2
 pop        $1
 set        $1 "bar"
 push       $1
 loadv      $0 1
-calld      @3
+calld      @4
 pop        $1

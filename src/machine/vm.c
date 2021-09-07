@@ -478,8 +478,11 @@ void vm_execute(vm_t *vm)
             case OP_RETURN:
                 fn = (function_t *)vm->frame.contents.object;
 
+                vm->pc = fn->return_addr;
+                vm_stack_push(vm, vm->registers[instruction.fields.pair.arg1]);
+
                 // Restore our save buffer
-                for (uint8_t i = 0, reg = fn->locals[i]; i != 0; i++, reg = fn->locals[i])
+                for (uint8_t i = 0, reg = fn->locals[i]; reg != 0; i++, reg = fn->locals[i])
                 {
                     vm->registers[reg] = fn->save[i];
                 }
@@ -495,8 +498,6 @@ void vm_execute(vm_t *vm)
                     vm->frame = vm_cstack_pop(vm);
                 }
 
-                vm_stack_push(vm, vm->registers[instruction.fields.pair.arg1]);
-                vm->pc = fn->return_addr;
                 break;
 
         }

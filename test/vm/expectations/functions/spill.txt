@@ -1,8 +1,10 @@
 [memory contents]
    0000 {BOOLEAN:false}
    0001 {BOOLEAN:true}
-   0002 {STRING:Foo}
-   0003 {STRING:Bar}
+   0002 {FUNCTION}
+   0003 {STRING:Foo}
+   0004 {FUNCTION}
+   0005 {STRING:Bar}
 
 [stack contents]
 

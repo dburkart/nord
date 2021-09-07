@@ -771,7 +771,8 @@ uint8_t compile_internal(ast_t *ast, compile_context_t *context)
             instruction = make_singlew_instr(OP_CALL, sym.location.address);
             code_block_write(context->binary->code, instruction);
 
-            context->rp = rp;
+            if (args != NULL)
+                context->rp = rp;
 
             // Pop the return value
             instruction = make_single_instr(OP_POP, context->rp);
