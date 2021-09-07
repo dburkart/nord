@@ -17,6 +17,7 @@ ast_t *statement(scan_context_t *);
 ast_t *if_statement(scan_context_t *);
 ast_t *for_statement(scan_context_t *);
 ast_t *function_decl(scan_context_t *);
+ast_t *anonymous_decl(scan_context_t *context);
 ast_t *variable_list(scan_context_t *);
 ast_t *variable_decl(scan_context_t *);
 ast_t *expression_list(scan_context_t *);
@@ -378,6 +379,9 @@ ast_t *statement(scan_context_t *context)
         left = function_decl(context);
 
     if (left == NULL)
+        left = anonymous_decl(context);
+
+    if (left == NULL)
         left = if_statement(context);
 
     if (left == NULL)
@@ -516,7 +520,45 @@ ast_t *function_decl(scan_context_t *context)
     }
     else
     {
+        backup(context);
+        return NULL;
+    }
+
+    if (peek(context).type == TOK_L_PAREN)
+    {
+        accept(context);
+        args = expression_list(context);
+        // TODO: Handle error
+        assert(accept(context).type == TOK_R_PAREN);
+    }
+
+    body = statement_block(context);
+    // TODO: Handle error
+    assert(body != NULL);
+
+    left = make_fn_expr(name, args, body);
+
+    return left;
+}
+
+ast_t *anonymous_decl(scan_context_t *context)
+{
+    ast_t *left, *args = NULL, *body;
+    char *name;
+
+    if (peek(context).type != TOK_FN)
+        return NULL;
+
+    accept(context);
+
+    if (peek(context).type == TOK_L_BRACE || peek(context).type == TOK_L_PAREN)
+    {
         name = "__anonymous";
+    }
+    else
+    {
+        backup(context);
+        return NULL;
     }
 
     if (peek(context).type == TOK_L_PAREN)
@@ -628,7 +670,14 @@ ast_t *expression_list(scan_context_t *context)
 
 ast_t *expression(scan_context_t *context)
 {
-    return assignment(context);
+    ast_t *value = assignment(context);
+
+    if (value == NULL)
+    {
+        value = anonymous_decl(context);
+    }
+
+    return value;
 }
 
 ast_t *assignment(scan_context_t *context)

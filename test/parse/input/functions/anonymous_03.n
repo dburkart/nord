@@ -1,0 +1,5 @@
+var f = fn {
+    print("Quick and dirty function")
+}
+
+f()

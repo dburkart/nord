@@ -1,0 +1,8 @@
+STMT LIST
+  ↳ DECLARE(var) -> f
+  ⋅ ↳ FUNCTION_DECL(__anonymous)
+  ⋅ ⋅ ↳ STMT LIST
+  ⋅ ⋅ ⋅ ↳ CALL_FN(print)
+  ⋅ ⋅ ⋅ ⋅ ↳ ARGUMENTS
+  ⋅ ⋅ ⋅ ⋅ ⋅ ↳ LITERAL(STRING) -> Quick and dirty function
+  ↳ CALL_FN(f)
