@@ -16,6 +16,7 @@
 #define FORMAT_SINGLE_ADDR      "%-10s @%d\n"
 #define FORMAT_PAIR             "%-10s $%d $%d\n"
 #define FORMAT_PAIR_ADDR        "%-10s $%d @%d\n"
+#define FORMAT_PAIR_ADDR2       "%-10s @%d $%d\n"
 #define FORMAT_PAIR_CONST_NUM   "%-10s $%d %d\n"
 #define FORMAT_PAIR_CONST_STR   "%-10s $%d %s\n"
 #define FORMAT_PAIR_CONST_REG   "%-10s %d $%d\n"
@@ -109,6 +110,8 @@ char *disassemble_instruction(memory_t *mem, instruction_t instruction)
                     asprintf(&str, "%f", value.contents.real);
                 else if (value.type == VAL_BOOLEAN)
                     asprintf(&str, "%s", (value.contents.boolean == true) ? "true" : "false");
+                else if (value.type == VAL_FUNCTION)
+                    asprintf(&str, "@%d ; Function", instruction.fields.pair.arg2);
                 asprintf(&assembly, FORMAT_PAIR_CONST_STR,
                         "set",
                         instruction.fields.pair.arg1,
@@ -130,7 +133,7 @@ char *disassemble_instruction(memory_t *mem, instruction_t instruction)
 
         // store <register> <address>
         case OP_STORE:
-            asprintf(&assembly, FORMAT_PAIR_ADDR,
+            asprintf(&assembly, FORMAT_PAIR_ADDR2,
                      "store",
                      instruction.fields.pair.arg1,
                      instruction.fields.pair.arg2

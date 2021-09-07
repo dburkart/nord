@@ -6,6 +6,7 @@
 
 #include <assert.h>
 #include <stdio.h>
+#include <string.h>
 
 #include "compile.h"
 #include "parse.h"
@@ -259,19 +260,28 @@ uint8_t compile_internal(ast_t *ast, compile_context_t *context)
             {
                 result = compile_internal(ast->op.declare.initial_value, context);
 
-                if (result < context->rp)
+                if (ast->op.declare.initial_value->type == AST_FUNCTION_DECL)
+                {
+                    sym = symbol_map_get(context->symbols, "__anonymous");
+                    value_t fn = memory_get(context->binary->data, sym.location.address);
+                    sym.location.type = LOC_MEMORY;
+                    sym.location.address = context->mp++;
+                    memory_set(context->binary->data, sym.location.address, fn);
+                }
+                else if (result < context->rp)
                 {
                     instruction = make_pair_instr(OP_MOVE, context->rp, result);
                     code_block_write(context->binary->code, instruction);
                     sym.location.address = context->rp;
+                    sym.location.type = LOC_REGISTER;
+                    context->rp += 1;
                 }
                 else
                 {
                     sym.location.address = result;
+                    sym.location.type = LOC_REGISTER;
+                    context->rp += 1;
                 }
-
-                sym.location.type = LOC_REGISTER;
-                context->rp += 1;
             }
 
             sym.name = ast->op.declare.name;
@@ -308,8 +318,22 @@ uint8_t compile_internal(ast_t *ast, compile_context_t *context)
                 exit(1);
             }
 
-            instruction = make_pair_instr(OP_MOVE, sym.location.address, result);
-            code_block_write(context->binary->code, instruction);
+            if (ast->op.assign.value->type == AST_FUNCTION_DECL)
+            {
+                sym = symbol_map_get(context->symbols, "__anonymous");
+                value_t fn = memory_get(context->binary->data, sym.location.address);
+                sym.location.address = context->mp++;
+                sym.name = ast->op.assign.name;
+                sym.type = SYM_VAR;
+                symbol_map_set(context->symbols, sym);
+                memory_set(context->binary->data, sym.location.address, fn);
+            }
+            else
+            {
+                instruction = make_pair_instr(OP_MOVE, sym.location.address, result);
+                code_block_write(context->binary->code, instruction);
+            }
+
             break;
 
         case AST_LITERAL:
@@ -664,6 +688,14 @@ uint8_t compile_internal(ast_t *ast, compile_context_t *context)
 
             context->rp = rp;
 
+            // If we're an anonymous function, load it into a register
+            if (strcmp(ast->op.fn.name, "__anonymous") == 0)
+            {
+                instruction = make_pair_instr(OP_LOAD, context->rp, mp);
+                result = context->rp;
+                code_block_write(context->binary->code, instruction);
+            }
+
             // Store our function in the symbol map
             symbol_map_set(context->symbols, sym);
             break;
@@ -671,6 +703,7 @@ uint8_t compile_internal(ast_t *ast, compile_context_t *context)
         case AST_FUNCTION_CALL:
             sym = symbol_map_get(context->symbols, ast->op.call.name);
             args = ast->op.call.args;
+            function_t *function;
 
             // Assume undefined symbols are builtins
             if (sym.location.type == LOC_UNDEF || sym.location.type == LOC_BUILTIN)
@@ -704,14 +737,19 @@ uint8_t compile_internal(ast_t *ast, compile_context_t *context)
 
                 break;
             }
+            else if (sym.location.type == LOC_MEMORY)
+            {
+                // We'll use the function definition for analysis and register spilling
+                function = (function_t *)memory_get(context->binary->data, sym.location.address).contents.object;
+            }
+            else if (sym.location.type == LOC_REGISTER)
+            {
 
-            // First thing we do is load the function we're calling into the
-            // frame register of the VM.
-            // instruction = make_singlew_instr(OP_LOADF, sym.location.address);
-            // code_block_write(context->binary->code, instruction);
-
-            // We'll use the function definition for analysis and register spilling
-            function_t *function = (function_t *)memory_get(context->binary->data, sym.location.address).contents.object;
+            }
+            else
+            {
+                assert(sym.location.type);
+            }
 
             // Now, iterate through the function args and save any locals that conflict
             for (uint8_t i = 0; i < function->nargs; i++)

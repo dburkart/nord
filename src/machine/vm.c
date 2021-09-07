@@ -166,7 +166,7 @@ void vm_execute(vm_t *vm)
                 break;
 
             case OP_STORE:
-                memory_set(vm->memory, instruction.fields.pair.arg2, vm->registers[instruction.fields.pair.arg1]);
+                memory_set(vm->memory, instruction.fields.pair.arg1, vm->registers[instruction.fields.pair.arg2]);
                 break;
 
             case OP_MOVE:
@@ -179,19 +179,6 @@ void vm_execute(vm_t *vm)
 
             case OP_POP:
                 vm->registers[instruction.fields.pair.arg1] = vm_stack_pop(vm);
-                break;
-
-            case OP_RESTORE:
-                for (int i = 0; i < instruction.fields.pair.arg2; i++)
-                {
-                    // Value
-                    result = vm_stack_pop(vm);
-
-                    // Key
-                    ret = vm_stack_pop(vm);
-
-                    vm->registers[ret.contents.number] = result;
-                }
                 break;
 
             case OP_JMP:

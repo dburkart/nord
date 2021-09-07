@@ -1,0 +1,5 @@
+var anon = fn() {
+    print("Anonymous")
+}
+
+anon()

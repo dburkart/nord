@@ -63,7 +63,7 @@ void symbol_map_set(symbol_map_t *symbol_map, symbol_t symbol)
 
     // Collision handling, simply look for the next free spot
     while (symbol_map->items[index].name != NULL &&
-           symbol.name != symbol_map->items[index].name)
+           strcmp(symbol.name, symbol_map->items[index].name) != 0)
     {
         index += 1;
     }

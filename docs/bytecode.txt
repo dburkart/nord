@@ -12,6 +12,9 @@ Moving data in / out of registers
 # Load the value at <address> into register <dest>
 load $<dest> @<address>
 
+# Save the value in <register> to address <dest>
+store @<dest> $<register>
+
 # Load the wide value specified by <immediate> into register <dest>
 loadv $<dest> <immediate>
 
@@ -21,9 +24,6 @@ set $<dest> <value>
 
 # Move instruction from <src> to <dest>
 move $<dest> $<src>
-
-# Restore N number of spilled registers from the stack
-restore <N>
 
 Arithmetic
 ==========
