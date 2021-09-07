@@ -163,7 +163,7 @@ void usage(char *name)
 int main(int argc, char *argv[])
 {
     bool rebase = false;
-    int all_passes, all_fails;
+    int all_passes = 0, all_fails = 0;
     unsigned long start_time;
 
     if (argc == 2)
