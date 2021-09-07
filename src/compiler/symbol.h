@@ -36,9 +36,6 @@ typedef struct
     char *name;
     sym_type_e type;
     sym_pointer_t location;
-    // This field is used for symbols of type SYM_FN to find overlaps and
-    // spill registers when we're calling the function
-    uint8_t low_reg;
 } symbol_t;
 
 // Symbol hash map, containing an array of symbols

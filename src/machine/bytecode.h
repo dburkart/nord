@@ -77,12 +77,6 @@ typedef enum
 
     // -- Functions
 
-    // loadf @<memory-addr>
-    OP_LOADF,
-
-    // save <register>
-    OP_SAVE,
-
     // call
     OP_CALL,
 

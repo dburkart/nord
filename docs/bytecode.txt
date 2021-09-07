@@ -22,10 +22,6 @@ set $<dest> <value>
 # Move instruction from <src> to <dest>
 move $<dest> $<src>
 
-# Save the contents of the specified register to the stack. This is used
-# to spill registers before calling a function
-save $<register>
-
 # Restore N number of spilled registers from the stack
 restore <N>
 

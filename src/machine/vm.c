@@ -387,16 +387,6 @@ void vm_execute(vm_t *vm)
                 vm->registers[instruction.fields.pair.arg1] = result;
                 break;
 
-            case OP_LOADF:
-
-
-                break;
-
-            case OP_SAVE:
-
-
-                break;
-
             case OP_CALL:
                 ret = memory_get(vm->memory, instruction.fields.pair.arg2);
 

@@ -269,21 +269,6 @@ char *disassemble_instruction(memory_t *mem, instruction_t instruction)
             break;
 
         // -- Functions
-        case OP_LOADF:
-            asprintf(&assembly, FORMAT_SINGLE_ADDR,
-                     "loadf",
-                     instruction.fields.pair.arg2
-                    );
-            break;
-
-        case OP_SAVE:
-            asprintf(&assembly, FORMAT_PAIR_CONST_REG,
-                     "save",
-                     instruction.fields.pair.arg1,
-                     instruction.fields.pair.arg2
-                    );
-            break;
-
         case OP_CALL:
             asprintf(&assembly, FORMAT_SINGLE_ADDR,
                      "call",
