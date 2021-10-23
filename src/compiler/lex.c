@@ -434,6 +434,13 @@ token_t peek(scan_context_t *context)
                     break;
                 }
 
+                advance = match_keyword("import", c, 6);
+                if (advance)
+                {
+                    t.type = TOK_IMPORT;
+                    break;
+                }
+
                 advance = match_identifier(c);
                 if (advance)
                 {

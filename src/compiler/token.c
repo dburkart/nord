@@ -138,6 +138,8 @@ const char *token_name(token_t t)
             return "LET";
         case TOK_EXPORTED:
             return "EXPORTED";
+        case TOK_IMPORT:
+            return "IMPORT";
 
         // Other
         case TOK_DOT_DOT:
