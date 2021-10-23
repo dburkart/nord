@@ -84,7 +84,12 @@ typedef enum
     OP_CALL_DYNAMIC,
 
     // return <register>
-    OP_RETURN
+    OP_RETURN,
+
+    // -- Modules
+
+    // import @<memory-addr>
+    OP_IMPORT,
 } opcode_t;
 
 // An instruction is an opcode paired with several operands

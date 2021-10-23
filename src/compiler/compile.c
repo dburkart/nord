@@ -835,6 +835,18 @@ uint8_t compile_internal(ast_t *ast, compile_context_t *context)
 
             break;
 
+        case AST_MODULE:
+            result = context->rp;
+
+            val = string_create(ast->op.module.name);
+            memory_set(context->binary->data, context->mp, val);
+
+            instruction = make_single_instr(OP_IMPORT, context->mp);
+            code_block_write(context->binary->code, instruction);
+            context->mp += 1;
+
+            break;
+
         default:
             ;
     }
