@@ -17,7 +17,7 @@ statement       -> variable_decl
 if_statement    -> "if" expression statement_block
                  | "if" expression statement ;
 for_statement   -> "for" ( IDENTIFIER "in" )? ( IDENTIFIER | STRING | tuple | range ) statement_block ;
-function_decl   -> "fn" IDENTIFIER ( "(" variable_list ")" )* statement_block ;
+function_decl   -> ( "/" "exported" "/" )? "fn" IDENTIFIER ( "(" variable_list ")" )* statement_block ;
 anonymous_decl  -> "fn" ( "(" variable_list ")" )* statement_block ;
 variable_list   -> IDENTIFIER ( "," variable_list )* ;
 variable_decl   -> ( "var" | "let" ) IDENTIFIER ( "=" expression ) "\n" ;

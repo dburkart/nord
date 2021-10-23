@@ -95,6 +95,9 @@ void print_ast_internal(scan_context_t *context, ast_t *ast, int indent)
             }
             break;
         case AST_FUNCTION_DECL:
+            if (ast->op.fn.exported)
+                printf("EXPORTED ");
+
             printf("FUNCTION_DECL(%s)\n", ast->op.fn.name);
             if (ast->op.fn.args != NULL)
             {
@@ -219,11 +222,12 @@ ast_t *make_group_expr(ast_t *expr)
     return group_expr;
 }
 
-ast_t *make_fn_expr(char *name, ast_t *args, ast_t *body)
+ast_t *make_fn_expr(char *name, bool exported, ast_t *args, ast_t *body)
 {
     ast_t *fn_expr = (ast_t *)malloc(sizeof(ast_t));
     fn_expr->type = AST_FUNCTION_DECL;
     fn_expr->op.fn.name = name;
+    fn_expr->op.fn.exported = exported;
     fn_expr->op.fn.args = args;
     fn_expr->op.fn.body = body;
     return fn_expr;
@@ -507,6 +511,26 @@ ast_t *function_decl(scan_context_t *context)
 {
     ast_t *left, *args = NULL, *body;
     char *name;
+    bool exported = false;
+
+    if (peek(context).type == TOK_SLASH)
+    {
+        accept(context);
+        if (peek(context).type != TOK_EXPORTED)
+        {
+            backup(context);
+            return NULL;
+        }
+        accept(context);
+        exported = true;
+
+        // TODO: Handle error
+        assert(accept(context).type == TOK_SLASH);
+
+        // TODO: Consume N newlines
+        if (peek(context).type == TOK_EOL)
+            accept(context);
+    }
 
     if (peek(context).type != TOK_FN)
         return NULL;
@@ -535,7 +559,7 @@ ast_t *function_decl(scan_context_t *context)
     // TODO: Handle error
     assert(body != NULL);
 
-    left = make_fn_expr(name, args, body);
+    left = make_fn_expr(name, exported, args, body);
 
     return left;
 }
@@ -572,7 +596,7 @@ ast_t *anonymous_decl(scan_context_t *context)
     // TODO: Handle error
     assert(body != NULL);
 
-    left = make_fn_expr(name, args, body);
+    left = make_fn_expr(name, false, args, body);
 
     return left;
 }
@@ -753,6 +777,12 @@ ast_t *term_md(scan_context_t *context)
     while (match(context, 2, TOK_SLASH, TOK_ASTERISK))
     {
         token_t operator = accept(context);
+
+        if (operator.type == TOK_SLASH && peek(context).type == TOK_EXPORTED)
+        {
+            backup(context);
+            return NULL;
+        }
         ast_t *right = unary(context);
         ast_t *new_left = make_binary_expr(left, operator, right);
         new_left->location.start = left->location.start;

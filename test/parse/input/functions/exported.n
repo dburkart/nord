@@ -1,0 +1,4 @@
+/exported/
+fn squared(x) {
+    x * x
+}

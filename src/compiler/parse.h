@@ -7,6 +7,7 @@
 #ifndef PARSE_H
 #define PARSE_H
 
+#include <stdbool.h>
 #include <stdint.h>
 
 #include "token.h"
@@ -69,6 +70,7 @@ typedef struct expr_t
         struct
         {
             char *name;
+            bool exported;
             struct expr_t *args;
             struct expr_t *body;
         } fn;

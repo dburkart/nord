@@ -1,0 +1,8 @@
+STMT LIST
+  ↳ EXPORTED FUNCTION_DECL(squared)
+  ⋅ ↳ ARGUMENTS
+  ⋅ ⋅ ↳ LITERAL(IDENTIFIER) -> x
+  ⋅ ↳ STMT LIST
+  ⋅ ⋅ ↳ BINARY(ASTERISK)
+  ⋅ ⋅ ⋅ ↳ LITERAL(IDENTIFIER) -> x
+  ⋅ ⋅ ⋅ ↳ LITERAL(IDENTIFIER) -> x
