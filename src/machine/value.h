@@ -100,7 +100,10 @@ value_t function_def_create(char *name, uint32_t address, uint8_t nargs, uint8_t
 typedef struct
 {
     object_t object;
+    char *name;
     struct vm_t *vm;
 } module_t;
+
+value_t module_create(char *name, struct vm_t *vm);
 
 #endif

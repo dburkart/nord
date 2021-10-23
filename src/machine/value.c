@@ -95,3 +95,18 @@ value_t function_def_create(char *name, uint32_t address, uint8_t nargs, uint8_t
 
     return val;
 }
+
+value_t module_create(char *name, struct vm_t *vm)
+{
+    value_t val;
+
+    module_t *module = (module_t *)malloc(sizeof(module_t));
+
+    module->name = name;
+    module->vm = vm;
+
+    val.type = VAL_MODULE;
+    val.contents.object = (object_t *)module;
+
+    return val;
+}

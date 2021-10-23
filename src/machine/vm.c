@@ -12,6 +12,9 @@
 #include "vm.h"
 #include "value.h"
 #include "util/dl.h"
+#include "compiler/compile.h"
+#include "compiler/parse.h"
+#include "compiler/lex.h"
 
 // Defines to make handling type information less verbose
 #define REG_TYPE3(a, t) vm->registers[instruction.fields.triplet.a].type == t
@@ -482,6 +485,45 @@ void vm_execute(vm_t *vm)
 
                 break;
 
+            case OP_IMPORT:
+                ret = memory_get(vm->memory, instruction.fields.pair.arg1);
+
+                // The only valid argument to an import statement is a string
+                assert(ret.type == VAL_STRING);
+
+                s1 = (string_t *)ret.contents.object;
+
+                char *filepath;
+                asprintf(&filepath, "%s.n", s1->string);
+
+                // TODO: This seems duplicated...
+                FILE *fp = fopen(filepath, "r");
+
+                fseek(fp, 0, SEEK_END);
+                long fsize = ftell(fp);
+                fseek(fp, 0, SEEK_SET);
+
+                char *input = malloc(fsize + 1);
+                fread(input, 1, fsize, fp);
+                fclose(fp);
+
+                input[fsize] = 0;
+
+                scan_context_t context;
+                context.name = filepath;
+                context.buffer = input;
+                context.position = 0;
+
+                ast_t *syntax_tree = parse(&context);
+                binary_t *binary = compile(filepath, input, syntax_tree);
+                vm_t *module_vm = vm_create(binary);
+                vm_execute(module_vm);
+
+                result = module_create(s1->string, (struct vm_t *)module_vm);
+
+                free(input);
+
+                break;
         }
     }
 }
