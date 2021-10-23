@@ -22,7 +22,7 @@ typedef struct expr_t
         AST_ASSIGN, AST_BINARY, AST_DECLARE, AST_UNARY,
         AST_LITERAL, AST_GROUP, AST_STMT_LIST,
         AST_FUNCTION_DECL, AST_FUNCTION_CALL,
-        AST_EXPR_LIST, AST_VAR_LIST,
+        AST_EXPR_LIST, AST_VAR_LIST, AST_MODULE,
         AST_IF_STMT, AST_FOR_STMT, AST_TUPLE, AST_RANGE,
     } type;
 
@@ -100,6 +100,10 @@ typedef struct expr_t
             struct expr_t *end;
         } range;
 
+        struct
+        {
+            char *name;
+        } module;
 
         struct expr_t *group;
     } op;

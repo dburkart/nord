@@ -14,6 +14,7 @@
 ast_t *statement_block(scan_context_t *);
 ast_t *statement_list(scan_context_t *);
 ast_t *statement(scan_context_t *);
+ast_t *import_statement(scan_context_t *);
 ast_t *if_statement(scan_context_t *);
 ast_t *for_statement(scan_context_t *);
 ast_t *function_decl(scan_context_t *);
@@ -154,6 +155,9 @@ void print_ast_internal(scan_context_t *context, ast_t *ast, int indent)
             print_ast_internal(context, ast->op.range.end, indent + 2);
             break;
 
+        case AST_MODULE:
+            printf("IMPORT %s\n", ast->op.module.name);
+            break;
     }
 }
 
@@ -281,6 +285,14 @@ ast_t *make_range_expr(ast_t *begin, ast_t *end)
     return range_expr;
 }
 
+ast_t *make_module_expr(char *module_name)
+{
+    ast_t *module_expr = (ast_t *)malloc(sizeof(ast_t));
+    module_expr->type = AST_MODULE;
+    module_expr->op.module.name = module_name;
+    return module_expr;
+}
+
 void list_expr_append(ast_t *list, ast_t *item)
 {
     if (list->op.list.size >= list->op.list.capacity - 1)
@@ -390,6 +402,9 @@ ast_t *statement(scan_context_t *context)
     if (left == NULL)
         left = for_statement(context);
 
+    if (left == NULL)
+        left = import_statement(context);
+
     if (peek(context).type == TOK_EOL)
     {
         accept(context);
@@ -403,6 +418,28 @@ ast_t *statement(scan_context_t *context)
         return left;
 
     return left;
+}
+
+ast_t *import_statement(scan_context_t *context)
+{
+    if (peek(context).type != TOK_IMPORT)
+        return NULL;
+
+    accept(context);
+
+    if (peek(context).type != TOK_STRING)
+    {
+        char *error;
+        token_t invalid = accept(context);
+        location_t loc = {invalid.start, invalid.end};
+        asprintf(&error, "Expected string following import.");
+        printf("%s", format_error(context->name, context->buffer, error, loc));
+        exit(1);
+    }
+
+    token_t module_name = accept(context);
+
+    return make_module_expr(token_value(context, module_name));
 }
 
 ast_t *if_statement(scan_context_t *context)

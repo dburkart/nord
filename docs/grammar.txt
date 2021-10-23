@@ -13,7 +13,9 @@ statement       -> variable_decl
                  | if_statement
                  | for_statement
                  | function_decl
-                 | anonymous_decl ;
+                 | anonymous_decl
+                 | import_statement ;
+import_statement-> "import" STRING ;
 if_statement    -> "if" expression statement_block
                  | "if" expression statement ;
 for_statement   -> "for" ( IDENTIFIER "in" )? ( IDENTIFIER | STRING | tuple | range ) statement_block ;
