@@ -63,6 +63,9 @@ void print_internal(value_t val)
         case VAL_FUNCTION:
             printf("function");
             break;
+        case VAL_MODULE:
+            printf("module");
+            break;
     }
 }
 
@@ -218,6 +221,10 @@ void builtin__type(vm_t *vm)
 
         case VAL_FUNCTION:
             vm_stack_push(vm, string_create("function"));
+            break;
+
+        case VAL_MODULE:
+            vm_stack_push(vm, string_create("module"));
             break;
 
         case VAL_ABSENT:

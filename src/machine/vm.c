@@ -64,6 +64,9 @@ void value_print(value_t v)
         case VAL_FUNCTION:
             printf("{FUNCTION}\n");
             break;
+        case VAL_MODULE:
+            printf("{MODULE}\n");
+            break;
     }
 }
 
@@ -82,6 +85,8 @@ vm_t *vm_create(binary_t *binary)
 
     vm->code = binary->code;
     vm->pc = 0;
+
+    vm->symbols = binary->symbols;
 
     memset(&vm->registers, 0, 128 * sizeof(value_t));
 

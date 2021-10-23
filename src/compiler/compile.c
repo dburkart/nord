@@ -61,6 +61,7 @@ compile_context_t *context_create(const char *name, const char *listing)
     context->binary = binary_create();
     context->binary->data = memory_create(1);
     context->binary->code = code_block_create();
+    context->binary->symbols = symbol_map_create();
     context->rp = 1;
 
     // Set up true and false
@@ -698,6 +699,11 @@ uint8_t compile_internal(ast_t *ast, compile_context_t *context)
 
             // Store our function in the symbol map
             symbol_map_set(context->symbols, sym);
+
+            // If the function is external, put it in our binary symbol map
+            if (ast->op.fn.exported)
+                symbol_map_set(context->binary->symbols, sym);
+
             break;
 
         case AST_FUNCTION_CALL:

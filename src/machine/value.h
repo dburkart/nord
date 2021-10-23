@@ -11,6 +11,7 @@
 #include <stdint.h>
 
 struct obj_t;
+struct vm_t;
 
 // Enumeration of value types supported by nord
 typedef enum
@@ -23,7 +24,8 @@ typedef enum
     VAL_BOOLEAN,
     VAL_TUPLE,
     VAL_ITERATOR,
-    VAL_FUNCTION
+    VAL_FUNCTION,
+    VAL_MODULE,
 } value_type_e;
 
 // The value_t struct encapsulates all possible values in the nord language.
@@ -94,5 +96,11 @@ typedef struct
 } function_t;
 
 value_t function_def_create(char *name, uint32_t address, uint8_t nargs, uint8_t *locals, uint8_t low);
+
+typedef struct
+{
+    object_t object;
+    struct vm_t *vm;
+} module_t;
 
 #endif

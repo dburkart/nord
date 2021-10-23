@@ -9,6 +9,7 @@
 
 #include <stdint.h>
 
+#include "compiler/symbol.h"
 #include "bytecode.h"
 #include "memory.h"
 
@@ -31,6 +32,7 @@ typedef struct
     // The following fields are filled in on deserialization
     memory_t *data;
     code_block_t *code;
+    symbol_map_t *symbols;
 } binary_t;
 
 binary_t *binary_create(void);

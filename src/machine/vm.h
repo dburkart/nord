@@ -7,6 +7,7 @@
 #ifndef VM_H
 #define VM_H
 
+#include "compiler/symbol.h"
 #include "memory.h"
 #include "value.h"
 #include "binary.h"
@@ -38,6 +39,11 @@ typedef struct
 
     //-- Special purpose registers
     value_t frame;
+
+    // Symbols
+
+    //-- Symbols this VM exports
+    symbol_map_t *symbols;
 } vm_t;
 
 vm_t *vm_create(binary_t *);
