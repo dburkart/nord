@@ -4,8 +4,8 @@
  * SPDX-License-Identifier: BSD-2-Clause
  */
 
-#include <stdbool.h>
 #include <stdarg.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -374,6 +374,22 @@ token_t peek(scan_context_t *context)
                     t.type = TOK_IDENTIFIER;
                     break;
                 }
+                break;
+            case 'e':
+                advance = match_keyword("exported", c, 8);
+                if (advance)
+                {
+                    t.type = TOK_EXPORTED;
+                    break;
+                }
+
+                advance = match_identifier(c);
+                if (advance)
+                {
+                    t.type = TOK_IDENTIFIER;
+                    break;
+                }
+
                 break;
             case 'f':
                 if (*(c + 1) == 'n') {

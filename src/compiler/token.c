@@ -136,6 +136,8 @@ const char *token_name(token_t t)
             return "INVALID";
         case TOK_LET:
             return "LET";
+        case TOK_EXPORTED:
+            return "EXPORTED";
 
         // Other
         case TOK_DOT_DOT:
