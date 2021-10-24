@@ -10,7 +10,8 @@
 typedef enum {
     SYM_VAR,
     SYM_CONSTANT,
-    SYM_FN
+    SYM_FN,
+    SYM_MODULE,
 } sym_type_e;
 
 // Location struct for a symbol. Details whether the symbol is in a register

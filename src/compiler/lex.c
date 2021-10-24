@@ -89,6 +89,9 @@ int match_identifier(const char *c)
         if (is_reserved(*c))
             break;
 
+        if (*c == '.')
+            break;
+
         len = len + 1;
         c = c + 1;
     }

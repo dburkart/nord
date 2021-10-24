@@ -521,6 +521,19 @@ void vm_execute(vm_t *vm)
 
                 result = module_create(s1->string, (struct vm_t *)module_vm);
 
+                // TODO: This definitely leaks memory, clean this up when we
+                //  implement garbage collection
+                memory_set(vm->memory, instruction.fields.pair.arg1, result);
+
+                symbol_t sym;
+
+                sym.name = s1->string;
+                sym.type = SYM_MODULE;
+                sym.location.type = LOC_MEMORY;
+                sym.location.address = instruction.fields.pair.arg1;
+
+                symbol_map_set(vm->symbols, sym);
+
                 free(input);
 
                 break;
