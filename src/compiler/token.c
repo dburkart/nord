@@ -142,6 +142,8 @@ const char *token_name(token_t t)
             return "IMPORT";
 
         // Other
+        case TOK_DOT:
+            return "DOT";
         case TOK_DOT_DOT:
             return "DOT_DOT";
         case TOK_R_ARROW:

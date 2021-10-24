@@ -355,6 +355,13 @@ token_t peek(scan_context_t *context)
                     break;
                 }
 
+                if (*c == '.')
+                {
+                    t.type = TOK_DOT;
+                    advance = 1;
+                    break;
+                }
+
                 // We didn't match anything, so consume until we hit whitespace
                 advance = 1;
                 while (!is_whitespace(*(c+advance)))

@@ -1,0 +1,3 @@
+import "math"
+
+math.power(2, 2)

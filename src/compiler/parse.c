@@ -32,6 +32,7 @@ ast_t *unary(scan_context_t *);
 ast_t *primary(scan_context_t *);
 ast_t *tuple(scan_context_t *);
 ast_t *range(scan_context_t *);
+ast_t *member_access(scan_context_t *);
 ast_t *function_call(scan_context_t *);
 
 ast_t *parse(scan_context_t *context)
@@ -862,6 +863,10 @@ ast_t *primary(scan_context_t *context)
     if (left != NULL)
         return left;
 
+    left = member_access(context);
+    if (left != NULL)
+        return left;
+
     left = range(context);
     if (left != NULL)
         return left;
@@ -950,6 +955,36 @@ ast_t *range(scan_context_t *context)
     }
 
     return range;
+}
+
+ast_t *member_access(scan_context_t *context)
+{
+    ast_t *left;
+
+    if (peek(context).type != TOK_IDENTIFIER)
+        return NULL;
+
+    token_t identifier = accept(context);
+    left = make_literal_expr(identifier);
+    left->op.literal.value = token_value(context, identifier);
+    left->location.start = identifier.start;
+    left->location.end = identifier.end;
+
+    if (peek(context).type != TOK_DOT)
+    {
+        backup(context);
+        return NULL;
+    }
+
+    token_t operator = accept(context);
+
+    ast_t *right = function_call(context);
+    if (right == NULL)
+    {
+        right = member_access(context);
+    }
+
+    return make_binary_expr(left, operator, right);
 }
 
 ast_t *function_call(scan_context_t *context)

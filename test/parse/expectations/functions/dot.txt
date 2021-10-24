@@ -1,0 +1,8 @@
+STMT LIST
+  ↳ IMPORT math
+  ↳ BINARY(DOT)
+  ⋅ ↳ LITERAL(IDENTIFIER) -> math
+  ⋅ ↳ CALL_FN(power)
+  ⋅ ⋅ ↳ ARGUMENTS
+  ⋅ ⋅ ⋅ ↳ LITERAL(NUMBER) -> 2
+  ⋅ ⋅ ⋅ ↳ LITERAL(NUMBER) -> 2

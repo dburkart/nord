@@ -39,7 +39,7 @@ enum token_type_e {
     TOK_IF,
 
     // Other
-    TOK_R_ARROW, TOK_DOT_DOT,
+    TOK_R_ARROW, TOK_DOT, TOK_DOT_DOT,
 
     // Invalid token
     TOK_INVALID,

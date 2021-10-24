@@ -38,9 +38,12 @@ term_md         -> unary ( ( "/" | "*" ) unary )*  ;
 unary           -> ( "!" | "-" ) unary
                  | primary ;
 primary         -> function_call
+                 | member_access
                  | range
                  | IDENTIFIER | NUMBER | FLOAT | STRING | "true" | "false" | "nil"
                  | tuple ;
 tuple           -> "(" expression_list ")" ;
 range           -> ( IDENTIFIER | NUMBER ) ".." ( IDENTIFIER | NUMBER ) ;
+member_access   -> IDENTIFIER "." member_access
+                 | IDENTIFIER "." function_call ;
 function_call   -> IDENTIFIER "(" ( expression_list )* ")" ;
