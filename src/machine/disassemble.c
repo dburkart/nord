@@ -127,7 +127,7 @@ char *disassemble_instruction(memory_t *mem, instruction_t instruction)
             asprintf(&assembly, FORMAT_PAIR_CONST_NUM,
                      "loadv",
                      instruction.fields.pair.arg1,
-                     instruction.fields.pair.arg2
+                     instruction.fields.pair_signed.arg2
                     );
             break;
 

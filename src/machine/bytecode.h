@@ -102,6 +102,10 @@ typedef struct
             uint8_t arg1;
             uint16_t arg2;
         } pair;
+        struct {
+            uint8_t arg1;
+            int16_t arg2;
+        } pair_signed;
         // Represents an instruction of the form OP A B C
         struct {
             uint8_t arg1;
@@ -121,6 +125,7 @@ typedef struct
 
 code_block_t *code_block_create(void);
 void code_block_write(code_block_t *, instruction_t);
+void code_block_merge(code_block_t *, code_block_t *);
 void code_block_free(code_block_t *);
 
 #endif

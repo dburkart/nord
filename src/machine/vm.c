@@ -9,6 +9,7 @@
 #include <string.h>
 
 #include "bytecode.h"
+#include "disassemble.h"
 #include "vm.h"
 #include "value.h"
 #include "util/dl.h"
@@ -146,6 +147,9 @@ void vm_execute(vm_t *vm)
         memory_t *mem;
         function_t *fn;
 
+//        printf("%d: %s", vm->pc, disassemble_instruction(vm->memory, instruction));
+//        getchar();
+
         switch (instruction.opcode)
         {
             case OP_NIL:
@@ -169,7 +173,7 @@ void vm_execute(vm_t *vm)
 
             case OP_LOADV:
                 result.type = VAL_INT;
-                result.contents.number = instruction.fields.pair.arg2;
+                result.contents.number = instruction.fields.pair_signed.arg2;
                 vm->registers[instruction.fields.pair.arg1] = result;
                 break;
 
@@ -190,7 +194,7 @@ void vm_execute(vm_t *vm)
                 break;
 
             case OP_JMP:
-                vm->pc = vm->registers[instruction.fields.pair.arg1].contents.number;
+                vm->pc += vm->registers[instruction.fields.pair.arg1].contents.number;
                 break;
 
             case OP_EQUAL:

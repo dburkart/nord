@@ -40,3 +40,11 @@ void code_block_write(code_block_t *block, instruction_t val)
     block->code[block->size] = val;
     block->size = block->size + 1;
 }
+
+void code_block_merge(code_block_t *into, code_block_t *from)
+{
+    for (int i = 0; i < from->size; i++)
+    {
+        code_block_write(into, from->code[i]);
+    }
+}
