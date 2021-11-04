@@ -6,7 +6,7 @@ endif
 
 PLATFORM ?= $(shell uname -s)
 
-CFLAGS := -Werror -Isrc -std=gnu99 -g -DPLATFORM=$(PLATFORM)
+CFLAGS := -Werror -Isrc -std=c11 -g -DPLATFORM=$(PLATFORM)
 LDFLAGS :=
 
 ifeq ($(PLATFORM),Linux)
