@@ -135,6 +135,7 @@ compile_result_t compile_binary(ast_t *ast, compile_context_t *context)
     instruction_t instruction;
     switch (ast->op.binary.operator.type)
     {
+        //-- Arithmetic
         case TOK_PLUS:
             instruction = INSTRUCTION(OP_ADD, context->rp, left.location, right.location);
             break;
@@ -149,6 +150,15 @@ compile_result_t compile_binary(ast_t *ast, compile_context_t *context)
 
         case TOK_SLASH:
             instruction = INSTRUCTION(OP_DIVIDE, context->rp, left.location, right.location);
+            break;
+
+        //-- Logic
+        case TOK_AND:
+            instruction = INSTRUCTION(OP_AND, context->rp, left.location, right.location);
+            break;
+
+        case TOK_OR:
+            instruction = INSTRUCTION(OP_OR, context->rp, left.location, right.location);
             break;
 
         default:
