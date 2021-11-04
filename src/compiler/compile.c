@@ -34,6 +34,8 @@ typedef struct
     code_block_t *code;
 } compile_result_t;
 
+compile_result_t compile_ast(ast_t *ast, compile_context_t *context);
+
 compile_context_t *context_create(const char *name, const char *listing)
 {
     compile_context_t *context = malloc(sizeof(compile_context_t));
@@ -98,6 +100,31 @@ compile_result_t compile_literal(ast_t *ast, compile_context_t *context)
     return (compile_result_t){ .location=context->rp, .code=NULL };
 }
 
+compile_result_t compile_unary(ast_t *ast, compile_context_t *context)
+{
+    compile_result_t right = compile_ast(ast->op.unary.operand, context);
+
+    switch (ast->op.unary.operator.type)
+    {
+        case TOK_MINUS:
+            code_block_write(context->current_code_block, INSTRUCTION(OP_NEGATE, context->rp, right.location));
+            break;
+
+        case TOK_BANG:
+            code_block_write(context->current_code_block, INSTRUCTION(OP_NOT, context->rp, right.location));
+            break;
+
+        case TOK_RETURN:
+            code_block_write(context->current_code_block, INSTRUCTION(OP_RETURN, right.location));
+            break;
+
+        default:
+            ;
+    }
+
+    return (compile_result_t){ .location=context->rp, .code=NULL };
+}
+
 compile_result_t compile_ast(ast_t *ast, compile_context_t *context)
 {
     compile_result_t result;
@@ -113,6 +140,11 @@ compile_result_t compile_ast(ast_t *ast, compile_context_t *context)
         case AST_LITERAL:
             result = compile_literal(ast, context);
             break;
+
+        case AST_UNARY:
+            result = compile_unary(ast, context);
+            break;
+
     }
     return result;
 }
