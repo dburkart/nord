@@ -21,6 +21,7 @@ typedef struct
     const char *listing;
     symbol_map_t *symbols;
     binary_t *binary;
+    code_block_t *current_code_block;
     uint8_t rp;
     uint64_t mp;
 } compile_context_t;
@@ -62,6 +63,7 @@ compile_context_t *context_create(const char *name, const char *listing)
     context->binary->data = memory_create(1);
     context->binary->code = code_block_create();
     context->binary->symbols = symbol_map_create();
+    context->current_code_block = context->binary->code;
     context->rp = 1;
 
     // Set up true and false
@@ -87,15 +89,15 @@ void compile_comparison(compile_context_t *context, uint8_t reg, uint8_t opcode,
 
     // First, write the false case
     instruction = make_pair_instr(OP_LOAD, reg, 0);
-    code_block_write(context->binary->code, instruction);
+    code_block_write(context->current_code_block, instruction);
 
     // Now, write out the comparison instruction
     instruction = make_triplet_instr(opcode, condition, left, right);
-    code_block_write(context->binary->code, instruction);
+    code_block_write(context->current_code_block, instruction);
 
     // Finally, write out the true case
     instruction = make_pair_instr(OP_LOAD, reg, 1);
-    code_block_write(context->binary->code, instruction);
+    code_block_write(context->current_code_block, instruction);
 }
 
 uint8_t compile_builtin_fn_call(compile_context_t *context, char *name, uint8_t rp_reset, uint8_t nargs, uint8_t *args)
@@ -124,20 +126,20 @@ uint8_t compile_builtin_fn_call(compile_context_t *context, char *name, uint8_t 
     for (int i = nargs - 1; i >= 0; i--)
     {
         instruction = make_single_instr(OP_PUSH, args[i]);
-        code_block_write(context->binary->code, instruction);
+        code_block_write(context->current_code_block, instruction);
     }
 
     context->rp = rp_reset;
 
     // Number of args -> $0
     instruction = make_pair_instr(OP_LOADV, 0, nargs);
-    code_block_write(context->binary->code, instruction);
+    code_block_write(context->current_code_block, instruction);
 
     instruction = make_singlew_instr(OP_CALL_DYNAMIC, sym.location.address);
-    code_block_write(context->binary->code, instruction);
+    code_block_write(context->current_code_block, instruction);
 
     instruction = make_single_instr(OP_POP, context->rp);
-    code_block_write(context->binary->code, instruction);
+    code_block_write(context->current_code_block, instruction);
 
     return context->rp;
 }
@@ -171,7 +173,7 @@ uint8_t compile_internal(ast_t *ast, compile_context_t *context)
                     ;
             }
 
-            code_block_write(context->binary->code, instruction);
+            code_block_write(context->current_code_block, instruction);
             result = context->rp;
             break;
         case AST_BINARY:
@@ -246,7 +248,7 @@ uint8_t compile_internal(ast_t *ast, compile_context_t *context)
                     ;
             }
 
-            code_block_write(context->binary->code, instruction);
+            code_block_write(context->current_code_block, instruction);
 
             result = context->rp;
             break;
@@ -272,7 +274,7 @@ uint8_t compile_internal(ast_t *ast, compile_context_t *context)
                 else if (result < context->rp)
                 {
                     instruction = make_pair_instr(OP_MOVE, context->rp, result);
-                    code_block_write(context->binary->code, instruction);
+                    code_block_write(context->current_code_block, instruction);
                     sym.location.address = context->rp;
                     sym.location.type = LOC_REGISTER;
                     context->rp += 1;
@@ -332,7 +334,7 @@ uint8_t compile_internal(ast_t *ast, compile_context_t *context)
             else
             {
                 instruction = make_pair_instr(OP_MOVE, sym.location.address, result);
-                code_block_write(context->binary->code, instruction);
+                code_block_write(context->current_code_block, instruction);
             }
 
             break;
@@ -343,7 +345,7 @@ uint8_t compile_internal(ast_t *ast, compile_context_t *context)
             {
                 result = context->rp;
                 instruction = make_pair_instr(OP_LOADV, result, atoi(ast->op.literal.value));
-                code_block_write(context->binary->code, instruction);
+                code_block_write(context->current_code_block, instruction);
             }
 
             if (ast->op.literal.token.type == TOK_FLOAT)
@@ -356,7 +358,7 @@ uint8_t compile_internal(ast_t *ast, compile_context_t *context)
                 memory_set(context->binary->data, context->mp, val);
 
                 instruction = make_pair_instr(OP_LOAD, result, context->mp);
-                code_block_write(context->binary->code, instruction);
+                code_block_write(context->current_code_block, instruction);
                 context->mp += 1;
             }
 
@@ -370,7 +372,7 @@ uint8_t compile_internal(ast_t *ast, compile_context_t *context)
 
                 // Now, write out an instruction to load it into a register
                 instruction = make_pair_instr(OP_LOAD, result, context->mp);
-                code_block_write(context->binary->code, instruction);
+                code_block_write(context->current_code_block, instruction);
                 context->mp += 1;
             }
 
@@ -389,7 +391,7 @@ uint8_t compile_internal(ast_t *ast, compile_context_t *context)
                 if (sym.location.type == LOC_MEMORY)
                 {
                     instruction = make_pair_instr(OP_LOAD, context->rp, sym.location.address);
-                    code_block_write(context->binary->code, instruction);
+                    code_block_write(context->current_code_block, instruction);
                     sym.location.type = LOC_REGISTER;
                     sym.location.address = context->rp++;
                     symbol_map_set(context->symbols, sym);
@@ -402,14 +404,14 @@ uint8_t compile_internal(ast_t *ast, compile_context_t *context)
             {
                 result = context->rp;
                 instruction = make_pair_instr(OP_LOAD, result, (ast->op.literal.token.type == TOK_TRUE) ? 1 : 0);
-                code_block_write(context->binary->code, instruction);
+                code_block_write(context->current_code_block, instruction);
             }
 
             if (ast->op.literal.token.type == TOK_NIL)
             {
                 result = context->rp;
                 instruction = make_single_instr(OP_NIL, result);
-                code_block_write(context->binary->code, instruction);
+                code_block_write(context->current_code_block, instruction);
             }
 
             break;
@@ -453,7 +455,7 @@ uint8_t compile_internal(ast_t *ast, compile_context_t *context)
             for (int i = ast->op.list.size - 1; i >= 0; i--)
             {
                 instruction = make_single_instr(OP_PUSH, regs[i]);
-                code_block_write(context->binary->code, instruction);
+                code_block_write(context->current_code_block, instruction);
             }
 
             context->rp = tmp;
@@ -461,7 +463,7 @@ uint8_t compile_internal(ast_t *ast, compile_context_t *context)
 
             // Now, set register 0 to the number of args
             instruction = make_pair_instr(OP_LOADV, 0, ast->op.list.size);
-            code_block_write(context->binary->code, instruction);
+            code_block_write(context->current_code_block, instruction);
 
             // Call tuple
             val = string_create("tuple");
@@ -470,10 +472,10 @@ uint8_t compile_internal(ast_t *ast, compile_context_t *context)
             context->mp += 1;
 
             instruction = make_singlew_instr(OP_CALL_DYNAMIC, tmp);
-            code_block_write(context->binary->code, instruction);
+            code_block_write(context->current_code_block, instruction);
 
             instruction = make_single_instr(OP_POP, context->rp);
-            code_block_write(context->binary->code, instruction);
+            code_block_write(context->current_code_block, instruction);
 
             result = context->rp;
 
@@ -498,18 +500,18 @@ uint8_t compile_internal(ast_t *ast, compile_context_t *context)
             // value for now, we'll come back later and modify it
             tmp = context->binary->code->size;
             instruction = make_pair_instr(OP_LOADV, context->rp++, 0);
-            code_block_write(context->binary->code, instruction);
+            code_block_write(context->current_code_block, instruction);
 
             // Load "true" into a register to compare against
             instruction = make_pair_instr(OP_LOAD, context->rp, 1);
-            code_block_write(context->binary->code, instruction);
+            code_block_write(context->current_code_block, instruction);
 
             instruction = make_triplet_instr(OP_EQUAL, 0, context->rp, result);
-            code_block_write(context->binary->code, instruction);
+            code_block_write(context->current_code_block, instruction);
 
             // Condition evaluates to false
             instruction = make_single_instr(OP_JMP, context->rp - 1);
-            code_block_write(context->binary->code, instruction);
+            code_block_write(context->current_code_block, instruction);
 
             // Decrement rp since we no longer need our comparison or
             // jump variables
@@ -549,7 +551,7 @@ uint8_t compile_internal(ast_t *ast, compile_context_t *context)
             nil = context->rp++;
 
             instruction = make_single_instr(OP_NIL, nil);
-            code_block_write(context->binary->code, instruction);
+            code_block_write(context->current_code_block, instruction);
 
             // If a local variable was defined, set it in the synbol map
             if (ast->op.for_stmt.var != NULL)
@@ -564,28 +566,28 @@ uint8_t compile_internal(ast_t *ast, compile_context_t *context)
             // Begin for-loop
             begin = context->binary->code->size;
             instruction = make_triplet_instr(OP_DEREF, var, left, 1);
-            code_block_write(context->binary->code, instruction);
+            code_block_write(context->current_code_block, instruction);
 
             // Dummy exit jump
             end = context->binary->code->size;
             instruction = make_pair_instr(OP_LOADV, context->rp, 0);
-            code_block_write(context->binary->code, instruction);
+            code_block_write(context->current_code_block, instruction);
 
             instruction = make_triplet_instr(OP_EQUAL, 1, var, nil);
-            code_block_write(context->binary->code, instruction);
+            code_block_write(context->current_code_block, instruction);
 
             // Save our instruction for modification later
             instruction = make_single_instr(OP_JMP, context->rp);
-            code_block_write(context->binary->code, instruction);
+            code_block_write(context->current_code_block, instruction);
 
             // Now, compile our for block
             compile_internal(ast->op.for_stmt.body, context);
 
             // Jump to the start of the loop
             instruction = make_pair_instr(OP_LOADV, context->rp, begin);
-            code_block_write(context->binary->code, instruction);
+            code_block_write(context->current_code_block, instruction);
             instruction = make_single_instr(OP_JMP, context->rp);
-            code_block_write(context->binary->code, instruction);
+            code_block_write(context->current_code_block, instruction);
 
             // Now, fix up our exit jump
             context->binary->code->code[end].fields.pair.arg2 = context->binary->code->size;
@@ -601,9 +603,9 @@ uint8_t compile_internal(ast_t *ast, compile_context_t *context)
             // over the function.
             instruction = make_pair_instr(OP_LOADV, context->rp, 0);
             tmp = context->binary->code->size;
-            code_block_write(context->binary->code, instruction);
+            code_block_write(context->current_code_block, instruction);
             instruction = make_single_instr(OP_JMP, context->rp);
-            code_block_write(context->binary->code, instruction);
+            code_block_write(context->current_code_block, instruction);
 
             addr = context->binary->code->size;
 
@@ -656,7 +658,7 @@ uint8_t compile_internal(ast_t *ast, compile_context_t *context)
             if (context->binary->code->code[address].opcode != OP_RETURN)
             {
                 instruction = make_single_instr(OP_RETURN, result);
-                code_block_write(context->binary->code, instruction);
+                code_block_write(context->current_code_block, instruction);
             }
 
             // Finally, modify our first jump instruction to jump to the correct address
@@ -694,7 +696,7 @@ uint8_t compile_internal(ast_t *ast, compile_context_t *context)
             {
                 instruction = make_pair_instr(OP_LOAD, context->rp, mp);
                 result = context->rp;
-                code_block_write(context->binary->code, instruction);
+                code_block_write(context->current_code_block, instruction);
             }
 
             // Store our function in the symbol map
@@ -767,12 +769,12 @@ uint8_t compile_internal(ast_t *ast, compile_context_t *context)
                         continue;
 
                     instruction = make_single_instr(OP_PUSH, function->low_reg + i);
-                    code_block_write(context->binary->code, instruction);
+                    code_block_write(context->current_code_block, instruction);
                 }
                 else if (function->locals[i] < context->rp)
                 {
                     instruction = make_single_instr(OP_PUSH, function->locals[i]);
-                    code_block_write(context->binary->code, instruction);
+                    code_block_write(context->current_code_block, instruction);
                 }
             }
 
@@ -804,7 +806,7 @@ uint8_t compile_internal(ast_t *ast, compile_context_t *context)
                     if (val != function->low_reg + i)
                     {
                         instruction = make_pair_instr(OP_MOVE, function->low_reg + i, val);
-                        code_block_write(context->binary->code, instruction);
+                        code_block_write(context->current_code_block, instruction);
                     }
 
                     context->rp += 1;
@@ -813,7 +815,7 @@ uint8_t compile_internal(ast_t *ast, compile_context_t *context)
 
             // Call the function
             instruction = make_singlew_instr(OP_CALL, sym.location.address);
-            code_block_write(context->binary->code, instruction);
+            code_block_write(context->current_code_block, instruction);
 
             if (args != NULL)
                 context->rp = rp;
@@ -821,7 +823,7 @@ uint8_t compile_internal(ast_t *ast, compile_context_t *context)
             // Pop the return value
             instruction = make_single_instr(OP_POP, context->rp);
             result = context->rp;
-            code_block_write(context->binary->code, instruction);
+            code_block_write(context->current_code_block, instruction);
 
             // Pop our locals back into registers
             for (int i = function->nargs - 1; i >= 0; --i)
@@ -829,7 +831,7 @@ uint8_t compile_internal(ast_t *ast, compile_context_t *context)
                 if (function->low_reg + i < context->rp)
                 {
                     instruction = make_single_instr(OP_POP, function->low_reg + i);
-                    code_block_write(context->binary->code, instruction);
+                    code_block_write(context->current_code_block, instruction);
                 }
             }
 
@@ -848,7 +850,7 @@ uint8_t compile_internal(ast_t *ast, compile_context_t *context)
             symbol_map_set(context->symbols, sym);
 
             instruction = make_single_instr(OP_IMPORT, context->mp);
-            code_block_write(context->binary->code, instruction);
+            code_block_write(context->current_code_block, instruction);
             context->mp += 1;
 
             break;
