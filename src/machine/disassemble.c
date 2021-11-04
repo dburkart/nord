@@ -34,24 +34,27 @@ char *disassemble(binary_t *binary)
 
     assembly = calloc(size, sizeof(char));
 
-    for (int i = 0; i < binary->code->size; i++)
+    for (int i = 0; i < binary->main_code->size; i++)
     {
-        char *new_instruction = disassemble_instruction(binary->data, binary->code->code[i]);
-
-        if (new_instruction == NULL)
-            continue;
-
-        size_t instruction_len = strlen(new_instruction);
-
-        if (instruction_len >= size - len)
+        for (int j = 0; j < binary->main_code->blocks[i]->size; j++)
         {
-            size = size * 2 - len > size - len ? size * 2 : size - len + 1;
-            assembly = realloc(assembly, size);
-        }
+            char *new_instruction = disassemble_instruction(binary->data, binary->main_code->blocks[i]->code[j]);
 
-        strcpy(assembly + len, new_instruction);
-        len += instruction_len;
-        free(new_instruction);
+            if (new_instruction == NULL)
+                continue;
+
+            size_t instruction_len = strlen(new_instruction);
+
+            if (instruction_len >= size - len)
+            {
+                size = size * 2 - len > size - len ? size * 2 : size - len + 1;
+                assembly = realloc(assembly, size);
+            }
+
+            strcpy(assembly + len, new_instruction);
+            len += instruction_len;
+            free(new_instruction);
+        }
     }
 
     return assembly;

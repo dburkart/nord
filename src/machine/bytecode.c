@@ -48,3 +48,35 @@ void code_block_merge(code_block_t *into, code_block_t *from)
         code_block_write(into, from->code[i]);
     }
 }
+
+code_collection_t *code_collection_create(void)
+{
+    return calloc(1, sizeof(code_collection_t));
+}
+
+void code_collection_add_block(code_collection_t *collection, code_block_t *block)
+{
+    if (collection->capacity == 0)
+    {
+        collection->capacity = 2;
+        collection->blocks = calloc(collection->capacity, sizeof(code_block_t *));
+    }
+
+    if (collection->size >= (collection->capacity - 1))
+    {
+        collection->capacity = collection->capacity * 2;
+        collection->blocks = realloc(collection->blocks, sizeof(code_block_t *) * collection->capacity);
+    }
+
+    collection->blocks[collection->size] = block;
+    collection->size = collection->size + 1;
+}
+
+void code_collection_free(code_collection_t *collection)
+{
+    for (int i = 0; i < collection->size; i++)
+    {
+        code_block_free(collection->blocks[i]);
+    }
+    free(collection->blocks);
+}

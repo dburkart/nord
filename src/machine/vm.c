@@ -87,7 +87,7 @@ vm_t *vm_create(binary_t *binary)
     // Set up the call stack
     vm_cstack_create(vm);
 
-    vm->code = binary->code;
+    vm->code = binary->main_code->blocks[0];
     vm->pc = 0;
 
     vm->symbols = binary->symbols;

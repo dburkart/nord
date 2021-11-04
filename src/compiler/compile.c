@@ -12,7 +12,6 @@ typedef struct
     const char *listing;
     symbol_map_t *symbols;
     binary_t *binary;
-    code_block_t *current_code_block;
     uint8_t rp;
     uint64_t mp;
 } compile_context_t;
@@ -26,9 +25,9 @@ compile_context_t *context_create(const char *name, const char *listing)
     context->symbols = symbol_map_create();
     context->binary = binary_create();
     context->binary->data = memory_create(1);
-    context->binary->code = code_block_create();
+    context->binary->packaged_code = code_collection_create();
+    context->binary->main_code = code_collection_create();
     context->binary->symbols = symbol_map_create();
-    context->current_code_block = context->binary->code;
     context->rp = 1;
 
     // Set up true and false

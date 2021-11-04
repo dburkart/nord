@@ -123,9 +123,20 @@ typedef struct
     instruction_t *code;
 } code_block_t;
 
+typedef struct
+{
+    size_t size;
+    size_t capacity;
+    code_block_t **blocks;
+} code_collection_t;
+
 code_block_t *code_block_create(void);
 void code_block_write(code_block_t *, instruction_t);
 void code_block_merge(code_block_t *, code_block_t *);
 void code_block_free(code_block_t *);
+
+code_collection_t *code_collection_create(void);
+void code_collection_add_block(code_collection_t *, code_block_t *);
+void code_collection_free(code_collection_t *);
 
 #endif
