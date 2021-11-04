@@ -8,6 +8,7 @@
 
 #include "compile.h"
 #include "machine/bytecode.h"
+#include "machine/value.h"
 #include "util/macros.h"
 
 #define INSTRUCTION(...) VFUNC(INSTRUCTION, __VA_ARGS__)
@@ -72,6 +73,22 @@ compile_result_t compile_literal(ast_t *ast, compile_context_t *context)
     {
         case TOK_NUMBER:
             code_block_write(context->current_code_block, INSTRUCTION(OP_LOADV, context->rp, atoi(ast->op.literal.value)));
+            break;
+
+        case TOK_STRING:
+        case TOK_FLOAT:
+            memory_set(context->binary->data, context->mp, value(atof(ast->op.literal.value)));
+            code_block_write(context->current_code_block, INSTRUCTION(OP_LOAD, context->rp, context->mp));
+            context->mp += 1;
+            break;
+
+        case TOK_TRUE:
+        case TOK_FALSE:
+            code_block_write(context->current_code_block, INSTRUCTION(OP_LOAD, context->rp, (ast->op.literal.token.type == TOK_TRUE) ? 1 : 0));
+            break;
+
+        case TOK_NIL:
+            code_block_write(context->current_code_block, INSTRUCTION(OP_NIL, context->rp));
             break;
 
         default:

@@ -10,6 +10,13 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+#define value(x) _Generic((x),               \
+                    int: value_from_int,     \
+                    float: value_from_float, \
+                    double: value_from_float,\
+                    char *: string_create    \
+                    )(x)
+
 struct obj_t;
 struct vm_t;
 
@@ -105,5 +112,15 @@ typedef struct
 } module_t;
 
 value_t module_create(char *name, struct vm_t *vm);
+
+static inline value_t value_from_int(int x)
+{
+    return (value_t){ .type=VAL_INT, .contents={ .number=x } };
+}
+
+static inline value_t value_from_float(double x)
+{
+    return (value_t){ .type=VAL_INT, .contents={ .real=x } };
+}
 
 #endif
