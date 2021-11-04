@@ -125,6 +125,40 @@ compile_result_t compile_unary(ast_t *ast, compile_context_t *context)
     return (compile_result_t){ .location=context->rp, .code=NULL };
 }
 
+compile_result_t compile_binary(ast_t *ast, compile_context_t *context)
+{
+    compile_result_t left = compile_ast(ast->op.binary.left, context);
+    context->rp += 1;
+    compile_result_t right = compile_ast(ast->op.binary.right, context);
+    context->rp -= 1;
+
+    instruction_t instruction;
+    switch (ast->op.binary.operator.type)
+    {
+        case TOK_PLUS:
+            instruction = INSTRUCTION(OP_ADD, context->rp, left.location, right.location);
+            break;
+
+        case TOK_MINUS:
+            instruction = INSTRUCTION(OP_SUBTRACT, context->rp, left.location, right.location);
+            break;
+
+        case TOK_ASTERISK:
+            instruction = INSTRUCTION(OP_MULTIPLY, context->rp, left.location, right.location);
+            break;
+
+        case TOK_SLASH:
+            instruction = INSTRUCTION(OP_DIVIDE, context->rp, left.location, right.location);
+            break;
+
+        default:
+            ;
+    }
+
+    code_block_write(context->current_code_block, instruction);
+    return (compile_result_t){ .location=context->rp, .code=NULL };
+}
+
 compile_result_t compile_ast(ast_t *ast, compile_context_t *context)
 {
     compile_result_t result;
@@ -143,6 +177,10 @@ compile_result_t compile_ast(ast_t *ast, compile_context_t *context)
 
         case AST_UNARY:
             result = compile_unary(ast, context);
+            break;
+
+        case AST_BINARY:
+            result = compile_binary(ast, context);
             break;
 
     }
