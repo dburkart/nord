@@ -74,6 +74,43 @@ void context_destroy(compile_context_t *context)
     free(context);
 }
 
+static inline compile_result_t write_out_builtin(compile_context_t *context, char *name, uint8_t nargs, uint8_t *args)
+{
+    symbol_t fn_symbol = symbol_map_get(context->symbols, name);
+
+    if (fn_symbol.location.type == LOC_UNDEF)
+    {
+        memory_set(context->binary->data, context->mp, string_create(name));
+        fn_symbol.location.type = LOC_BUILTIN;
+        fn_symbol.location.address = context->mp++;
+        fn_symbol.name = name;
+        fn_symbol.type = SYM_FN;
+
+        symbol_map_t *map = context->symbols;
+        while (map->parent != NULL)
+            map = map->parent;
+        symbol_map_set(map, fn_symbol);
+    }
+
+    uint8_t reset_register = context->rp;
+
+    // We push args onto the stack in reverse order because we'll pop them
+    // off in the builtin
+    for (int i = nargs - 1; i >= 0; i--)
+    {
+        code_block_write(context->current_code_block, INSTRUCTION(OP_PUSH, args[i]));
+    }
+
+    context->rp = reset_register;
+
+    // Number of args -> $0
+    code_block_write(context->current_code_block, INSTRUCTION(OP_LOADV, 0, nargs));
+    code_block_write(context->current_code_block, INSTRUCTION(OP_CALL_DYNAMIC, fn_symbol.location.address));
+    code_block_write(context->current_code_block, INSTRUCTION(OP_POP, context->rp));
+
+    return (compile_result_t){ .location=context->rp, .type=VAL_UNKNOWN, .code=NULL };
+}
+
 //-- Compile AST nodes
 
 compile_result_t compile_statement_list(ast_t *ast, compile_context_t *context)
@@ -236,7 +273,7 @@ compile_result_t compile_unary(ast_t *ast, compile_context_t *context)
     return (compile_result_t){ .location=context->rp, .type=right.type, .code=NULL };
 }
 
-static inline compile_result_t compile_binary_comparison(uint8_t opcode, uint8_t base_register, uint8_t condition, uint8_t left, uint8_t right)
+compile_result_t compile_binary_comparison(uint8_t opcode, uint8_t base_register, uint8_t condition, uint8_t left, uint8_t right)
 {
     code_block_t *block = code_block_create();
 
@@ -499,23 +536,6 @@ compile_result_t compile_fn_declaration(ast_t *ast, compile_context_t *context)
 
 compile_result_t compile_fn_call_builtin(ast_t *ast, compile_context_t *context)
 {
-    symbol_t fn_symbol = symbol_map_get(context->symbols, ast->op.call.name);
-
-    if (fn_symbol.location.type == LOC_UNDEF)
-    {
-        memory_set(context->binary->data, context->mp, string_create(ast->op.call.name));
-        fn_symbol.location.type = LOC_BUILTIN;
-        fn_symbol.location.address = context->mp++;
-        fn_symbol.name = ast->op.call.name;
-        fn_symbol.type = SYM_FN;
-
-        symbol_map_t *map = context->symbols;
-        while (map->parent != NULL)
-            map = map->parent;
-        symbol_map_set(map, fn_symbol);
-    }
-
-    uint8_t reset_register = context->rp;
     ast_t *args = ast->op.call.args;
     uint8_t *arg_registers;
     if (args != NULL)
@@ -533,23 +553,11 @@ compile_result_t compile_fn_call_builtin(ast_t *ast, compile_context_t *context)
         }
     }
 
-    // We push args onto the stack in reverse order because we'll pop them
-    // off in the builtin
-    for (int i = args->op.list.size - 1; i >= 0; i--)
-    {
-        code_block_write(context->current_code_block, INSTRUCTION(OP_PUSH, arg_registers[i]));
-    }
+    compile_result_t result = write_out_builtin(context, ast->op.fn.name, args->op.list.size, arg_registers);
 
     free(arg_registers);
 
-    context->rp = reset_register;
-
-    // Number of args -> $0
-    code_block_write(context->current_code_block, INSTRUCTION(OP_LOADV, 0, args->op.list.size));
-    code_block_write(context->current_code_block, INSTRUCTION(OP_CALL_DYNAMIC, fn_symbol.location.address));
-    code_block_write(context->current_code_block, INSTRUCTION(OP_POP, context->rp));
-
-    return (compile_result_t){ .location=context->rp, .type=VAL_UNKNOWN, .code=NULL };
+    return result;
 }
 
 compile_result_t compile_fn_call_native(ast_t *ast, compile_context_t *context)
