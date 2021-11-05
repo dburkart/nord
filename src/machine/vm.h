@@ -28,9 +28,11 @@ typedef struct
     int csp;
 
     // Code-related data structures
-    code_block_t *code;
+    code_collection_t *regions;
+    // Current code region
+    uint64_t region;
     // Program counter
-    int pc;
+    uint64_t pc;
 
     // Registers
 

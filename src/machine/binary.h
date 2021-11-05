@@ -31,10 +31,10 @@ typedef struct
     } sections;
     // The following fields are filled in on deserialization
     memory_t *data;
-    // Packaged code is relocatable "chunks". Currently these are functions, but
-    // in theory these could be any chunk of distinct code.
-    code_collection_t *packaged_code;
-    code_collection_t *main_code;
+    // The first block is module-level code, and subsequent blocks are
+    // self-contained code blobs. These can correspond to functions and other
+    // bits of relocatable code.
+    code_collection_t *code;
     symbol_map_t *symbols;
 } binary_t;
 

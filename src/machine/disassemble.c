@@ -34,11 +34,11 @@ char *disassemble(binary_t *binary)
 
     assembly = calloc(size, sizeof(char));
 
-    for (int i = 0; i < binary->main_code->size; i++)
+    for (int i = 0; i < binary->code->size; i++)
     {
-        for (int j = 0; j < binary->main_code->blocks[i]->size; j++)
+        for (int j = 0; j < binary->code->blocks[i]->size; j++)
         {
-            char *new_instruction = disassemble_instruction(binary->data, binary->main_code->blocks[i]->code[j]);
+            char *new_instruction = disassemble_instruction(binary->data, binary->code->blocks[i]->code[j]);
 
             if (new_instruction == NULL)
                 continue;

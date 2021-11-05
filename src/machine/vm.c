@@ -87,7 +87,8 @@ vm_t *vm_create(binary_t *binary)
     // Set up the call stack
     vm_cstack_create(vm);
 
-    vm->code = binary->main_code->blocks[0];
+    vm->regions = binary->code;
+    vm->region = 0;
     vm->pc = 0;
 
     vm->symbols = binary->symbols;
@@ -134,10 +135,10 @@ value_t vm_cstack_pop(vm_t *vm)
 
 void vm_execute(vm_t *vm)
 {
-    while (vm->pc < vm->code->size)
+    while (vm->pc < vm->regions->blocks[vm->region]->size)
     {
         // Pull off the next instruction
-        instruction_t instruction = vm->code->code[vm->pc++];
+        instruction_t instruction = vm->regions->blocks[vm->region]->code[vm->pc++];
         value_t ret;
         value_t result;
         string_t *s1, *s2;
@@ -402,7 +403,7 @@ void vm_execute(vm_t *vm)
                 fn = (function_t *)ret.contents.object;
                 ret = function_def_create(
                     fn->name,
-                    fn->addr,
+                    fn->address,
                     fn->nargs,
                     fn->locals,
                     fn->low_reg
@@ -413,10 +414,11 @@ void vm_execute(vm_t *vm)
                 fn = (function_t *)vm->frame.contents.object;
 
                 // First, set the return address in the current frame
-                fn->return_addr = vm->pc;
+                fn->return_address = (address_t){ .region=vm->region, .offset=vm->pc };
 
-                // Now set the program counter
-                vm->pc = fn->addr;
+                // Now set the program counter / region
+                vm->region = fn->address.region;
+                vm->pc = fn->address.offset;
 
                 // Initialize save buffer, if null
                 if (fn->save == NULL)
@@ -467,7 +469,8 @@ void vm_execute(vm_t *vm)
             case OP_RETURN:
                 fn = (function_t *)vm->frame.contents.object;
 
-                vm->pc = fn->return_addr;
+                vm->region = fn->return_address.region;
+                vm->pc = fn->return_address.offset;
                 vm_stack_push(vm, vm->registers[instruction.fields.pair.arg1]);
 
                 // Restore our save buffer

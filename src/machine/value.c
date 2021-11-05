@@ -77,14 +77,14 @@ value_t tuple_create(int length)
     return val;
 }
 
-value_t function_def_create(char *name, uint32_t address, uint8_t nargs, uint8_t *locals, uint8_t low)
+value_t function_def_create(char *name, address_t address, uint8_t nargs, uint8_t *locals, uint8_t low)
 {
     value_t val;
     function_t *func = (function_t *)malloc(sizeof(function_t));
 
     func->object.type = VAL_FUNCTION;
     func->name = name;
-    func->addr = address;
+    func->address = address;
     func->nargs = nargs;
     func->locals = locals;
     func->low_reg = low;

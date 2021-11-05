@@ -10,6 +10,8 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+#include "address.h"
+
 #define value(x) _Generic((x),               \
                     int: value_from_int,     \
                     float: value_from_float, \
@@ -95,15 +97,15 @@ typedef struct
 {
     object_t object;
     char *name;
-    uint32_t addr;           // Where this function lives in code
-    uint32_t return_addr;    // Return address
-    uint8_t nargs;           // number of args
-    uint8_t *locals;         // Which registers are used by this function, 0 terminated
+    address_t address;        // Where this function lives in code
+    address_t return_address;
+    uint8_t nargs;            // number of args
+    uint8_t *locals;          // Which registers are used by this function, 0 terminated
     uint8_t low_reg;
-    value_t *save;           // Registers to restore upon return
+    value_t *save;            // Registers to restore upon return
 } function_t;
 
-value_t function_def_create(char *name, uint32_t address, uint8_t nargs, uint8_t *locals, uint8_t low);
+value_t function_def_create(char *name, address_t address, uint8_t nargs, uint8_t *locals, uint8_t low);
 
 typedef struct
 {

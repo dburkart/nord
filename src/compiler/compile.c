@@ -28,6 +28,7 @@ typedef struct
     code_block_t *current_code_block;
     uint8_t rp;
     uint64_t mp;
+    uint64_t cp;
 } compile_context_t;
 
 typedef struct
@@ -48,12 +49,12 @@ compile_context_t *context_create(const char *name, const char *listing)
     context->symbols = symbol_map_create();
     context->binary = binary_create();
     context->binary->data = memory_create(1);
-    context->binary->packaged_code = code_collection_create();
-    context->binary->main_code = code_collection_create();
+    context->binary->code = code_collection_create();
     context->binary->symbols = symbol_map_create();
     context->current_code_block = code_block_create();
-    code_collection_add_block(context->binary->main_code, context->current_code_block);
+    code_collection_add_block(context->binary->code, context->current_code_block);
     context->rp = 1;
+    context->cp = 0;
 
     // Set up true and false
     memory_set(context->binary->data, 0, (value_t){VAL_BOOLEAN, false});
@@ -313,6 +314,23 @@ compile_result_t compile_declare(ast_t *ast, compile_context_t *context)
 
     symbol_map_set(context->symbols, symbol);
     return (compile_result_t){ .location=symbol.location.address, .type=type, .code=NULL};
+}
+
+compile_result_t compile_fn_declaration(ast_t *ast, compile_context_t *context)
+{
+    // Create our inner scope for this function
+    symbol_map_t *inner_scope = symbol_map_create();
+    inner_scope->parent = context->symbols;
+    context->symbols = inner_scope;
+
+    // Create a new code block for our function
+    code_block_t *fn_block = code_block_create();
+    code_collection_add_block(context->binary->code, fn_block);
+    context->cp += 1;
+    context->current_code_block = fn_block;
+
+
+    return (compile_result_t){};
 }
 
 compile_result_t compile_ast(ast_t *ast, compile_context_t *context)

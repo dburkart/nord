@@ -83,7 +83,7 @@ binary_t *binary_load(const char *path)
     binary->data = mem;
 
     // Load code section
-    binary->main_code = code_collection_create();
+    binary->code = code_collection_create();
     lseek(fd, binary->sections.code_offset, SEEK_SET);
     code_block_t *code = code_block_create();
     size_t size;
@@ -94,7 +94,7 @@ binary_t *binary_load(const char *path)
         read(fd, &instruction, sizeof(instruction_t));
         code_block_write(code, instruction);
     }
-    code_collection_add_block(binary->main_code, code);
+    code_collection_add_block(binary->code, code);
 
     close(fd);
 
@@ -184,8 +184,8 @@ void binary_write(binary_t *binary, const char *path)
     }
 
     // Write out code section
-    write(fd, &binary->main_code->blocks[0]->size, sizeof(size_t));
-    write(fd, binary->main_code->blocks[0]->code, binary->main_code->blocks[0]->size * sizeof(instruction_t));
+    write(fd, &binary->code->blocks[0]->size, sizeof(size_t));
+    write(fd, binary->code->blocks[0]->code, binary->code->blocks[0]->size * sizeof(instruction_t));
 
 done:
     close(fd);
