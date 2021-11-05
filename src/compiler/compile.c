@@ -839,6 +839,8 @@ compile_result_t compile_ast(ast_t *ast, compile_context_t *context)
             result = compile_for_statement(ast, context);
             break;
 
+        default:
+            ;
     }
     return result;
 }
