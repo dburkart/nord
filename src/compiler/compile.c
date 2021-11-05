@@ -498,6 +498,17 @@ compile_result_t compile_fn_declaration(ast_t *ast, compile_context_t *context)
         context->rp += args->op.list.size;
     }
 
+    // Construct locals to keep track of
+    uint8_t *locals = (uint8_t *)malloc(context->rp - restore_register + 1);
+    for (int i = restore_register; i < context->rp + 1; i++)
+    {
+        locals[i - restore_register] = i;
+    }
+    locals[context->rp - restore_register + 1] = 0;
+
+    function_t *fn_prototype = (function_t *)fn_def.contents.object;
+    fn_prototype->locals = locals;
+
     compile_result_t fn_result = compile_ast(ast->op.fn.body, context);
     code_block_free(fn_result.code);
 
@@ -512,17 +523,6 @@ compile_result_t compile_fn_declaration(ast_t *ast, compile_context_t *context)
     symbol_map_destroy(map);
     context->cp = previous_code_pointer;
     context->current_code_block = previous_code_block;
-
-    // Construct locals to keep track of
-    function_t *fn_prototype = (function_t *)fn_def.contents.object;
-    uint8_t *locals = (uint8_t *)malloc(context->rp - fn_prototype->low_reg + 1);
-    for (int i = restore_register; i < context->rp + 1; i++)
-    {
-        locals[i - restore_register] = i;
-    }
-    locals[context->rp - restore_register + 1] = 0;
-
-    fn_prototype->locals = locals;
 
     symbol_map_set(context->symbols, symbol);
     context->rp = restore_register;
@@ -586,7 +586,7 @@ compile_result_t compile_fn_call_native(ast_t *ast, compile_context_t *context)
     }
 
 
-    uint8_t restore_register;
+    uint8_t restore_register = context->rp;
     if (args != NULL)
     {
         if (args->op.list.size != function->nargs)
@@ -601,11 +601,6 @@ compile_result_t compile_fn_call_native(ast_t *ast, compile_context_t *context)
             printf("%s", format_error(context->name, context->listing, error, loc));
             exit(1);
         }
-
-        restore_register = context->rp;
-
-        // First, set the register pointer to our first local of the function we're calling
-        context->rp = function->locals[0];
 
         for (int i = 0; i < args->op.list.size; i++)
         {
@@ -622,8 +617,8 @@ compile_result_t compile_fn_call_native(ast_t *ast, compile_context_t *context)
     // Call the function
     code_block_write(context->current_code_block, INSTRUCTION(OP_CALL, fn_symbol.location.address));
 
-    if (args != NULL)
-        context->rp = restore_register;
+    // Restore RP
+    context->rp = restore_register;
 
     // Pop the return value
     code_block_write(context->current_code_block, INSTRUCTION(OP_POP, context->rp));
@@ -660,6 +655,8 @@ compile_result_t compile_fn_call(ast_t *ast, compile_context_t *context)
 
 compile_result_t compile_if_statement(ast_t *ast, compile_context_t *context)
 {
+    uint8_t restore_register = context->rp;
+
     // Compile the parts of our if statement
     compile_result_t if_condition = compile_ast(ast->op.if_stmt.condition, context);
     compile_result_t if_body = compile_statement_list(ast->op.if_stmt.body, context);
@@ -678,9 +675,7 @@ compile_result_t compile_if_statement(ast_t *ast, compile_context_t *context)
     // Jump if false
     code_block_write(context->current_code_block, INSTRUCTION(OP_JMP, context->rp - 1));
 
-    // Decrement rp since we no longer need our comparison or
-    // jump variables
-    context->rp -= 2;
+    context->rp = restore_register;
 
     code_block_merge(context->current_code_block, if_body.code);
     code_block_free(if_body.code);
