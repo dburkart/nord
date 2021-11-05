@@ -2,4 +2,3 @@
 Code Region: 0
 
 loadv      $1 200
-move       $2 $1

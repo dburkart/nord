@@ -1,15 +1,19 @@
-loadv      $1 8
-jump       $1
-set        $1 "foo"
-push       $1
-loadv      $0 1
-calld      @4
-pop        $1
-return     $1
+
+Code Region: 0
+
 call       @2
 pop        $1
 set        $1 "bar"
 push       $1
 loadv      $0 1
 calld      @4
-pop        $1
+pop        $2
+
+Code Region: 1
+
+set        $1 "foo"
+push       $1
+loadv      $0 1
+calld      @4
+pop        $2
+return     $2

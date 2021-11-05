@@ -1,12 +1,17 @@
-loadv      $1 4
-jump       $1
+
+Code Region: 0
+
+call       @4
+pop        $1
+
+Code Region: 1
+
 set        $1 "hi"
 return     $1
-loadv      $1 10
-jump       $1
+
+Code Region: 2
+
 call       @2
 pop        $1
 set        $1 "mom"
 return     $1
-call       @4
-pop        $1
