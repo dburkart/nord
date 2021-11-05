@@ -170,7 +170,7 @@ char *disassemble_instruction(memory_t *mem, instruction_t instruction)
         case OP_PUSH:
             asprintf(&assembly, FORMAT_SINGLE,
                      "push",
-                     instruction.fields.pair.arg1
+                     instruction.fields.pair.arg2
                     );
             break;
 

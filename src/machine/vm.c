@@ -187,7 +187,7 @@ void vm_execute(vm_t *vm)
                 break;
 
             case OP_PUSH:
-                vm_stack_push(vm, vm->registers[instruction.fields.pair.arg1]);
+                vm_stack_push(vm, vm->registers[instruction.fields.pair.arg2]);
                 break;
 
             case OP_POP:

@@ -426,6 +426,61 @@ compile_result_t compile_fn_declaration(ast_t *ast, compile_context_t *context)
     return (compile_result_t){ .location=symbol.location.address, .type=VAL_FUNCTION, .code=NULL };
 }
 
+compile_result_t compile_fn_call_builtin(ast_t *ast, compile_context_t *context)
+{
+    symbol_t fn_symbol = symbol_map_get(context->symbols, ast->op.call.name);
+
+    if (fn_symbol.location.type == LOC_UNDEF)
+    {
+        memory_set(context->binary->data, context->mp, string_create(ast->op.call.name));
+        fn_symbol.location.type = LOC_BUILTIN;
+        fn_symbol.location.address = context->mp++;
+        fn_symbol.name = ast->op.call.name;
+        fn_symbol.type = SYM_FN;
+
+        symbol_map_t *map = context->symbols;
+        while (map->parent != NULL)
+            map = map->parent;
+        symbol_map_set(map, fn_symbol);
+    }
+
+    uint8_t reset_register = context->rp;
+    ast_t *args = ast->op.call.args;
+    uint8_t *arg_registers;
+    if (args != NULL)
+    {
+        arg_registers = (uint8_t *)malloc(sizeof(uint8_t) * args->op.list.size);
+
+        // First, calculate the values of our arguments
+        for (int i = 0; i < args->op.list.size; i++)
+        {
+            compile_result_t arg = compile_ast(args->op.list.items[i], context);
+            arg_registers[i] = arg.location;
+
+            if (arg_registers[i] == context->rp)
+                context->rp++;
+        }
+    }
+
+    // We push args onto the stack in reverse order because we'll pop them
+    // off in the builtin
+    for (int i = args->op.list.size - 1; i >= 0; i--)
+    {
+        code_block_write(context->current_code_block, INSTRUCTION(OP_PUSH, arg_registers[i]));
+    }
+
+    free(arg_registers);
+
+    context->rp = reset_register;
+
+    // Number of args -> $0
+    code_block_write(context->current_code_block, INSTRUCTION(OP_LOADV, 0, args->op.list.size));
+    code_block_write(context->current_code_block, INSTRUCTION(OP_CALL_DYNAMIC, fn_symbol.location.address));
+    code_block_write(context->current_code_block, INSTRUCTION(OP_POP, context->rp));
+
+    return (compile_result_t){ .location=context->rp, .type=VAL_UNKNOWN, .code=NULL };
+}
+
 compile_result_t compile_fn_call_native(ast_t *ast, compile_context_t *context)
 {
     symbol_t fn_symbol = symbol_map_get(context->symbols, ast->op.call.name);
@@ -512,6 +567,10 @@ compile_result_t compile_fn_call(ast_t *ast, compile_context_t *context)
     {
         case LOC_MEMORY:
             return compile_fn_call_native(ast, context);
+
+        case LOC_BUILTIN:
+        case LOC_UNDEF:
+            return compile_fn_call_builtin(ast, context);
 
         default:
             ;
