@@ -123,7 +123,7 @@ static inline value_t value_from_int(int x)
 
 static inline value_t value_from_float(double x)
 {
-    return (value_t){ .type=VAL_INT, .contents={ .real=x } };
+    return (value_t){ .type=VAL_FLOAT, .contents={ .real=x } };
 }
 
 static inline value_type_e arithmetic_cast(value_type_e first, value_type_e second)

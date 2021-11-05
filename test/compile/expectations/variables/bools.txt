@@ -1,3 +1,6 @@
+
+Code Region: 0
+
 set        $1 false
 loadv      $2 2
 multiply   $2 $2 $1

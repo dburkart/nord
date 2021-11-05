@@ -1,3 +1,6 @@
+
+Code Region: 0
+
 loadv      $1 9
 loadv      $2 4
 subtract   $1 $1 $2
