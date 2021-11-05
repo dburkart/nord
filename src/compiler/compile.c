@@ -31,6 +31,7 @@ typedef struct
 typedef struct
 {
     uint8_t location;
+    value_type_e type;
     code_block_t *code;
 } compile_result_t;
 
@@ -71,33 +72,40 @@ void context_destroy(compile_context_t *context)
 
 compile_result_t compile_literal(ast_t *ast, compile_context_t *context)
 {
+    value_type_e type = VAL_UNKNOWN;
     switch (ast->op.literal.token.type)
     {
         case TOK_NUMBER:
             code_block_write(context->current_code_block, INSTRUCTION(OP_LOADV, context->rp, atoi(ast->op.literal.value)));
+            type = VAL_INT;
             break;
 
         case TOK_STRING:
+            type = VAL_STRING;
         case TOK_FLOAT:
             memory_set(context->binary->data, context->mp, value(atof(ast->op.literal.value)));
             code_block_write(context->current_code_block, INSTRUCTION(OP_LOAD, context->rp, context->mp));
             context->mp += 1;
+            if (type == VAL_UNKNOWN)
+                type = VAL_FLOAT;
             break;
 
         case TOK_TRUE:
         case TOK_FALSE:
             code_block_write(context->current_code_block, INSTRUCTION(OP_LOAD, context->rp, (ast->op.literal.token.type == TOK_TRUE) ? 1 : 0));
+            type = VAL_BOOLEAN;
             break;
 
         case TOK_NIL:
             code_block_write(context->current_code_block, INSTRUCTION(OP_NIL, context->rp));
+            type = VAL_NIL;
             break;
 
         default:
             break;
     }
 
-    return (compile_result_t){ .location=context->rp, .code=NULL };
+    return (compile_result_t){ .location=context->rp, .type=type, .code=NULL };
 }
 
 compile_result_t compile_unary(ast_t *ast, compile_context_t *context)
@@ -122,7 +130,7 @@ compile_result_t compile_unary(ast_t *ast, compile_context_t *context)
             ;
     }
 
-    return (compile_result_t){ .location=context->rp, .code=NULL };
+    return (compile_result_t){ .location=context->rp, .type=right.type, .code=NULL };
 }
 
 static inline compile_result_t compile_binary_comparison(uint8_t opcode, uint8_t base_register, uint8_t condition, uint8_t left, uint8_t right)
@@ -138,59 +146,69 @@ static inline compile_result_t compile_binary_comparison(uint8_t opcode, uint8_t
     // This is the true case
     code_block_write(block, INSTRUCTION(OP_LOAD, base_register, 1));
 
-    return (compile_result_t){ .location=base_register, .code=block };
+    return (compile_result_t){ .location=base_register, .type=VAL_BOOLEAN, .code=block };
 }
 
 compile_result_t compile_binary(ast_t *ast, compile_context_t *context)
 {
-    compile_result_t intermediate_result = {0, NULL};
+    compile_result_t intermediate_result = {0, VAL_ABSENT, NULL};
     compile_result_t left = compile_ast(ast->op.binary.left, context);
     context->rp += 1;
     compile_result_t right = compile_ast(ast->op.binary.right, context);
     context->rp -= 1;
 
+    value_type_e type = VAL_UNKNOWN;
     instruction_t instruction;
     switch (ast->op.binary.operator.type)
     {
         //-- Arithmetic
         case TOK_PLUS:
             instruction = INSTRUCTION(OP_ADD, context->rp, left.location, right.location);
+            type = arithmetic_cast(left.type, right.type);
             break;
 
         case TOK_MINUS:
             instruction = INSTRUCTION(OP_SUBTRACT, context->rp, left.location, right.location);
+            type = arithmetic_cast(left.type, right.type);
             break;
 
         case TOK_ASTERISK:
             instruction = INSTRUCTION(OP_MULTIPLY, context->rp, left.location, right.location);
+            type = arithmetic_cast(left.type, right.type);
             break;
 
         case TOK_SLASH:
             instruction = INSTRUCTION(OP_DIVIDE, context->rp, left.location, right.location);
+            type = VAL_FLOAT;
             break;
 
         //-- Logic
         case TOK_AND:
             instruction = INSTRUCTION(OP_AND, context->rp, left.location, right.location);
+            type = VAL_BOOLEAN;
             break;
 
         case TOK_OR:
             instruction = INSTRUCTION(OP_OR, context->rp, left.location, right.location);
+            type = VAL_BOOLEAN;
             break;
 
         case TOK_EQUAL_EQUAL:
             intermediate_result = compile_binary_comparison(OP_EQUAL, context->rp + 2, 1, left.location, right.location);
             instruction = INSTRUCTION(OP_MOVE, context->rp, intermediate_result.location);
+            type = VAL_BOOLEAN;
             break;
 
         case TOK_BANG_EQUAL:
             intermediate_result = compile_binary_comparison(OP_EQUAL, context->rp + 2, 0, left.location, right.location);
             instruction = INSTRUCTION(OP_MOVE, context->rp, intermediate_result.location);
+            type = VAL_BOOLEAN;
             break;
 
         case TOK_LESS:
             intermediate_result = compile_binary_comparison(OP_LESSTHAN, context->rp + 2, 1, left.location, right.location);
             instruction = INSTRUCTION(OP_MOVE, context->rp, intermediate_result.location);
+            type = VAL_BOOLEAN;
             break;
 
         case TOK_LESS_EQUAL:
@@ -199,11 +217,13 @@ compile_result_t compile_binary(ast_t *ast, compile_context_t *context)
             code_block_free(intermediate_result.code);
             intermediate_result = compile_binary_comparison(OP_EQUAL, context->rp + 3, 1, left.location, right.location);
             instruction = INSTRUCTION(OP_OR, context->rp, context->rp + 2, context->rp + 3);
+            type = VAL_BOOLEAN;
             break;
 
         case TOK_GREATER:
             intermediate_result = compile_binary_comparison(OP_LESSTHAN, context->rp + 2, 0, left.location, right.location);
             instruction = INSTRUCTION(OP_MOVE, context->rp, intermediate_result.location);
+            type = VAL_BOOLEAN;
             break;
 
         case TOK_GREATER_EQUAL:
@@ -212,6 +232,7 @@ compile_result_t compile_binary(ast_t *ast, compile_context_t *context)
             code_block_free(intermediate_result.code);
             intermediate_result = compile_binary_comparison(OP_EQUAL, context->rp + 3, 1, left.location, right.location);
             instruction = INSTRUCTION(OP_OR, context->rp, context->rp + 2, context->rp + 3);
+            type = VAL_BOOLEAN;
             break;
 
         default:
@@ -225,7 +246,7 @@ compile_result_t compile_binary(ast_t *ast, compile_context_t *context)
     }
 
     code_block_write(context->current_code_block, instruction);
-    return (compile_result_t){ .location=context->rp, .code=NULL };
+    return (compile_result_t){ .location=context->rp, .type=type, .code=NULL };
 }
 
 compile_result_t compile_ast(ast_t *ast, compile_context_t *context)

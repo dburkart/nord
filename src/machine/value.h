@@ -24,6 +24,7 @@ struct vm_t;
 typedef enum
 {
     VAL_ABSENT,
+    VAL_UNKNOWN,
     VAL_NIL,
     VAL_INT,
     VAL_STRING,
@@ -121,6 +122,23 @@ static inline value_t value_from_int(int x)
 static inline value_t value_from_float(double x)
 {
     return (value_t){ .type=VAL_INT, .contents={ .real=x } };
+}
+
+static inline value_type_e arithmetic_cast(value_type_e first, value_type_e second)
+{
+    if (first == VAL_UNKNOWN || second == VAL_UNKNOWN)
+        return VAL_UNKNOWN;
+
+    if (first == second)
+        return first;
+
+    if (first == VAL_FLOAT || second == VAL_FLOAT)
+        return VAL_FLOAT;
+
+    if (first == VAL_STRING || second == VAL_STRING)
+        return VAL_STRING;
+
+    return VAL_UNKNOWN;
 }
 
 #endif
