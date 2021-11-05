@@ -126,9 +126,18 @@ compile_result_t compile_statement_list(ast_t *ast, compile_context_t *context)
     context->current_code_block = inner_block;
 
     compile_result_t result;
-    for (int i = 0; i < ast->op.list.size; i++)
+
+    // If it's not a statement list, simply compile the one statement
+    if (ast->type != AST_STMT_LIST)
     {
-        result = compile_ast(ast->op.list.items[i], context);
+        result = compile_ast(ast, context);
+    }
+    else
+    {
+        for (int i = 0; i < ast->op.list.size; i++)
+        {
+            result = compile_ast(ast->op.list.items[i], context);
+        }
     }
 
     // Restore code block
