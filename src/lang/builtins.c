@@ -66,6 +66,9 @@ void print_internal(value_t val)
         case VAL_MODULE:
             printf("module");
             break;
+        case VAL_UNKNOWN:
+            printf("unknown");
+            break;
     }
 }
 
@@ -230,6 +233,10 @@ void builtin__type(vm_t *vm)
         case VAL_ABSENT:
             assert(false);
             break;
+
+        case VAL_UNKNOWN:
+            // Do nothing
+            ;
     }
 }
 

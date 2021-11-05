@@ -71,6 +71,9 @@ void value_print(value_t v)
         case VAL_MODULE:
             printf("{MODULE}\n");
             break;
+        case VAL_UNKNOWN:
+            printf("{UNKNOWN}\n");
+            break;
     }
 }
 

@@ -180,6 +180,9 @@ void binary_write(binary_t *binary, const char *path)
             case VAL_MODULE:
                 // TODO: Handle
                 ;
+            case VAL_UNKNOWN:
+                // DO nothing
+                break;
         }
     }
 
