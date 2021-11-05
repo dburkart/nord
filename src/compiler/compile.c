@@ -74,6 +74,38 @@ void context_destroy(compile_context_t *context)
     free(context);
 }
 
+//-- Compile AST nodes
+
+compile_result_t compile_statement_list(ast_t *ast, compile_context_t *context)
+{
+    // Create our inner scope for this block
+    symbol_map_t *inner_scope = symbol_map_create();
+    inner_scope->parent = context->symbols;
+    context->symbols = inner_scope;
+
+    // Create a new code block for this block
+    code_block_t *previous_block =  context->current_code_block;
+    code_block_t *inner_block = code_block_create();
+    context->current_code_block = inner_block;
+
+    compile_result_t result;
+    for (int i = 0; i < ast->op.list.size; i++)
+    {
+        result = compile_ast(ast->op.list.items[i], context);
+    }
+
+    // Restore code block
+    context->current_code_block = previous_block;
+
+    // Restore scope
+    context->symbols = context->symbols->parent;
+    symbol_map_destroy(inner_scope);
+
+    // Modify result to include our generated block
+    result.code = inner_block;
+    return result;
+}
+
 compile_result_t compile_literal(ast_t *ast, compile_context_t *context)
 {
     value_type_e type = VAL_UNKNOWN;
@@ -388,7 +420,8 @@ compile_result_t compile_fn_declaration(ast_t *ast, compile_context_t *context)
     context->symbols = inner_scope;
 
     // Create a new code block for our function
-    uint64_t previous_code_block = context->cp;
+    uint64_t previous_code_pointer = context->cp;
+    code_block_t *previous_code_block = context->current_code_block;
     code_block_t *fn_block = code_block_create();
     code_collection_add_block(context->binary->code, fn_block);
     context->cp = context->binary->code->size - 1;
@@ -439,8 +472,8 @@ compile_result_t compile_fn_declaration(ast_t *ast, compile_context_t *context)
     symbol_map_t *map = context->symbols;
     context->symbols = context->symbols->parent;
     symbol_map_destroy(map);
-    context->cp = previous_code_block;
-    context->current_code_block = context->binary->code->blocks[context->cp];
+    context->cp = previous_code_pointer;
+    context->current_code_block = previous_code_block;
 
     // Construct locals to keep track of
     function_t *fn_prototype = (function_t *)fn_def.contents.object;
@@ -622,10 +655,9 @@ compile_result_t compile_ast(ast_t *ast, compile_context_t *context)
     switch (ast->type)
     {
         case AST_STMT_LIST:
-            for (int i = 0; i < ast->op.list.size; i++)
-            {
-                result = compile_ast(ast->op.list.items[i], context);
-            }
+            result = compile_statement_list(ast, context);
+            // Here we merge the result into the current code block
+            code_block_merge(context->current_code_block, result.code);
             break;
 
         case AST_LITERAL:
