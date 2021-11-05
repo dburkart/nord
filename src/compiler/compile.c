@@ -142,6 +142,43 @@ compile_result_t compile_literal(ast_t *ast, compile_context_t *context)
     return (compile_result_t){ .location=result, .type=type, .code=NULL };
 }
 
+compile_result_t compile_tuple(ast_t *ast, compile_context_t *context)
+{
+    uint8_t *registers = (uint8_t *)malloc(sizeof(uint8_t) * ast->op.list.size);
+    uint8_t restore_register = context->rp;
+
+    // First, calculate the values of the tuple
+    for (int i = 0; i < ast->op.list.size; i++)
+    {
+        compile_result_t result = compile_ast(ast->op.list.items[i], context);
+        registers[i] = result.location;
+
+        if (registers[i] == context->rp)
+            context->rp++;
+    }
+
+    // Now, push them on the stack in reverse order
+    for (int i = ast->op.list.size - 1; i >= 0; i--)
+    {
+        code_block_write(context->current_code_block, INSTRUCTION(OP_PUSH, registers[i]));
+    }
+
+    context->rp = restore_register;
+    free(registers);
+
+    // Now, set register 0 to the number of args
+    code_block_write(context->current_code_block, INSTRUCTION(OP_LOADV, 0, ast->op.list.size));
+
+    // Call tuple
+    value_t builtin_name = string_create("tuple");
+    memory_set(context->binary->data, context->mp, builtin_name);
+
+    code_block_write(context->current_code_block, INSTRUCTION(OP_CALL_DYNAMIC, context->mp++));
+    code_block_write(context->current_code_block, INSTRUCTION(OP_POP, context->rp));
+
+    return (compile_result_t){ .location=context->rp, .type=VAL_TUPLE, .code=NULL };
+}
+
 compile_result_t compile_unary(ast_t *ast, compile_context_t *context)
 {
     compile_result_t right = compile_ast(ast->op.unary.operand, context);
@@ -621,6 +658,10 @@ compile_result_t compile_ast(ast_t *ast, compile_context_t *context)
 
         case AST_FUNCTION_CALL:
             result = compile_fn_call(ast, context);
+            break;
+
+        case AST_TUPLE:
+            result = compile_tuple(ast, context);
             break;
 
     }
