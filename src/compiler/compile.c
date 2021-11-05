@@ -347,6 +347,10 @@ compile_result_t compile_ast(ast_t *ast, compile_context_t *context)
             result = compile_assign(ast, context);
             break;
 
+        case AST_GROUP:
+            result = compile_ast(ast->op.group, context);
+            break;
+
     }
     return result;
 }
