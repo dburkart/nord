@@ -195,7 +195,7 @@ void vm_execute(vm_t *vm)
                 break;
 
             case OP_JMP:
-                vm->pc += vm->registers[instruction.fields.pair.arg1].contents.number;
+                vm->pc += vm->registers[instruction.fields.pair.arg2].contents.number;
                 break;
 
             case OP_EQUAL:

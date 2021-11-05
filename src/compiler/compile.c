@@ -448,6 +448,7 @@ compile_result_t compile_fn_declaration(ast_t *ast, compile_context_t *context)
     symbol_map_set(context->symbols, symbol);
 
     compile_result_t fn_result = compile_ast(ast->op.fn.body, context);
+    code_block_free(fn_result.code);
 
     if (args != NULL)
     {
@@ -649,6 +650,36 @@ compile_result_t compile_fn_call(ast_t *ast, compile_context_t *context)
     return (compile_result_t){};
 }
 
+compile_result_t compile_if_statement(ast_t *ast, compile_context_t *context)
+{
+    // Compile the parts of our if statement
+    compile_result_t if_condition = compile_ast(ast->op.if_stmt.condition, context);
+    compile_result_t if_body = compile_statement_list(ast->op.if_stmt.body, context);
+
+    // Increment rp if necessary
+    if (if_body.location == context->rp)
+        context->rp += 1;
+
+    // How far ahead to jump if we evaluate to false
+    code_block_write(context->current_code_block, INSTRUCTION(OP_LOADV, context->rp++, if_body.code->size));
+
+    // Test the condition
+    code_block_write(context->current_code_block, INSTRUCTION(OP_LOAD, context->rp, 1));
+    code_block_write(context->current_code_block, INSTRUCTION(OP_EQUAL, 0, context->rp, if_condition.location));
+
+    // Jump if false
+    code_block_write(context->current_code_block, INSTRUCTION(OP_JMP, context->rp - 1));
+
+    // Decrement rp since we no longer need our comparison or
+    // jump variables
+    context->rp -= 2;
+
+    code_block_merge(context->current_code_block, if_body.code);
+    code_block_free(if_body.code);
+
+    return (compile_result_t){ .location=context->rp, .type=VAL_UNKNOWN, .code=NULL };
+}
+
 compile_result_t compile_ast(ast_t *ast, compile_context_t *context)
 {
     compile_result_t result;
@@ -694,6 +725,10 @@ compile_result_t compile_ast(ast_t *ast, compile_context_t *context)
 
         case AST_TUPLE:
             result = compile_tuple(ast, context);
+            break;
+
+        case AST_IF_STMT:
+            result = compile_if_statement(ast, context);
             break;
 
     }
