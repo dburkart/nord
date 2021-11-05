@@ -248,6 +248,21 @@ compile_result_t compile_tuple(ast_t *ast, compile_context_t *context)
     return (compile_result_t){ .location=context->rp, .type=VAL_TUPLE, .code=NULL };
 }
 
+compile_result_t compile_range(ast_t *ast, compile_context_t *context)
+{
+    uint8_t restore_register = context->rp;
+
+    uint8_t registers[2];
+    registers[0] = compile_ast(ast->op.range.begin, context).location;
+    context->rp++;
+    registers[1] = compile_ast(ast->op.range.end, context).location;
+    context->rp = restore_register;
+
+    compile_result_t result = write_out_builtin(context, "range", 2, registers);
+    return result;
+
+}
+
 compile_result_t compile_unary(ast_t *ast, compile_context_t *context)
 {
     compile_result_t right = compile_ast(ast->op.unary.operand, context);
@@ -785,6 +800,10 @@ compile_result_t compile_ast(ast_t *ast, compile_context_t *context)
 
         case AST_TUPLE:
             result = compile_tuple(ast, context);
+            break;
+
+        case AST_RANGE:
+            result = compile_range(ast, context);
             break;
 
         case AST_IF_STMT:
