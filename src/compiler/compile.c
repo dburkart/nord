@@ -4,11 +4,13 @@
  * SPDX-License-Identifier: BSD-2-Clause
  */
 
+#include <stdio.h>
 #include <stdlib.h>
 
 #include "compile.h"
 #include "machine/bytecode.h"
 #include "machine/value.h"
+#include "util/error.h"
 #include "util/macros.h"
 
 #define INSTRUCTION(...) VFUNC(INSTRUCTION, __VA_ARGS__)
@@ -81,13 +83,17 @@ compile_result_t compile_literal(ast_t *ast, compile_context_t *context)
             break;
 
         case TOK_STRING:
+            memory_set(context->binary->data, context->mp, value(ast->op.literal.value));
+            code_block_write(context->current_code_block, INSTRUCTION(OP_LOAD, context->rp, context->mp));
+            context->mp += 1;
             type = VAL_STRING;
+            break;
+
         case TOK_FLOAT:
             memory_set(context->binary->data, context->mp, value(atof(ast->op.literal.value)));
             code_block_write(context->current_code_block, INSTRUCTION(OP_LOAD, context->rp, context->mp));
             context->mp += 1;
-            if (type == VAL_UNKNOWN)
-                type = VAL_FLOAT;
+            type = VAL_FLOAT;
             break;
 
         case TOK_TRUE:
@@ -249,6 +255,66 @@ compile_result_t compile_binary(ast_t *ast, compile_context_t *context)
     return (compile_result_t){ .location=context->rp, .type=type, .code=NULL };
 }
 
+compile_result_t compile_assign(ast_t *ast, compile_context_t *context)
+{
+    // First, check our symbol to make sure it's been defined
+    symbol_t symbol = symbol_map_get(context->symbols, ast->op.assign.name);
+
+    // Error handling
+    if (symbol.location.type == LOC_UNDEF)
+    {
+        char *error;
+        location_t loc = {ast->location.start, ast->location.end};
+        asprintf(&error, "Use of undeclared identifier \"%s\"", ast->op.assign.name);
+        printf("%s", format_error(context->name, context->listing, error, loc));
+        exit(1);
+    }
+
+    if (symbol.type == SYM_CONSTANT)
+    {
+        char *error;
+        location_t loc = {ast->location.start, ast->location.end};
+        asprintf(&error, "Cannot assign to constant \"%s\", value is immutable", ast->op.assign.name);
+        printf("%s", format_error(context->name, context->listing, error, loc));
+        exit(1);
+    }
+
+    compile_result_t rvalue = compile_ast(ast->op.assign.value, context);
+
+    switch (rvalue.type)
+    {
+        case VAL_FUNCTION:
+            // TODO: Handle functions
+            break;
+
+        default:
+            code_block_write(context->current_code_block, INSTRUCTION(OP_MOVE, symbol.location.address, rvalue.location));
+            break;
+    }
+
+    return (compile_result_t){ .location=symbol.location.address, .type=rvalue.type, NULL};
+}
+
+compile_result_t compile_declare(ast_t *ast, compile_context_t *context)
+{
+    value_type_e type = VAL_ABSENT;
+    symbol_t symbol = (symbol_t){ .location={ .address=0, .type=LOC_NONE }, .name=ast->op.declare.name };
+    symbol.type = (ast->op.declare.var_type.type == TOK_VAR) ? SYM_VAR : SYM_CONSTANT;
+
+    if (ast->op.declare.initial_value != NULL)
+    {
+        compile_result_t initial_value = compile_ast(ast->op.declare.initial_value, context);
+        type = initial_value.type;
+
+        symbol.location.address = initial_value.location;
+        symbol.location.type = LOC_REGISTER;
+        context->rp += 1;
+    }
+
+    symbol_map_set(context->symbols, symbol);
+    return (compile_result_t){ .location=symbol.location.address, .type=type, .code=NULL};
+}
+
 compile_result_t compile_ast(ast_t *ast, compile_context_t *context)
 {
     compile_result_t result;
@@ -271,6 +337,14 @@ compile_result_t compile_ast(ast_t *ast, compile_context_t *context)
 
         case AST_BINARY:
             result = compile_binary(ast, context);
+            break;
+
+        case AST_DECLARE:
+            result = compile_declare(ast, context);
+            break;
+
+        case AST_ASSIGN:
+            result = compile_assign(ast, context);
             break;
 
     }
