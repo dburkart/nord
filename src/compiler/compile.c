@@ -125,8 +125,25 @@ compile_result_t compile_unary(ast_t *ast, compile_context_t *context)
     return (compile_result_t){ .location=context->rp, .code=NULL };
 }
 
+static inline compile_result_t compile_binary_comparison(uint8_t opcode, uint8_t base_register, uint8_t condition, uint8_t left, uint8_t right)
+{
+    code_block_t *block = code_block_create();
+
+    // This is the false case
+    code_block_write(block, INSTRUCTION(OP_LOAD, base_register, 0));
+
+    // This is the comparison instruction
+    code_block_write(block, INSTRUCTION(opcode, condition, left, right));
+
+    // This is the true case
+    code_block_write(block, INSTRUCTION(OP_LOAD, base_register, 1));
+
+    return (compile_result_t){ .location=base_register, .code=block };
+}
+
 compile_result_t compile_binary(ast_t *ast, compile_context_t *context)
 {
+    compile_result_t intermediate_result = {0, NULL};
     compile_result_t left = compile_ast(ast->op.binary.left, context);
     context->rp += 1;
     compile_result_t right = compile_ast(ast->op.binary.right, context);
@@ -161,8 +178,50 @@ compile_result_t compile_binary(ast_t *ast, compile_context_t *context)
             instruction = INSTRUCTION(OP_OR, context->rp, left.location, right.location);
             break;
 
+        case TOK_EQUAL_EQUAL:
+            intermediate_result = compile_binary_comparison(OP_EQUAL, context->rp + 2, 1, left.location, right.location);
+            instruction = INSTRUCTION(OP_MOVE, context->rp, intermediate_result.location);
+            break;
+
+        case TOK_BANG_EQUAL:
+            intermediate_result = compile_binary_comparison(OP_EQUAL, context->rp + 2, 0, left.location, right.location);
+            instruction = INSTRUCTION(OP_MOVE, context->rp, intermediate_result.location);
+            break;
+
+        case TOK_LESS:
+            intermediate_result = compile_binary_comparison(OP_LESSTHAN, context->rp + 2, 1, left.location, right.location);
+            instruction = INSTRUCTION(OP_MOVE, context->rp, intermediate_result.location);
+            break;
+
+        case TOK_LESS_EQUAL:
+            intermediate_result = compile_binary_comparison(OP_LESSTHAN, context->rp + 2, 1, left.location, right.location);
+            code_block_merge(context->current_code_block, intermediate_result.code);
+            code_block_free(intermediate_result.code);
+            intermediate_result = compile_binary_comparison(OP_EQUAL, context->rp + 3, 1, left.location, right.location);
+            instruction = INSTRUCTION(OP_OR, context->rp, context->rp + 2, context->rp + 3);
+            break;
+
+        case TOK_GREATER:
+            intermediate_result = compile_binary_comparison(OP_LESSTHAN, context->rp + 2, 0, left.location, right.location);
+            instruction = INSTRUCTION(OP_MOVE, context->rp, intermediate_result.location);
+            break;
+
+        case TOK_GREATER_EQUAL:
+            intermediate_result = compile_binary_comparison(OP_LESSTHAN, context->rp + 2, 0, left.location, right.location);
+            code_block_merge(context->current_code_block, intermediate_result.code);
+            code_block_free(intermediate_result.code);
+            intermediate_result = compile_binary_comparison(OP_EQUAL, context->rp + 3, 1, left.location, right.location);
+            instruction = INSTRUCTION(OP_OR, context->rp, context->rp + 2, context->rp + 3);
+            break;
+
         default:
             ;
+    }
+
+    if (intermediate_result.code != NULL)
+    {
+        code_block_merge(context->current_code_block, intermediate_result.code);
+        code_block_free(intermediate_result.code);
     }
 
     code_block_write(context->current_code_block, instruction);
