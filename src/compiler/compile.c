@@ -328,9 +328,71 @@ compile_result_t compile_fn_declaration(ast_t *ast, compile_context_t *context)
     code_collection_add_block(context->binary->code, fn_block);
     context->cp += 1;
     context->current_code_block = fn_block;
+    uint8_t restore_register = context->rp;
 
+    ast_t *args = ast->op.fn.args;
+    value_t fn_def = function_def_create(
+                ast->op.fn.name,
+                (address_t){ .region=context->cp, .offset=0 },
+                (args == NULL) ? 0 : args->op.list.size,
+                NULL,
+                context->rp
+            );
+    memory_set(context->binary->data, context->mp, fn_def);
 
-    return (compile_result_t){};
+    symbol_t symbol;
+    symbol.name = ast->op.fn.name;
+    symbol.type = SYM_FN;
+    symbol.location.type = LOC_MEMORY;
+    symbol.location.address = context->mp++;
+
+    symbol_map_set(context->symbols, symbol);
+
+    if (args != NULL)
+    {
+        for (int i = args->op.list.size - 1; i >= 0; i--)
+        {
+            symbol_t arg;
+            arg.location.type = LOC_REGISTER;
+            arg.location.address = context->rp + i;
+            arg.name = args->op.list.items[i]->op.literal.value;
+            arg.type = SYM_VAR;
+            symbol_map_set(context->symbols, arg);
+        }
+        context->rp += args->op.list.size;
+    }
+
+    compile_result_t fn_result = compile_ast(ast->op.fn.body, context);
+
+    // If return was implicit, add it in now
+    size_t last = context->current_code_block->size - 1;
+    if (context->current_code_block->code[last].opcode != OP_RETURN)
+        code_block_write(context->current_code_block, INSTRUCTION(OP_RETURN, fn_result.location));
+
+    // Reset state
+    symbol_map_t *map = context->symbols;
+    context->symbols = context->symbols->parent;
+    symbol_map_destroy(map);
+
+    // Construct locals to keep track of
+    function_t *fn_prototype = (function_t *)fn_def.contents.object;
+    uint8_t *locals = (uint8_t *)malloc(context->rp - fn_prototype->low_reg + 1);
+    for (int i = fn_prototype->low_reg; i < context->rp + 1; i++)
+    {
+        locals[i - fn_prototype->low_reg] = i;
+    }
+    locals[context->rp - fn_prototype->low_reg + 1] = 0;
+
+    fn_prototype->locals = locals;
+
+    symbol_map_set(context->symbols, symbol);
+    context->rp = restore_register;
+
+    // If the function is external, put it in our binary symbol map
+    if (ast->op.fn.exported)
+        symbol_map_set(context->binary->symbols, symbol);
+
+    return (compile_result_t){ .location=symbol.location.address, .type=VAL_FUNCTION, .code=NULL };
 }
 
 compile_result_t compile_ast(ast_t *ast, compile_context_t *context)
@@ -367,6 +429,10 @@ compile_result_t compile_ast(ast_t *ast, compile_context_t *context)
 
         case AST_GROUP:
             result = compile_ast(ast->op.group, context);
+            break;
+
+        case AST_FUNCTION_DECL:
+            result = compile_fn_declaration(ast, context);
             break;
 
     }

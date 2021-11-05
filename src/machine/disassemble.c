@@ -36,6 +36,7 @@ char *disassemble(binary_t *binary)
 
     for (int i = 0; i < binary->code->size; i++)
     {
+        printf("Code Region %d:\n\n", i);
         for (int j = 0; j < binary->code->blocks[i]->size; j++)
         {
             char *new_instruction = disassemble_instruction(binary->data, binary->code->blocks[i]->code[j]);
