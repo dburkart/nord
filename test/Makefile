@@ -10,23 +10,23 @@ all: runner lex/run parse/run compile/run vm/run interpret/run
 runner: testrunner.c
 	$(CC) $(CFLAGS) -I$(BASE)/src testrunner.c -o testrunner
 
-lex/run:
+lex/run: $(OBJECTS)
 	$(CC) -c $(CFLAGS) -I$(BASE)/src $@.c -o $@.o
 	$(CC) $(CFLAGS) $(LDFLAGS) -I$(BASE)/src -o $@ $(OBJECTS) $@.o
 
-parse/run:
+parse/run: $(OBJECTS)
 	$(CC) -c $(CFLAGS) -I$(BASE)/src $@.c -o $@.o
 	$(CC) $(CFLAGS) $(LDFLAGS) -I$(BASE)/src -o $@ $(OBJECTS) $@.o
 
-compile/run:
+compile/run: $(OBJECTS)
 	$(CC) -c $(CFLAGS) -I$(BASE)/src $@.c -o $@.o
 	$(CC) $(CFLAGS) $(LDFLAGS) -I$(BASE)/src -o $@ $(OBJECTS) $@.o
 
-vm/run:
+vm/run: $(OBJECTS)
 	$(CC) -c $(CFLAGS) -I$(BASE)/src $@.c -o $@.o
 	$(CC) $(CFLAGS) $(LDFLAGS) -I$(BASE)/src -o $@ $(OBJECTS) $@.o
 
-interpret/run:
+interpret/run: $(OBJECTS)
 	$(CC) -c $(CFLAGS) -I$(BASE)/src $@.c -o $@.o
 	$(CC) $(CFLAGS) $(LDFLAGS) -I$(BASE)/src -o $@ $(OBJECTS) $@.o
 
