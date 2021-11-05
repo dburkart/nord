@@ -621,6 +621,7 @@ compile_result_t compile_ast(ast_t *ast, compile_context_t *context)
 
         case AST_FUNCTION_CALL:
             result = compile_fn_call(ast, context);
+            break;
 
     }
     return result;
