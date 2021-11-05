@@ -96,9 +96,12 @@ static inline compile_result_t write_out_builtin(compile_context_t *context, cha
 
     // We push args onto the stack in reverse order because we'll pop them
     // off in the builtin
-    for (int i = nargs - 1; i >= 0; i--)
+    if (nargs)
     {
-        code_block_write(context->current_code_block, INSTRUCTION(OP_PUSH, args[i]));
+        for (int i = nargs - 1; i >= 0; i--)
+        {
+            code_block_write(context->current_code_block, INSTRUCTION(OP_PUSH, args[i]));
+        }
     }
 
     context->rp = reset_register;
@@ -200,7 +203,12 @@ compile_result_t compile_literal(ast_t *ast, compile_context_t *context)
                     exit(1);
                 }
 
-                if (identifier.location.type == LOC_MEMORY)
+                type = VAL_UNKNOWN;
+                if (identifier.type == SYM_FN)
+                {
+                    type = VAL_FUNCTION;
+                }
+                else if (identifier.location.type == LOC_MEMORY)
                 {
                     code_block_write(context->current_code_block, INSTRUCTION(OP_LOAD, context->rp, identifier.location.address));
                     identifier.location.type = LOC_REGISTER;
@@ -208,7 +216,6 @@ compile_result_t compile_literal(ast_t *ast, compile_context_t *context)
                     symbol_map_set(context->symbols, identifier);
                 }
 
-                type = VAL_UNKNOWN;
                 result = identifier.location.address;
             }
             break;
@@ -442,7 +449,9 @@ compile_result_t compile_assign(ast_t *ast, compile_context_t *context)
     switch (rvalue.type)
     {
         case VAL_FUNCTION:
-            // TODO: Handle functions
+            symbol.location.address = rvalue.location;
+            symbol.location.type = LOC_MEMORY;
+            symbol_map_set(context->symbols, symbol);
             break;
 
         default:
@@ -464,8 +473,13 @@ compile_result_t compile_declare(ast_t *ast, compile_context_t *context)
         compile_result_t initial_value = compile_ast(ast->op.declare.initial_value, context);
         type = initial_value.type;
 
-        symbol.location.address = initial_value.location;
         symbol.location.type = LOC_REGISTER;
+        if (type == VAL_FUNCTION)
+        {
+            symbol.location.type = LOC_MEMORY;
+        }
+
+        symbol.location.address = initial_value.location;
         context->rp += 1;
     }
 
@@ -562,9 +576,11 @@ compile_result_t compile_fn_call_builtin(ast_t *ast, compile_context_t *context)
 {
     ast_t *args = ast->op.call.args;
     uint8_t *arg_registers;
+    uint8_t number_of_args = 0;
     if (args != NULL)
     {
         arg_registers = (uint8_t *)malloc(sizeof(uint8_t) * args->op.list.size);
+        number_of_args = args->op.list.size;
 
         // First, calculate the values of our arguments
         for (int i = 0; i < args->op.list.size; i++)
@@ -577,7 +593,7 @@ compile_result_t compile_fn_call_builtin(ast_t *ast, compile_context_t *context)
         }
     }
 
-    compile_result_t result = write_out_builtin(context, ast->op.fn.name, args->op.list.size, arg_registers);
+    compile_result_t result = write_out_builtin(context, ast->op.fn.name, number_of_args, arg_registers);
 
     free(arg_registers);
 
