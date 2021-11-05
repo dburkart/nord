@@ -77,6 +77,7 @@ void context_destroy(compile_context_t *context)
 compile_result_t compile_literal(ast_t *ast, compile_context_t *context)
 {
     value_type_e type = VAL_UNKNOWN;
+    uint8_t result = context->rp;
     switch (ast->op.literal.token.type)
     {
         case TOK_NUMBER:
@@ -109,11 +110,36 @@ compile_result_t compile_literal(ast_t *ast, compile_context_t *context)
             type = VAL_NIL;
             break;
 
+        case TOK_IDENTIFIER:
+            {
+                symbol_t identifier = symbol_map_get(context->symbols, ast->op.literal.value);
+                if (identifier.location.type == LOC_UNDEF)
+                {
+                    char *error;
+                    location_t loc = {ast->location.start, ast->location.end};
+                    asprintf(&error, "Use of undeclared identifier \"%s\"", ast->op.literal.value);
+                    printf("%s", format_error(context->name, context->listing, error, loc));
+                    exit(1);
+                }
+
+                if (identifier.location.type == LOC_MEMORY)
+                {
+                    code_block_write(context->current_code_block, INSTRUCTION(OP_LOAD, context->rp, identifier.location.address));
+                    identifier.location.type = LOC_REGISTER;
+                    identifier.location.address = context->rp++;
+                    symbol_map_set(context->symbols, identifier);
+                }
+
+                type = VAL_UNKNOWN;
+                result = identifier.location.address;
+            }
+            break;
+
         default:
             break;
     }
 
-    return (compile_result_t){ .location=context->rp, .type=type, .code=NULL };
+    return (compile_result_t){ .location=result, .type=type, .code=NULL };
 }
 
 compile_result_t compile_unary(ast_t *ast, compile_context_t *context)
