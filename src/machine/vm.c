@@ -155,7 +155,7 @@ void vm_execute(vm_t *vm)
         {
             case OP_NIL:
                 result.type = VAL_NIL;
-                vm->registers[instruction.fields.pair.arg1] = result;
+                vm->registers[instruction.fields.pair.arg2] = result;
                 break;
 
             // Load a value into the specified register

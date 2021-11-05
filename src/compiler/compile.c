@@ -688,6 +688,63 @@ compile_result_t compile_if_statement(ast_t *ast, compile_context_t *context)
     return (compile_result_t){ .location=context->rp, .type=VAL_UNKNOWN, .code=NULL };
 }
 
+compile_result_t compile_for_statement(ast_t *ast, compile_context_t *context)
+{
+    // Compile our collection
+    compile_result_t collection = compile_ast(ast->op.for_stmt.iterable, context);
+
+    // Next, make an iterator over the collection
+    compile_result_t iter_result = write_out_builtin(context, "iter", 1, &collection.location);
+
+    // Need to keep track of our iterator
+    context->rp += 1;
+
+    // Now, define a new symbol map for the for loop
+    symbol_map_t *for_map = symbol_map_create();
+    for_map->parent = context->symbols;
+    context->symbols = for_map;
+
+    // This will point to our local variable. We'll need this even if it's not
+    // defined by the user.
+    uint8_t var = context->rp++;
+    uint8_t nil = context->rp++;
+
+    code_block_write(context->current_code_block, INSTRUCTION(OP_NIL, nil));
+
+    // If a local variable was defined, set it in the synbol map
+    if (ast->op.for_stmt.var != NULL)
+    {
+        symbol_t symbol = { .type=SYM_VAR, .name=ast->op.for_stmt.var, .location={ .type=LOC_REGISTER, .address=var } };
+        symbol_map_set(context->symbols, symbol);
+    }
+
+    // Compile our body
+    compile_result_t for_body = compile_statement_list(ast->op.for_stmt.body, context);
+
+    // Begin for-loop
+    code_block_write(context->current_code_block, INSTRUCTION(OP_DEREF, var, iter_result.location, 1));
+
+    // Exit jump
+    code_block_write(context->current_code_block, INSTRUCTION(OP_LOADV, context->rp, for_body.code->size + 3));
+    code_block_write(context->current_code_block, INSTRUCTION(OP_EQUAL, 1, var, nil));
+    code_block_write(context->current_code_block, INSTRUCTION(OP_JMP, context->rp));
+
+    code_block_merge(context->current_code_block, for_body.code);
+
+    // Jump to the start of the loop
+    code_block_write(context->current_code_block, INSTRUCTION(OP_LOADV, context->rp, (for_body.code->size + 6) * -1));
+    code_block_write(context->current_code_block, INSTRUCTION(OP_JMP, context->rp));
+    code_block_free(for_body.code);
+
+    context->rp -= 2;
+
+    // Reset symbol map
+    context->symbols = context->symbols->parent;
+    symbol_map_destroy(for_map);
+
+    return (compile_result_t){ .location=context->rp, .type=VAL_UNKNOWN, .code=NULL };
+}
+
 compile_result_t compile_ast(ast_t *ast, compile_context_t *context)
 {
     compile_result_t result;
@@ -737,6 +794,10 @@ compile_result_t compile_ast(ast_t *ast, compile_context_t *context)
 
         case AST_IF_STMT:
             result = compile_if_statement(ast, context);
+            break;
+
+        case AST_FOR_STMT:
+            result = compile_for_statement(ast, context);
             break;
 
     }

@@ -86,7 +86,7 @@ char *disassemble_instruction(memory_t *mem, instruction_t instruction)
         case OP_NIL:
             asprintf(&assembly, FORMAT_SINGLE,
                      "nil",
-                     instruction.fields.pair.arg1
+                     instruction.fields.pair.arg2
                     );
             break;
 
