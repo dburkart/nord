@@ -484,9 +484,6 @@ compile_result_t compile_fn_declaration(ast_t *ast, compile_context_t *context)
 
     symbol_map_set(context->symbols, symbol);
 
-    compile_result_t fn_result = compile_ast(ast->op.fn.body, context);
-    code_block_free(fn_result.code);
-
     if (args != NULL)
     {
         for (int i = args->op.list.size - 1; i >= 0; i--)
@@ -500,6 +497,9 @@ compile_result_t compile_fn_declaration(ast_t *ast, compile_context_t *context)
         }
         context->rp += args->op.list.size;
     }
+
+    compile_result_t fn_result = compile_ast(ast->op.fn.body, context);
+    code_block_free(fn_result.code);
 
     // If return was implicit, add it in now
     size_t last = context->current_code_block->size - 1;
