@@ -36,7 +36,20 @@ char *disassemble(binary_t *binary)
 
     for (int i = 0; i < binary->code->size; i++)
     {
-        printf("Code Region %d:\n\n", i);
+        char *region_marker;
+
+        asprintf(&region_marker, "\nCode Region: %d\n\n", i);
+        size_t region_marker_len = strlen(region_marker);
+        if (region_marker_len >= size - len)
+        {
+            size = size * 2 - len > size - len ? size * 2 : size - len + 1;
+            assembly = realloc(assembly, size);
+        }
+
+        strcpy(assembly + len, region_marker);
+        len += region_marker_len;
+        free(region_marker);
+
         for (int j = 0; j < binary->code->blocks[i]->size; j++)
         {
             char *new_instruction = disassemble_instruction(binary->data, binary->code->blocks[i]->code[j]);
@@ -165,7 +178,7 @@ char *disassemble_instruction(memory_t *mem, instruction_t instruction)
         case OP_POP:
             asprintf(&assembly, FORMAT_SINGLE,
                      "pop",
-                     instruction.fields.pair.arg1
+                     instruction.fields.pair.arg2
                     );
             break;
 
@@ -293,7 +306,7 @@ char *disassemble_instruction(memory_t *mem, instruction_t instruction)
         case OP_RETURN:
             asprintf(&assembly, FORMAT_SINGLE,
                      "return",
-                     instruction.fields.pair.arg1
+                     instruction.fields.pair.arg2
                     );
             break;
 

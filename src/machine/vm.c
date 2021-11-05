@@ -148,7 +148,7 @@ void vm_execute(vm_t *vm)
         memory_t *mem;
         function_t *fn;
 
-//        printf("%d: %s", vm->pc, disassemble_instruction(vm->memory, instruction));
+//        printf("%ld: %s", vm->pc, disassemble_instruction(vm->memory, instruction));
 //        getchar();
 
         switch (instruction.opcode)
@@ -191,7 +191,7 @@ void vm_execute(vm_t *vm)
                 break;
 
             case OP_POP:
-                vm->registers[instruction.fields.pair.arg1] = vm_stack_pop(vm);
+                vm->registers[instruction.fields.pair.arg2] = vm_stack_pop(vm);
                 break;
 
             case OP_JMP:
@@ -471,7 +471,7 @@ void vm_execute(vm_t *vm)
 
                 vm->region = fn->return_address.region;
                 vm->pc = fn->return_address.offset;
-                vm_stack_push(vm, vm->registers[instruction.fields.pair.arg1]);
+                vm_stack_push(vm, vm->registers[instruction.fields.pair.arg2]);
 
                 // Restore our save buffer
                 for (uint8_t i = 0, reg = fn->locals[i]; reg != 0; i++, reg = fn->locals[i])

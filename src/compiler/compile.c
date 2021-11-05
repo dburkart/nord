@@ -4,6 +4,7 @@
  * SPDX-License-Identifier: BSD-2-Clause
  */
 
+#include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -17,7 +18,7 @@
 
 #define INSTRUCTION4(OP, ARG1, ARG2, ARG3) (instruction_t){ OP, .fields={ .triplet={ARG1, ARG2, ARG3} } }
 #define INSTRUCTION3(OP, ARG1, ARG2) (instruction_t){ OP, .fields={ .pair={ARG1, ARG2 } } }
-#define INSTRUCTION2(OP, ARG1) INSTRUCTION3(OP, ARG1, 0)
+#define INSTRUCTION2(OP, ARG1) INSTRUCTION3(OP, 0, ARG1)
 
 typedef struct
 {
@@ -324,10 +325,12 @@ compile_result_t compile_fn_declaration(ast_t *ast, compile_context_t *context)
     context->symbols = inner_scope;
 
     // Create a new code block for our function
+    uint64_t previous_code_block = context->cp;
     code_block_t *fn_block = code_block_create();
     code_collection_add_block(context->binary->code, fn_block);
-    context->cp += 1;
+    context->cp = context->binary->code->size - 1;
     context->current_code_block = fn_block;
+
     uint8_t restore_register = context->rp;
 
     ast_t *args = ast->op.fn.args;
@@ -348,6 +351,8 @@ compile_result_t compile_fn_declaration(ast_t *ast, compile_context_t *context)
 
     symbol_map_set(context->symbols, symbol);
 
+    compile_result_t fn_result = compile_ast(ast->op.fn.body, context);
+
     if (args != NULL)
     {
         for (int i = args->op.list.size - 1; i >= 0; i--)
@@ -362,8 +367,6 @@ compile_result_t compile_fn_declaration(ast_t *ast, compile_context_t *context)
         context->rp += args->op.list.size;
     }
 
-    compile_result_t fn_result = compile_ast(ast->op.fn.body, context);
-
     // If return was implicit, add it in now
     size_t last = context->current_code_block->size - 1;
     if (context->current_code_block->code[last].opcode != OP_RETURN)
@@ -373,15 +376,17 @@ compile_result_t compile_fn_declaration(ast_t *ast, compile_context_t *context)
     symbol_map_t *map = context->symbols;
     context->symbols = context->symbols->parent;
     symbol_map_destroy(map);
+    context->cp = previous_code_block;
+    context->current_code_block = context->binary->code->blocks[context->cp];
 
     // Construct locals to keep track of
     function_t *fn_prototype = (function_t *)fn_def.contents.object;
     uint8_t *locals = (uint8_t *)malloc(context->rp - fn_prototype->low_reg + 1);
-    for (int i = fn_prototype->low_reg; i < context->rp + 1; i++)
+    for (int i = restore_register; i < context->rp + 1; i++)
     {
-        locals[i - fn_prototype->low_reg] = i;
+        locals[i - restore_register] = i;
     }
-    locals[context->rp - fn_prototype->low_reg + 1] = 0;
+    locals[context->rp - restore_register + 1] = 0;
 
     fn_prototype->locals = locals;
 
@@ -393,6 +398,100 @@ compile_result_t compile_fn_declaration(ast_t *ast, compile_context_t *context)
         symbol_map_set(context->binary->symbols, symbol);
 
     return (compile_result_t){ .location=symbol.location.address, .type=VAL_FUNCTION, .code=NULL };
+}
+
+compile_result_t compile_fn_call_native(ast_t *ast, compile_context_t *context)
+{
+    symbol_t fn_symbol = symbol_map_get(context->symbols, ast->op.call.name);
+    ast_t *args = ast->op.call.args;
+
+    // Native function calls must exist in memory
+    assert(fn_symbol.location.type == LOC_MEMORY);
+
+    function_t *function = (function_t *)memory_get(context->binary->data, fn_symbol.location.address).contents.object;
+
+    // Now, iterate through the function args and save any locals that conflict
+    for (uint8_t i = 0; i < function->nargs; i++)
+    {
+
+        if (function->locals == NULL)
+        {
+            if (function->low_reg + i >= context->rp)
+                continue;
+
+            code_block_write(context->current_code_block, INSTRUCTION(OP_PUSH, function->low_reg + i));
+        }
+        else if (function->locals[i] < context->rp)
+            code_block_write(context->current_code_block, INSTRUCTION(OP_PUSH, function->locals[i]));
+    }
+
+
+    uint8_t restore_register;
+    if (args != NULL)
+    {
+        if (args->op.list.size != function->nargs)
+        {
+            char *error;
+            location_t loc = {args->location.start, args->location.end};
+            asprintf(&error, "Function \"%s\" expected %d arguments, but was passed %ld.",
+                     function->name,
+                     function->nargs,
+                     args->op.list.size
+            );
+            printf("%s", format_error(context->name, context->listing, error, loc));
+            exit(1);
+        }
+
+        restore_register = context->rp;
+
+        // First, set the register pointer to our first local of the function we're calling
+        context->rp = function->locals[0];
+
+        for (int i = 0; i < args->op.list.size; i++)
+        {
+            compile_result_t arg = compile_ast(args->op.list.items[i], context);
+
+            // If we weren't serendipitous, move things around
+            if (arg.location != function->locals[i])
+                code_block_write(context->current_code_block, INSTRUCTION(OP_MOVE, function->locals[i], arg.location));
+
+            context->rp += 1;
+        }
+    }
+
+    // Call the function
+    code_block_write(context->current_code_block, INSTRUCTION(OP_CALL, fn_symbol.location.address));
+
+    if (args != NULL)
+        context->rp = restore_register;
+
+    // Pop the return value
+    code_block_write(context->current_code_block, INSTRUCTION(OP_POP, context->rp));
+
+    // Pop our locals back into registers
+    for (int i = function->nargs - 1; i >= 0; --i)
+    {
+        if (function->low_reg + i < context->rp)
+            code_block_write(context->current_code_block, INSTRUCTION(OP_POP, function->low_reg + i));
+    }
+
+    return (compile_result_t){ .location=context->rp, .type=VAL_UNKNOWN, .code=NULL };
+}
+
+compile_result_t compile_fn_call(ast_t *ast, compile_context_t *context)
+{
+    symbol_t fn_symbol = symbol_map_get(context->symbols, ast->op.call.name);
+
+    switch (fn_symbol.location.type)
+    {
+        case LOC_MEMORY:
+            return compile_fn_call_native(ast, context);
+
+        default:
+            ;
+    }
+
+    return (compile_result_t){};
 }
 
 compile_result_t compile_ast(ast_t *ast, compile_context_t *context)
@@ -434,6 +533,9 @@ compile_result_t compile_ast(ast_t *ast, compile_context_t *context)
         case AST_FUNCTION_DECL:
             result = compile_fn_declaration(ast, context);
             break;
+
+        case AST_FUNCTION_CALL:
+            result = compile_fn_call(ast, context);
 
     }
     return result;
