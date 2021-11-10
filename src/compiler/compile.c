@@ -168,15 +168,13 @@ compile_result_t compile_literal(ast_t *ast, compile_context_t *context)
 
         case TOK_STRING:
             memory_set(context->binary->data, context->mp, value(ast->op.literal.value));
-            code_block_write(context->current_code_block, INSTRUCTION(OP_LOAD, context->rp, context->mp));
-            context->mp += 1;
+            code_block_write(context->current_code_block, INSTRUCTION(OP_LOAD, context->rp, context->mp++));
             type = VAL_STRING;
             break;
 
         case TOK_FLOAT:
             memory_set(context->binary->data, context->mp, value(atof(ast->op.literal.value)));
-            code_block_write(context->current_code_block, INSTRUCTION(OP_LOAD, context->rp, context->mp));
-            context->mp += 1;
+            code_block_write(context->current_code_block, INSTRUCTION(OP_LOAD, context->rp, context->mp++));
             type = VAL_FLOAT;
             break;
 

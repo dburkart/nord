@@ -54,7 +54,10 @@ value_t string_create(char *string)
 
     str->object.type = VAL_STRING;
     str->length = strlen(string);
-    str->string = string;
+
+    char *our_string = (char *)malloc(str->length + 1);
+    strcpy(our_string, string);
+    str->string = our_string;
 
     val.type = VAL_STRING;
     val.contents.object = (object_t *)str;
