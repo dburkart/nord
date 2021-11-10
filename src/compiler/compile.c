@@ -706,7 +706,7 @@ compile_result_t compile_if_statement(ast_t *ast, compile_context_t *context)
         context->rp += 1;
 
     // How far ahead to jump if we evaluate to false
-    code_block_write(context->current_code_block, INSTRUCTION(OP_LOADV, context->rp++, if_body.code->size));
+    code_block_write(context->current_code_block, INSTRUCTION(OP_LOADV, context->rp++, if_body.code->size + 1));
 
     // Test the condition
     code_block_write(context->current_code_block, INSTRUCTION(OP_LOAD, context->rp, 1));
@@ -767,7 +767,7 @@ compile_result_t compile_for_statement(ast_t *ast, compile_context_t *context)
     code_block_merge(context->current_code_block, for_body.code);
 
     // Jump to the start of the loop
-    code_block_write(context->current_code_block, INSTRUCTION(OP_LOADV, context->rp, (for_body.code->size + 6) * -1));
+    code_block_write(context->current_code_block, INSTRUCTION(OP_LOADV, context->rp, (for_body.code->size + 5) * -1));
     code_block_write(context->current_code_block, INSTRUCTION(OP_JMP, context->rp));
     code_block_free(for_body.code);
 

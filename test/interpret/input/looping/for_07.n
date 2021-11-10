@@ -1,0 +1,7 @@
+var total = 1
+
+for i in 1 .. 10 {
+    total = total * i
+}
+
+print(total)

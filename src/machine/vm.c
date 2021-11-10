@@ -198,7 +198,8 @@ void vm_execute(vm_t *vm)
                 break;
 
             case OP_JMP:
-                vm->pc += vm->registers[instruction.fields.pair.arg2].contents.number;
+                // We have to account for the fact that we've already incremented our program counter
+                vm->pc += vm->registers[instruction.fields.pair.arg2].contents.number - 1;
                 break;
 
             case OP_EQUAL:
