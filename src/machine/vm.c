@@ -497,7 +497,7 @@ void vm_execute(vm_t *vm)
                 break;
 
             case OP_IMPORT:
-                ret = memory_get(vm->memory, instruction.fields.pair.arg1);
+                ret = memory_get(vm->memory, instruction.fields.pair.arg2);
 
                 // The only valid argument to an import statement is a string
                 assert(ret.type == VAL_STRING);
@@ -534,7 +534,7 @@ void vm_execute(vm_t *vm)
 
                 // TODO: This definitely leaks memory, clean this up when we
                 //  implement garbage collection
-                memory_set(vm->memory, instruction.fields.pair.arg1, result);
+                memory_set(vm->memory, instruction.fields.pair.arg2, result);
 
                 symbol_t sym;
 

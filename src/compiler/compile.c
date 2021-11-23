@@ -9,6 +9,7 @@
 #include <stdlib.h>
 
 #include "compile.h"
+#include "lang/module.h"
 #include "machine/bytecode.h"
 #include "machine/value.h"
 #include "util/error.h"
@@ -783,6 +784,10 @@ compile_result_t compile_module(ast_t *ast, compile_context_t *context)
     value_t module_name = string_create(ast->op.module.name);
 
     memory_set(context->binary->data, context->mp, module_name);
+
+    const char *symbol_name = symbol_name_for_module_path(ast->op.module.name);
+    symbol_t module = (symbol_t){ .location={ .address=context->mp, .type=LOC_MEMORY }, .name=symbol_name };
+    symbol_map_set(context->symbols, module);
 
     code_block_write(context->current_code_block, INSTRUCTION(OP_IMPORT, context->mp++));
 

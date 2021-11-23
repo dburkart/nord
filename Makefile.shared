@@ -28,6 +28,7 @@ SOURCES=$(BASE)/src/compiler/token.c \
         $(BASE)/src/machine/disassemble.c \
         $(BASE)/src/machine/binary.c \
         $(BASE)/src/machine/value.c \
-        $(BASE)/src/lang/builtins.c
+        $(BASE)/src/lang/builtins.c \
+        $(BASE)/src/lang/module.c
 
 OBJECTS=$(SOURCES:.c=.o)

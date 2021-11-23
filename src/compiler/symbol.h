@@ -34,7 +34,7 @@ typedef struct
 // Symbol struct, contains the symbol name and location
 typedef struct
 {
-    char *name;
+    const char *name;
     sym_type_e type;
     sym_pointer_t location;
 } symbol_t;
