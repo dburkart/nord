@@ -26,6 +26,13 @@ int main(int argc, char *argv[])
     {
         FILE *fp = fopen(argv[i], "r");
 
+        if (fp == NULL)
+        {
+            perror(argv[i]);
+            status = 1;
+            goto done;
+        }
+
         fseek(fp, 0, SEEK_END);
         long fsize = ftell(fp);
         fseek(fp, 0, SEEK_SET);
