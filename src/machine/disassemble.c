@@ -313,7 +313,7 @@ char *disassemble_instruction(memory_t *mem, instruction_t instruction)
         case OP_IMPORT:
             asprintf(&assembly, FORMAT_SINGLE_ADDR,
                      "import",
-                     instruction.fields.pair.arg1
+                     instruction.fields.pair.arg2
                      );
             break;
     }

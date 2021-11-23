@@ -778,6 +778,17 @@ compile_result_t compile_for_statement(ast_t *ast, compile_context_t *context)
     return (compile_result_t){ .location=context->rp, .type=VAL_UNKNOWN, .code=NULL };
 }
 
+compile_result_t compile_module(ast_t *ast, compile_context_t *context)
+{
+    value_t module_name = string_create(ast->op.module.name);
+
+    memory_set(context->binary->data, context->mp, module_name);
+
+    code_block_write(context->current_code_block, INSTRUCTION(OP_IMPORT, context->mp++));
+
+    return (compile_result_t){ .location=context->rp, .type=VAL_MODULE, .code=NULL };
+}
+
 compile_result_t compile_ast(ast_t *ast, compile_context_t *context)
 {
     compile_result_t result;
@@ -835,6 +846,10 @@ compile_result_t compile_ast(ast_t *ast, compile_context_t *context)
 
         case AST_FOR_STMT:
             result = compile_for_statement(ast, context);
+            break;
+
+        case AST_MODULE:
+            result = compile_module(ast, context);
             break;
 
         default:
