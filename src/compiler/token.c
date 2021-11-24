@@ -104,6 +104,8 @@ const char *token_name(token_t t)
             return "ASTERISK";
         case TOK_SLASH:
             return "SLASH";
+        case TOK_MODULO:
+            return "MODULO";
 
         // Literals
         case TOK_IDENTIFIER:

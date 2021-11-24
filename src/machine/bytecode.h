@@ -55,6 +55,8 @@ typedef enum
     OP_DIVIDE,
     // negate <register-out> <register-in>
     OP_NEGATE,
+    // modulo <register-out> <register-in> <register-in>
+    OP_MODULO,
 
     // -- Logic
 

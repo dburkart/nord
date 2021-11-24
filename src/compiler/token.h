@@ -19,7 +19,7 @@ enum token_type_e {
     TOK_EQUAL, TOK_BANG,
 
     // Math
-    TOK_PLUS, TOK_MINUS, TOK_ASTERISK, TOK_SLASH,
+    TOK_PLUS, TOK_MINUS, TOK_ASTERISK, TOK_SLASH, TOK_MODULO,
 
     // Logical Conjunctions
     TOK_AND, TOK_OR,

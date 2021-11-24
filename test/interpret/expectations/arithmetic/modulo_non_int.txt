@@ -1,0 +1,4 @@
+interpret/input/arithmetic/modulo_non_int.n:1:6: Non-integer values are not yet supported by the modulo operator.
+
+print(10.2 % 3)
+      ^~~~ Found here.

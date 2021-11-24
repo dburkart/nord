@@ -33,7 +33,7 @@ assignment      -> IDENTIFIER "=" expression
 conjunction     -> equality ( ( "and" | "or" ) equality )* ;
 equality        -> comparison ( ( "!=" | "==") comparison )* ;
 comparison      -> term ( ( ">" | ">=" | "<" | "<=" ) term )* ;
-term            -> term_md ( ( "-" | "+" ) term_md )* ;
+term            -> term_md ( ( "-" | "+" | "%" ) term_md )* ;
 term_md         -> unary ( ( "/" | "*" ) unary )*  ;
 unary           -> ( "!" | "-" ) unary
                  | primary ;

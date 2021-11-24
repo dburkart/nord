@@ -795,7 +795,7 @@ ast_t *term(scan_context_t *context)
 {
     ast_t *left = term_md(context);
 
-    while (match(context, 2, TOK_MINUS, TOK_PLUS))
+    while (match(context, 3, TOK_MINUS, TOK_PLUS, TOK_MODULO))
     {
         token_t operator = accept(context);
         ast_t *right = term_md(context);

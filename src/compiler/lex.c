@@ -316,6 +316,10 @@ token_t peek(scan_context_t *context)
                 t.type = TOK_SLASH;
                 advance = 1;
                 break;
+            case '%':
+                t.type = TOK_MODULO;
+                advance = 1;
+                break;
             case '"':
                 advance = match_string(c);
                 if (advance)

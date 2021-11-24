@@ -325,6 +325,13 @@ void vm_execute(vm_t *vm)
                 vm->registers[instruction.fields.triplet.arg1] = result;
                 break;
 
+            case OP_MODULO:
+                // TODO: Handle floats?
+                result.type = VAL_INT;
+                result.contents.number = NUM3(arg2) % NUM3(arg3);
+                vm->registers[instruction.fields.triplet.arg1] = result;
+                break;
+
             case OP_NEGATE:
                 result.type = VAL_INT;
                 result.contents.number = -vm->registers[instruction.fields.pair.arg2].contents.number;

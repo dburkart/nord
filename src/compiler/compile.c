@@ -363,6 +363,23 @@ compile_result_t compile_binary(ast_t *ast, compile_context_t *context)
             type = VAL_FLOAT;
             break;
 
+        case TOK_MODULO:
+            if (left.type != VAL_INT || right.type != VAL_INT)
+            {
+                location_t loc;
+                if (left.type != VAL_INT)
+                    loc = ast->op.binary.left->location;
+                else
+                    loc = ast->op.binary.right->location;
+
+                char *error = "Non-integer values are not yet supported by the modulo operator.";
+                printf("%s", format_error(context->name, context->listing, error, loc));
+                exit(1);
+            }
+            instruction = INSTRUCTION(OP_MODULO, context->rp, left.location, right.location);
+            type = arithmetic_cast(left.type, right.type);
+            break;
+
         //-- Logic
         case TOK_AND:
             instruction = INSTRUCTION(OP_AND, context->rp, left.location, right.location);
