@@ -1,0 +1,5 @@
+interpret/input/functions/call_no_args.n:5:9: Function "add" expected 2 arguments, but was passed none.
+
+
+var c = add()
+         ^~~~~ Found here.

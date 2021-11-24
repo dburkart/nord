@@ -996,7 +996,8 @@ ast_t *function_call(scan_context_t *context)
     if (peek(context).type != TOK_IDENTIFIER)
         return NULL;
 
-    fn_name = token_value(context, accept(context));
+    token_t identifier = accept(context);
+    fn_name = token_value(context, identifier);
 
     if (peek(context).type != TOK_L_PAREN)
     {
@@ -1012,6 +1013,8 @@ ast_t *function_call(scan_context_t *context)
     assert(accept(context).type == TOK_R_PAREN);
 
     left = make_call_expr(fn_name, args);
+    left->location.start = identifier.start;
+    left->location.end = context->position;
 
     return left;
 }

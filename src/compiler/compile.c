@@ -7,6 +7,7 @@
 #include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "compile.h"
 #include "lang/module.h"
@@ -661,7 +662,7 @@ compile_result_t compile_fn_call_native(ast_t *ast, compile_context_t *context)
         if (args->op.list.size != function->nargs)
         {
             char *error;
-            location_t loc = {args->location.start, args->location.end};
+            location_t loc = {ast->location.start, ast->location.end};
             asprintf(&error, "Function \"%s\" expected %d arguments, but was passed %ld.",
                      function->name,
                      function->nargs,
@@ -681,6 +682,17 @@ compile_result_t compile_fn_call_native(ast_t *ast, compile_context_t *context)
 
             context->rp += 1;
         }
+    }
+    else if (function->nargs > 0)
+    {
+        char *error;
+        location_t loc = {ast->location.start, ast->location.end};
+        asprintf(&error, "Function \"%s\" expected %d arguments, but was passed none.",
+                 function->name,
+                 function->nargs
+        );
+        printf("%s", format_error(context->name, context->listing, error, loc));
+        exit(1);
     }
 
     // Call the function

@@ -1,0 +1,5 @@
+interpret/input/functions/call_extra_args.n:5:9: Function "add" expected 2 arguments, but was passed 3.
+
+
+var c = add(1, 2, 3)
+         ^~~~~~~~~~~~ Found here.

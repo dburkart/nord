@@ -9,4 +9,3 @@ Code Region: 1
 
 multiply   $2 $1 $1
 return     $2
-
