@@ -8,6 +8,7 @@
 #define SYMBOL_H
 
 typedef enum {
+    SYM_NONE,
     SYM_VAR,
     SYM_CONSTANT,
     SYM_FN,

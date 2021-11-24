@@ -23,7 +23,9 @@
 
 typedef struct
 {
+    // Name of the module we are compiling
     const char *name;
+    // Source code that is being compiled
     const char *listing;
     symbol_map_t *symbols;
     binary_t *binary;
@@ -31,6 +33,7 @@ typedef struct
     uint8_t rp;
     uint64_t mp;
     uint64_t cp;
+    symbol_t member_context;
 } compile_context_t;
 
 typedef struct
@@ -54,6 +57,7 @@ compile_context_t *context_create(const char *name, const char *listing)
     context->binary->code = code_collection_create();
     context->binary->symbols = symbol_map_create();
     context->current_code_block = code_block_create();
+    context->member_context = (symbol_t){ 0 };
     code_collection_add_block(context->binary->code, context->current_code_block);
     context->rp = 1;
     context->cp = 0;
@@ -324,8 +328,14 @@ compile_result_t compile_binary(ast_t *ast, compile_context_t *context)
     compile_result_t intermediate_result = {0, VAL_ABSENT, NULL};
     compile_result_t left = compile_ast(ast->op.binary.left, context);
     context->rp += 1;
-    compile_result_t right = compile_ast(ast->op.binary.right, context);
-    context->rp -= 1;
+
+    compile_result_t right;
+    // The dot operator must be special cased
+    if (ast->op.binary.operator.type != TOK_DOT)
+    {
+        right = compile_ast(ast->op.binary.right, context);
+        context->rp -= 1;
+    }
 
     value_type_e type = VAL_UNKNOWN;
     instruction_t instruction;
@@ -404,6 +414,26 @@ compile_result_t compile_binary(ast_t *ast, compile_context_t *context)
             instruction = INSTRUCTION(OP_OR, context->rp, context->rp + 2, context->rp + 3);
             type = VAL_BOOLEAN;
             break;
+
+        case TOK_DOT:
+        {
+            // Currently, the left side must be a literal
+            assert(ast->op.binary.left->type == AST_LITERAL);
+
+            // TODO: Support more than a single level
+            assert(ast->op.binary.right->type == AST_FUNCTION_CALL);
+
+            symbol_t previous_context = context->member_context;
+
+            context->member_context = symbol_map_get(context->symbols, ast->op.binary.left->op.literal.value);
+
+            right = compile_ast(ast->op.binary.right, context);
+            type = right.type;
+
+            context->member_context = previous_context;
+
+            break;
+        }
 
         default:
             ;
