@@ -136,6 +136,93 @@ value_t vm_cstack_pop(vm_t *vm)
     return memory_get(vm->call_stack, vm->csp);
 }
 
+//-- Instructions
+
+void instruction_call(vm_t *vm, instruction_t instruction)
+{
+    function_t *fn;
+    value_t function_def;
+
+    function_def = memory_get(vm->memory, instruction.fields.pair.arg2);
+
+    // This must be of type VAL_FUNCTION
+    assert(function_def.type == VAL_FUNCTION);
+
+    // Save the current frame if it's set
+    if (vm->frame.type == VAL_FUNCTION)
+    {
+        vm_cstack_push(vm, vm->frame);
+    }
+
+    // Make a copy so we don't pollute the function definition later
+    fn = (function_t *)function_def.contents.object;
+    function_def = function_def_create(
+            fn->name,
+            fn->address,
+            fn->nargs,
+            fn->locals,
+            fn->low_reg
+    );
+
+    vm->frame = function_def;
+
+    fn = (function_t *)vm->frame.contents.object;
+
+    // First, set the return address in the current frame
+    fn->return_address = (address_t){ .region=vm->region, .offset=vm->pc };
+
+    // Now set the program counter / region
+    vm->region = fn->address.region;
+    vm->pc = fn->address.offset;
+
+    // Initialize save buffer, if null
+    if (fn->save == NULL)
+    {
+        uint8_t count = 0;
+
+        while (fn->locals[count] != 0)
+        {
+            count += 1;
+        }
+
+        fn->save = (value_t *)malloc(sizeof(value_t) * count);
+    }
+
+    // Finally, save out locals
+    for (uint8_t i = fn->nargs, reg = fn->locals[i]; reg != 0; i++, reg = fn->locals[i])
+    {
+        fn->save[i] = vm->registers[reg];
+    }
+}
+
+void instruction_call_builtin(vm_t *vm, instruction_t instruction)
+{
+    value_t function_name;
+    string_t *strobj;
+
+    function_name = memory_get(vm->memory, instruction.fields.pair.arg2);
+
+    // Function names must be string values. Not sure how they wouldn't
+    // be, so we assert here.
+    assert(function_name.type == VAL_STRING);
+
+    strobj = (string_t *)function_name.contents.object;
+
+    char *builtin_name;
+    asprintf(&builtin_name, "builtin__%s", strobj->string);
+    void (*builtin)(vm_t *);
+    builtin = (void (*)(vm_t *))dynamic_load_self(builtin_name);
+    free(builtin_name);
+
+    // TODO: Maintain a symbol map for future calls?
+
+    // TODO: Proper error handling-- we couldn't find the supplied
+    // runtime symbol
+    assert(builtin != NULL);
+
+    (*builtin)(vm);
+}
+
 void vm_execute(vm_t *vm)
 {
     while (vm->pc < vm->regions->blocks[vm->region]->size)
@@ -396,82 +483,11 @@ void vm_execute(vm_t *vm)
                 break;
 
             case OP_CALL:
-                ret = memory_get(vm->memory, instruction.fields.pair.arg2);
-
-                // This must be of type VAL_FUNCTION
-                assert(ret.type == VAL_FUNCTION);
-
-                // Save the current frame if it's set
-                if (vm->frame.type == VAL_FUNCTION)
-                {
-                    vm_cstack_push(vm, vm->frame);
-                }
-
-                // Make a copy so we don't pollute the function definition later
-                fn = (function_t *)ret.contents.object;
-                ret = function_def_create(
-                    fn->name,
-                    fn->address,
-                    fn->nargs,
-                    fn->locals,
-                    fn->low_reg
-                );
-
-                vm->frame = ret;
-
-                fn = (function_t *)vm->frame.contents.object;
-
-                // First, set the return address in the current frame
-                fn->return_address = (address_t){ .region=vm->region, .offset=vm->pc };
-
-                // Now set the program counter / region
-                vm->region = fn->address.region;
-                vm->pc = fn->address.offset;
-
-                // Initialize save buffer, if null
-                if (fn->save == NULL)
-                {
-                    uint8_t count = 0;
-
-                    while (fn->locals[count] != 0)
-                    {
-                        count += 1;
-                    }
-
-                    fn->save = (value_t *)malloc(sizeof(value_t) * count);
-                }
-
-                // Finally, save out locals
-                for (uint8_t i = fn->nargs, reg = fn->locals[i]; reg != 0; i++, reg = fn->locals[i])
-                {
-                    fn->save[i] = vm->registers[reg];
-                }
-
+                instruction_call(vm, instruction);
                 break;
 
             case OP_CALL_DYNAMIC:
-                ret = memory_get(vm->memory, instruction.fields.pair.arg2);
-
-                // Function names must be string values. Not sure how they wouldn't
-                // be, so we assert here.
-                assert(ret.type == VAL_STRING);
-
-                s1 = (string_t *)ret.contents.object;
-
-                char *builtin_name;
-                asprintf(&builtin_name, "builtin__%s", s1->string);
-                void (*builtin)(vm_t *);
-                builtin = (void (*)(vm_t *))dynamic_load_self(builtin_name);
-                free(builtin_name);
-
-                // TODO: Maintain a symbol map for future calls?
-
-                // TODO: Proper error handling-- we couldn't find the supplied
-                // runtime symbol
-                assert(builtin != NULL);
-
-                (*builtin)(vm);
-
+                instruction_call_builtin(vm, instruction);
                 break;
 
             case OP_RETURN:
