@@ -10,7 +10,7 @@
 
 #include "error.h"
 
-char *format_error(const char *listing_name, const char *listing, const char *str, location_t loc)
+char *format_error_internal(const char *listing_name, const char *listing, const char *str, location_t loc, const char *located_where)
 {
     char *error;
     int lineno = 1, position = 1, nl = 0;
@@ -58,14 +58,37 @@ char *format_error(const char *listing_name, const char *listing, const char *st
     caret_pointer[loc.end - loc.start] = 0;
 
     asprintf(&error,
-             "%s:%d:%lu: %s\n\n%s\n%s%s Found here.\n",
+             "%s:%d:%lu: %s\n\n%s\n%s%s %s\n",
              listing_name,
              lineno,
              (unsigned long)loc.start - (position - 1),
              str,
              line,
              spacing,
-             caret_pointer
-            );
+             caret_pointer,
+             located_where
+    );
     return error;
+}
+
+char *format_error_found_here(const char *listing_name, const char *listing, const char *str, location_t loc)
+{
+    return format_error_internal(
+            listing_name,
+            listing,
+            str,
+            loc,
+            "Found here."
+            );
+}
+
+char *format_error_expected_here(const char *listing_name, const char *listing, const char *str, location_t loc)
+{
+    return format_error_internal(
+            listing_name,
+            listing,
+            str,
+            loc,
+            "Expected here."
+            );
 }

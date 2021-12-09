@@ -6,7 +6,6 @@
 #include <stdio.h>
 
 #include "machine/binary.h"
-#include "machine/disassemble.h"
 #include "machine/vm.h"
 #include "compiler/compile.h"
 #include "compiler/lex.h"

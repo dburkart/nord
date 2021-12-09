@@ -151,9 +151,6 @@ void vm_execute(vm_t *vm)
         memory_t *mem;
         function_t *fn;
 
-//        printf("%ld: %s", vm->pc, disassemble_instruction(vm->memory, instruction));
-//        getchar();
-
         switch (instruction.opcode)
         {
             case OP_NIL:

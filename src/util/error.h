@@ -9,6 +9,7 @@
 
 #include "location.h"
 
-char *format_error(const char *listing_name, const char *listing, const char *str, location_t loc);
+char *format_error_found_here(const char *listing_name, const char *listing, const char *str, location_t loc);
+char *format_error_expected_here(const char *listing_name, const char *listing, const char *str, location_t loc);
 
 #endif

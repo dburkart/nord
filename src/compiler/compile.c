@@ -203,7 +203,7 @@ compile_result_t compile_literal(ast_t *ast, compile_context_t *context)
                     char *error;
                     location_t loc = {ast->location.start, ast->location.end};
                     asprintf(&error, "Use of undeclared identifier \"%s\"", ast->op.literal.value);
-                    printf("%s", format_error(context->name, context->listing, error, loc));
+                    printf("%s", format_error_found_here(context->name, context->listing, error, loc));
                     exit(1);
                 }
 
@@ -373,7 +373,7 @@ compile_result_t compile_binary(ast_t *ast, compile_context_t *context)
                     loc = ast->op.binary.right->location;
 
                 char *error = "Non-integer values are not yet supported by the modulo operator.";
-                printf("%s", format_error(context->name, context->listing, error, loc));
+                printf("%s", format_error_found_here(context->name, context->listing, error, loc));
                 exit(1);
             }
             instruction = INSTRUCTION(OP_MODULO, context->rp, left.location, right.location);
@@ -478,7 +478,7 @@ compile_result_t compile_assign(ast_t *ast, compile_context_t *context)
         char *error;
         location_t loc = {ast->location.start, ast->location.end};
         asprintf(&error, "Use of undeclared identifier \"%s\"", ast->op.assign.name);
-        printf("%s", format_error(context->name, context->listing, error, loc));
+        printf("%s", format_error_found_here(context->name, context->listing, error, loc));
         exit(1);
     }
 
@@ -487,7 +487,7 @@ compile_result_t compile_assign(ast_t *ast, compile_context_t *context)
         char *error;
         location_t loc = {ast->location.start, ast->location.end};
         asprintf(&error, "Cannot assign to constant \"%s\", value is immutable", ast->op.assign.name);
-        printf("%s", format_error(context->name, context->listing, error, loc));
+        printf("%s", format_error_found_here(context->name, context->listing, error, loc));
         exit(1);
     }
 
@@ -685,7 +685,7 @@ compile_result_t compile_fn_call_native(ast_t *ast, compile_context_t *context)
                      function->nargs,
                      args->op.list.size
             );
-            printf("%s", format_error(context->name, context->listing, error, loc));
+            printf("%s", format_error_found_here(context->name, context->listing, error, loc));
             exit(1);
         }
 
@@ -708,7 +708,7 @@ compile_result_t compile_fn_call_native(ast_t *ast, compile_context_t *context)
                  function->name,
                  function->nargs
         );
-        printf("%s", format_error(context->name, context->listing, error, loc));
+        printf("%s", format_error_found_here(context->name, context->listing, error, loc));
         exit(1);
     }
 

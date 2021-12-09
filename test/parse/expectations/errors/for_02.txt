@@ -1,4 +1,4 @@
 parse/input/errors/for_02.n:1:13: Expected statement or body following for statement.
 
 for (1, 2, 3)
-             ^ Found here.
+             ^ Expected here.

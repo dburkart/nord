@@ -340,7 +340,7 @@ ast_t *statement_block(scan_context_t* context)
         char *error;
         location_t loc = {invalid.start, invalid.end};
         asprintf(&error, "Expected closing brace of statement block (\"}\").");
-        printf("%s", format_error(context->name, context->buffer, error, loc));
+        printf("%s", format_error_found_here(context->name, context->buffer, error, loc));
         exit(1);
     }
 
@@ -434,7 +434,7 @@ ast_t *import_statement(scan_context_t *context)
         token_t invalid = accept(context);
         location_t loc = {invalid.start, invalid.end};
         asprintf(&error, "Expected string following import.");
-        printf("%s", format_error(context->name, context->buffer, error, loc));
+        printf("%s", format_error_found_here(context->name, context->buffer, error, loc));
         exit(1);
     }
 
@@ -459,7 +459,7 @@ ast_t *if_statement(scan_context_t *context)
         accept(context);
         location_t loc = {if_kw.end, if_kw.end + 1};
         asprintf(&error, "Expected expression following if keyword.");
-        printf("%s", format_error(context->name, context->buffer, error, loc));
+        printf("%s", format_error_found_here(context->name, context->buffer, error, loc));
         exit(1);
     }
 
@@ -476,8 +476,7 @@ ast_t *if_statement(scan_context_t *context)
         accept(context);
         location_t loc = {condition->location.end, condition->location.end + 1};
         asprintf(&error, "Expected statement or body following if-statement.");
-        // TODO: Refactor error handling to handle custom "Found here." text
-        printf("%s", format_error(context->name, context->buffer, error, loc));
+        printf("%s", format_error_expected_here(context->name, context->buffer, error, loc));
         exit(1);
     }
 
@@ -524,8 +523,7 @@ ast_t *for_statement(scan_context_t *context)
         token_t invalid = accept(context);
         location_t loc = {for_kw.end, invalid.start};
         asprintf(&error, "Expected iterable type after \"for\" keyword.");
-        // TODO: Refactor error handling to handle custom "Found here." text
-        printf("%s", format_error(context->name, context->buffer, error, loc));
+        printf("%s", format_error_expected_here(context->name, context->buffer, error, loc));
         exit(1);
     }
 
@@ -537,8 +535,7 @@ ast_t *for_statement(scan_context_t *context)
         accept(context);
         location_t loc = {iterable->location.end, iterable->location.end + 1};
         asprintf(&error, "Expected statement or body following for statement.");
-        // TODO: Refactor error handling to handle custom "Found here." text
-        printf("%s", format_error(context->name, context->buffer, error, loc));
+        printf("%s", format_error_expected_here(context->name, context->buffer, error, loc));
         exit(1);
     }
 
@@ -654,7 +651,7 @@ ast_t *variable_decl(scan_context_t *context)
         token_t invalid = accept(context);
         location_t loc = {invalid.start, invalid.end};
         asprintf(&error, "Expected identifier in declaration, but found \"%s\".", token_value(context, invalid));
-        printf("%s", format_error(context->name, context->buffer, error, loc));
+        printf("%s", format_error_found_here(context->name, context->buffer, error, loc));
         exit(1);
     }
 
@@ -850,7 +847,7 @@ ast_t *unary(scan_context_t *context)
             char *error;
             location_t loc = {peek(context).start, peek(context).end};
             asprintf(&error, "Unexpected token. Expected keyword, number, string, or identifier, but found \"%s\"", token_value(context, peek(context)));
-            printf("%s", format_error(context->name, context->buffer, error, loc));
+            printf("%s", format_error_found_here(context->name, context->buffer, error, loc));
             exit(1);
         }
         return p;
@@ -915,7 +912,7 @@ ast_t *tuple(scan_context_t *context)
             char *error;
             location_t loc = {paren.start, paren.end};
             asprintf(&error, "Mismatched parenthesis. Expected \")\", but found \"%s\".", token_value(context, paren));
-            printf("%s", format_error(context->name, context->buffer, error, loc));
+            printf("%s", format_error_found_here(context->name, context->buffer, error, loc));
             exit(1);
         }
 
