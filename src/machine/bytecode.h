@@ -21,19 +21,25 @@ typedef enum
     // -- Loading to and from memory and registers
 
     // load <register> <address>
+    //      Loads the value at the specified address into a register
     OP_LOAD,
     // load <register> <value>
+    //      Loads a 16-bit value into the specified register
     OP_LOADV,
     // store <register> <address>
+    //      Stores the value in a register to the specified address
     OP_STORE,
     // move <register-out> <register-in>
+    //      Move a value from one register to another
     OP_MOVE,
 
     // -- Stack manipulation
 
     // push <register>
+    //      Push the value in a given register onto the stack
     OP_PUSH,
     // pop <register>
+    //      Pop the next value on the stack into the given register
     OP_POP,
     // restore <num-registers>
     OP_RESTORE,
@@ -41,6 +47,8 @@ typedef enum
     // -- Jumps
 
     // jump <register>
+    //      Jump a given number of instructions based on the value in the
+    //      target register
     OP_JMP,
 
     // -- Arithmetic operations
@@ -64,17 +72,27 @@ typedef enum
     OP_AND,
     // or <register-out> <register-in> <register-in>
     OP_OR,
-
-    // equal <value-desired> <register-in> <register-in>
-    OP_EQUAL,
-    // lt <value-desired> <register-in> <register-in>
-    OP_LESSTHAN,
     // not <register-out> <register-in>
     OP_NOT,
+
+    // equal <value-desired> <register-in> <register-in>
+    //      If the result comparing the two in-registers for equality results
+    //      in the value specified in arg1, execute the next instruction.
+    //      Otherwise, jump over it.
+    OP_EQUAL,
+    // lt <value-desired> <register-in> <register-in>
+    //      If the result of comparing the first in-register to the second by
+    //      '<' martches the desired value specified in arg1, execute the next
+    //      instruction. Otherwise, jump over it.
+    OP_LESSTHAN,
 
     // -- Iteration
 
     // deref <register-out> <register-in> <register-post-advance>
+    //      TODO: This instruction should be renamed
+    //      Dereference the value pointed to by the iterator in register-in,
+    //      storing the value at that index in register-out. Finally, advance
+    //      the iterator by the value in register-post-advance.
     OP_DEREF,
 
     // -- Functions
