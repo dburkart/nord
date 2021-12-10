@@ -6,65 +6,13 @@
 
 #include <stdarg.h>
 #include <stdbool.h>
-#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
 #include "lex.h"
-
-/*
- * Return whether or not the specified character is reserved and shouldn't be
- * allowed in an identifier.
- */
-bool is_reserved(char c)
-{
-    switch (c)
-    {
-        case '(':
-        case ')':
-        case '{':
-        case '}':
-        case ':':
-        case ',':
-        case '*':
-        case '+':
-        case '/':
-        case '-':
-        case '=':
-            return true;
-    }
-    return false;
-}
-
-/*
- * Return whether or not the specified character is whitespace
- */
-bool is_whitespace(char c)
-{
-    if (c == ' ' || c == '\t' || c == '\n')
-        return true;
-    return false;
-}
-
-bool is_boundary(char c)
-{
-    return is_whitespace(c) || is_reserved(c) || c == '\0';
-}
+#include "util/match.h"
 
 ///---- Matching functions
-
-/*
- * Match a keyword
- */
-int match_keyword(const char *to_match, const char *c, int len)
-{
-    if (memcmp(to_match, c, len) == 0 && is_boundary(c[len]))
-    {
-        return len;
-    }
-
-    return 0;
-}
 
 /*
  * Match an identifier. Identifiers must begin with an alphabetic character,

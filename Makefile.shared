@@ -21,6 +21,7 @@ SOURCES=$(BASE)/src/compiler/token.c \
         $(BASE)/src/util/hash.c \
         $(BASE)/src/util/error.c \
         $(BASE)/src/util/dl.c \
+        $(BASE)/src/util/match.c \
         $(BASE)/src/compiler/symbol.c \
         $(BASE)/src/compiler/compile.c \
         $(BASE)/src/machine/memory.c \
