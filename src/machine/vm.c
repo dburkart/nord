@@ -94,6 +94,10 @@ vm_t *vm_create(binary_t *binary)
     vm->region = 0;
     vm->pc = 0;
 
+    vm->inbound = memory_create(VM_STACK_SIZE);
+    vm->outbound = memory_create(VM_STACK_SIZE);
+    vm->size_inbound = vm->size_outbound = 0;
+
     vm->symbols = binary->symbols;
 
     memset(&vm->registers, 0, 128 * sizeof(value_t));
@@ -135,6 +139,41 @@ value_t vm_cstack_pop(vm_t *vm)
     vm->csp--;
     return memory_get(vm->call_stack, vm->csp);
 }
+
+void vm_add_inbound_value(vm_t *vm, value_t value)
+{
+    memory_set(vm->inbound, vm->size_inbound++, value);
+}
+
+// Private
+value_t *vm_get_inbound_values(vm_t *vm)
+{
+    value_t *values = malloc((vm->size_inbound + 1) * sizeof(value_t));
+
+    for (int i = 0; i < vm->size_inbound; i++)
+    {
+        values[i] = memory_get(vm->inbound, i);
+    }
+
+    values[vm->size_inbound] = (value_t){.type=VAL_NIL };
+
+    vm->size_inbound = 0;
+
+    return values;
+}
+
+value_t vm_get_outbound_value(vm_t *vm)
+{
+    vm->size_outbound -= 1;
+    return memory_get(vm->outbound, vm->size_outbound);
+}
+
+// Private
+void vm_add_outbound_value(vm_t *vm, value_t value)
+{
+    memory_set(vm->outbound, vm->size_outbound++, value);
+}
+
 
 //-- Instructions
 
@@ -568,6 +607,32 @@ void vm_execute(vm_t *vm)
                 free(input);
 
                 break;
+
+            case OP_SETINBOUND:
+            {
+                ret = memory_get(vm->memory, instruction.fields.pair.arg2);
+
+                assert(ret.type == VAL_MODULE);
+
+                module_t *module = (module_t *)ret.contents.object;
+
+                vm_add_inbound_value((vm_t *)module->vm, vm->registers[instruction.fields.pair.arg1]);
+
+                break;
+            }
+
+            case OP_GETOUTBOUND:
+            {
+                ret = memory_get(vm->memory, instruction.fields.pair.arg2);
+
+                assert(ret.type == VAL_MODULE);
+
+                module_t *module = (module_t *)ret.contents.object;
+
+                vm->registers[instruction.fields.pair.arg1] = vm_get_outbound_value((vm_t *)module->vm);
+
+                break;
+            }
         }
     }
 }

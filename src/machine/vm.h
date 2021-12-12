@@ -42,6 +42,14 @@ typedef struct
     //-- Special purpose registers
     value_t frame;
 
+    //-- VM interface
+    // TODO: Multi-threaded support
+    memory_t *inbound;
+    size_t size_inbound;
+
+    memory_t *outbound;
+    size_t size_outbound;
+
     // Symbols
 
     //-- Symbols this VM exports
@@ -55,5 +63,8 @@ void vm_dump(vm_t *);
 
 void vm_stack_push(vm_t *, value_t val);
 value_t vm_stack_pop(vm_t *);
+
+void vm_add_inbound_value(vm_t *vm, value_t value);
+value_t vm_get_outbound_value(vm_t *vm);
 
 #endif
