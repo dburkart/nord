@@ -13,6 +13,8 @@
 // Opcodes for VM instructions
 typedef enum
 {
+    OP_NONE,
+
     // -- Constants
 
     // nil <register>

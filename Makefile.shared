@@ -26,6 +26,7 @@ SOURCES=$(BASE)/src/compiler/token.c \
         $(BASE)/src/compiler/compile.c \
         $(BASE)/src/machine/memory.c \
         $(BASE)/src/machine/vm.c \
+        $(BASE)/src/machine/assemble.c \
         $(BASE)/src/machine/disassemble.c \
         $(BASE)/src/machine/binary.c \
         $(BASE)/src/machine/value.c \

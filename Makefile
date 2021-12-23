@@ -2,7 +2,7 @@ BASE=.
 
 include Makefile.shared
 
-BINARIES=nord
+BINARIES=nord asmn
 
 .PHONY: test
 
